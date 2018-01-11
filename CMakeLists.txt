@@ -1,0 +1,38 @@
+cmake_minimum_required(VERSION 3.4)
+
+project(serializationpp)
+
+set(CMAKE_CXX_STANDARD 14)
+
+if(MSVC)
+    set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /MT")
+    set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /MTd")
+    add_definitions(-D_SCL_SECURE_NO_WARNINGS)
+endif()
+
+get_filename_component(SERIALIZATIONPP_ROOT "${CMAKE_CURRENT_LIST_DIR}" ABSOLUTE)
+
+set(SERIALIZATIONPP_INCLUDE "${SERIALIZATIONPP_ROOT}/include")
+include_directories(${SERIALIZATIONPP_INCLUDE})
+
+set(SERIALIZATIONPP_HEADERS "${SERIALIZATIONPP_INCLUDE}/serializationpp")
+
+set(HEADERS
+    ${SERIALIZATIONPP_HEADERS}/details/memory_managers.h
+    ${SERIALIZATIONPP_HEADERS}/fast_binary_serializator.h
+    ${SERIALIZATIONPP_HEADERS}/memory_storage.h
+    ${SERIALIZATIONPP_HEADERS}/name_value.h
+    ${SERIALIZATIONPP_HEADERS}/serializationpp.h
+    ${SERIALIZATIONPP_HEADERS}/types.h
+    )
+
+add_library(${PROJECT_NAME} STATIC ${HEADERS})
+set_target_properties(${PROJECT_NAME} PROPERTIES LINKER_LANGUAGE CXX)
+
+set(SERIALIZATIONPP_TEST_PROJECT test_${PROJECT_NAME})
+
+add_test(NAME ${SERIALIZATIONPP_TEST_PROJECT} COMMAND ${SERIALIZATIONPP_TEST_PROJECT})
+
+add_subdirectory(tests)
+
+enable_testing()
