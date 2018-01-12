@@ -67,7 +67,7 @@ namespace spp
                 const auto oldSize = data_.size();
                 const auto newSize = oldSize + size;
                 if (newSize > maxSize_)
-                    return false;
+                    return nullptr;
                 data_.resize(newSize);
                 return data_.data() + oldSize;
             }

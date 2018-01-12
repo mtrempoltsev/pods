@@ -13,4 +13,9 @@ set(SOURCES
 
 add_executable(${SERIALIZATIONPP_TEST_PROJECT} ${SOURCES})
 
-target_link_libraries(${SERIALIZATIONPP_TEST_PROJECT} ${GTEST_BOTH_LIBRARIES})
+find_package(Threads)
+
+target_link_libraries(${SERIALIZATIONPP_TEST_PROJECT}
+    ${GTEST_BOTH_LIBRARIES}
+    ${CMAKE_THREAD_LIBS_INIT}
+    )
