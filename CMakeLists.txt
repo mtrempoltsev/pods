@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.4)
 
-project(serializationpp)
+project(serialization++)
 
 set(CMAKE_CXX_STANDARD 14)
 
@@ -15,14 +15,17 @@ get_filename_component(SERIALIZATIONPP_ROOT "${CMAKE_CURRENT_LIST_DIR}" ABSOLUTE
 set(SERIALIZATIONPP_INCLUDE "${SERIALIZATIONPP_ROOT}/include")
 include_directories(${SERIALIZATIONPP_INCLUDE})
 
-set(SERIALIZATIONPP_HEADERS "${SERIALIZATIONPP_INCLUDE}/serializationpp")
+set(SERIALIZATIONPP_HEADERS "${SERIALIZATIONPP_INCLUDE}/serialization++")
 
 set(HEADERS
+    ${SERIALIZATIONPP_HEADERS}/errors.h
     ${SERIALIZATIONPP_HEADERS}/details/memory_managers.h
-    ${SERIALIZATIONPP_HEADERS}/fast_binary_serializator.h
+    ${SERIALIZATIONPP_HEADERS}/binary_serializer.h
+    ${SERIALIZATIONPP_HEADERS}/file_storage.h
+    ${SERIALIZATIONPP_HEADERS}/json_serializer.h
     ${SERIALIZATIONPP_HEADERS}/memory_storage.h
     ${SERIALIZATIONPP_HEADERS}/name_value.h
-    ${SERIALIZATIONPP_HEADERS}/serializationpp.h
+    ${SERIALIZATIONPP_HEADERS}/serialization++.h
     ${SERIALIZATIONPP_HEADERS}/types.h
     )
 

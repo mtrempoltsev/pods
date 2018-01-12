@@ -6,7 +6,10 @@ include_directories(${GTEST_INCLUDE_DIRS})
 include_directories(${SERIALIZATIONPP_INCLUDE})
 
 set(SOURCES
+    test_binary_serializer.cpp
     test_fixed_memory_storage.cpp
+    test_json_serializer.cpp
+    test_portable_binary_serializer.cpp
     test_resizeable_memory_storage.cpp
     main.cpp
     )
