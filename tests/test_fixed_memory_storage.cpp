@@ -4,7 +4,7 @@
 
 #include <serialization++/memory_storage.h>
 
-#include "storage_data.cpp"
+#include "storage_data.h"
 
 class fixedSizeMemoryStorage
     : public ::testing::Test
@@ -54,14 +54,6 @@ TEST_F(fixedSizeMemoryStorage, testRawData)
     testRawDataRead(in);
 }
 
-TEST_F(fixedSizeMemoryStorage, testEnum)
-{
-    testEnumWrite(out);
-
-    spp::ReadOnlyMemoryStorage in(out.data(), out.size());
-    testEnumRead(in);
-}
-
 TEST_F(fixedSizeMemoryStorage, testError)
 {
     uint16_t small = 0;
@@ -70,15 +62,15 @@ TEST_F(fixedSizeMemoryStorage, testError)
     {
         char data[4];
         spp::FixedSizeWriteOnlyMemoryStorage out(data, 4);
-        EXPECT_FALSE(out.put(big));
+        EXPECT_EQ(out.put(big), spp::Error::NotEnoughMemory);
     }
 
     {
         char data[sizeof(small)];
         spp::FixedSizeWriteOnlyMemoryStorage out(data, sizeof(small));
-        EXPECT_TRUE(out.put(small));
+        EXPECT_EQ(out.put(small), spp::Error::NoError);
 
         spp::ReadOnlyMemoryStorage in(out.data(), out.size());
-        EXPECT_FALSE(in.get(big));
+        EXPECT_EQ(in.get(big), spp::Error::UnexpectedEnd);
     }
 }

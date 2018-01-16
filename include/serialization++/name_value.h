@@ -17,5 +17,5 @@ namespace spp
     };
 }
 
-#define SPP_MDR(field) ::spp::MandatoryNameValue<decltype(field)>(#field, field)
-#define SPP_OPT(field) ::spp::OptionalNameValue<decltype(field)>(#field, field)
+#define SPP_MDR(field) #field, field
+#define SPP_OPT(field) #field, field

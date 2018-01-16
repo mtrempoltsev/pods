@@ -5,6 +5,11 @@ include_directories(${GTEST_INCLUDE_DIRS})
 
 include_directories(${SERIALIZATIONPP_INCLUDE})
 
+set(HEADERS
+   data.h
+   storage_data.h
+   )
+
 set(SOURCES
     test_binary_serializer.cpp
     test_fixed_memory_storage.cpp
@@ -14,7 +19,7 @@ set(SOURCES
     main.cpp
     )
 
-add_executable(${SERIALIZATIONPP_TEST_PROJECT} ${SOURCES})
+add_executable(${SERIALIZATIONPP_TEST_PROJECT} ${HEADERS} ${SOURCES})
 
 find_package(Threads)
 

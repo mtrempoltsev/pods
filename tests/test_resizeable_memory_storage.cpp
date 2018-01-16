@@ -2,7 +2,7 @@
 
 #include <serialization++/memory_storage.h>
 
-#include "storage_data.cpp"
+#include "storage_data.h"
 
 TEST(resizeableMemoryStorage, testSigned)
 {
@@ -49,15 +49,6 @@ TEST(resizeableMemoryStorage, testRawData)
     testRawDataRead(in);
 }
 
-TEST(resizeableMemoryStorage, testEnum)
-{
-    spp::ResizeableWriteOnlyMemoryStorage out;
-    testEnumWrite(out);
-
-    spp::ReadOnlyMemoryStorage in(out.data(), out.size());
-    testEnumRead(in);
-}
-
 TEST(resizeableMemoryStorage, testError)
 {
     uint16_t small = 0;
@@ -65,14 +56,14 @@ TEST(resizeableMemoryStorage, testError)
 
     {
         spp::ResizeableWriteOnlyMemoryStorage out(4, 4);
-        EXPECT_FALSE(out.put(big));
+        EXPECT_EQ(out.put(big), spp::Error::NotEnoughMemory);
     }
 
     {
         spp::ResizeableWriteOnlyMemoryStorage out;
-        EXPECT_TRUE(out.put(small));
+        EXPECT_EQ(out.put(small), spp::Error::NoError);
 
         spp::ReadOnlyMemoryStorage in(out.data(), out.size());
-        EXPECT_FALSE(in.get(big));
+        EXPECT_EQ(in.get(big), spp::Error::UnexpectedEnd);
     }
 }

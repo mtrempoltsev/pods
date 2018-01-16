@@ -3,9 +3,10 @@
 #include <cassert>
 #include <limits>
 #include <type_traits>
-#include <vector>
 
 #include "details/memory_managers.h"
+
+#include "errors.h"
 
 namespace spp
 {
@@ -26,43 +27,55 @@ namespace spp
         ReadOnlyMemoryStorage(ReadOnlyMemoryStorage&&) = delete;
         ReadOnlyMemoryStorage& operator=(ReadOnlyMemoryStorage&&) = delete;
 
-        bool get(bool& value) noexcept
+        Error get(bool& value) noexcept
         {
             if (pos_ + sizeof(bool) > maxSize_)
-                return false;
+            {
+                return Error::UnexpectedEnd;
+            }
+
             value = data_[pos_] == 1;
             pos_ += sizeof(bool);
-            return true;
+            return Error::NoError;
         }
 
         template <class T>
-        bool get(T& value, typename std::enable_if<std::is_arithmetic<T>::value && sizeof(T) == 1, int>::type = 0) noexcept
+        Error get(T& value, typename std::enable_if<std::is_arithmetic<T>::value && sizeof(T) == 1, int>::type = 0) noexcept
         {
             if (pos_ + sizeof(T) > maxSize_)
-                return false;
+            {
+                return Error::UnexpectedEnd;
+            }
+
             value = data_[pos_];
             pos_ += sizeof(T);
-            return true;
+            return Error::NoError;
         }
 
         template <class T>
-        bool get(T& value, typename std::enable_if<std::is_arithmetic<T>::value && sizeof(T) == 2, int>::type = 0) noexcept
+        Error get(T& value, typename std::enable_if<std::is_arithmetic<T>::value && sizeof(T) == 2, int>::type = 0) noexcept
         {
             if (pos_ + sizeof(T) > maxSize_)
-                return false;
+            {
+                return Error::UnexpectedEnd;
+            }
+
             auto to = reinterpret_cast<char*>(&value);
             auto from = data_ + pos_;
             to[0] = from[0];
             to[1] = from[1];
             pos_ += sizeof(T);
-            return true;
+            return Error::NoError;
         }
 
         template <class T>
-        bool get(T& value, typename std::enable_if<std::is_arithmetic<T>::value && sizeof(T) == 4, int>::type = 0) noexcept
+        Error get(T& value, typename std::enable_if<std::is_arithmetic<T>::value && sizeof(T) == 4, int>::type = 0) noexcept
         {
             if (pos_ + sizeof(T) > maxSize_)
-                return false;
+            {
+                return Error::UnexpectedEnd;
+            }
+
             auto to = reinterpret_cast<char*>(&value);
             auto from = data_ + pos_;
             to[0] = from[0];
@@ -70,14 +83,17 @@ namespace spp
             to[2] = from[2];
             to[3] = from[3];
             pos_ += sizeof(T);
-            return true;
+            return Error::NoError;
         }
 
         template <class T>
-        bool get(T& value, typename std::enable_if<std::is_arithmetic<T>::value && sizeof(T) == 8, int>::type = 0) noexcept
+        Error get(T& value, typename std::enable_if<std::is_arithmetic<T>::value && sizeof(T) == 8, int>::type = 0) noexcept
         {
             if (pos_ + sizeof(T) > maxSize_)
-                return false;
+            {
+                return Error::UnexpectedEnd;
+            }
+
             auto to = reinterpret_cast<char*>(&value);
             auto from = data_ + pos_;
             to[0] = from[0];
@@ -89,27 +105,27 @@ namespace spp
             to[6] = from[6];
             to[7] = from[7];
             pos_ += sizeof(T);
-            return true;
+            return Error::NoError;
         }
 
-        template <class T, typename std::enable_if<std::is_enum<T>::value, int>::type = 0>
-        bool get(T& value) noexcept
-        {
-            std::underlying_type_t<T> tmp;
-            if (!get(tmp))
-                return false;
-            value = static_cast<T>(tmp);
-            return true;
-        }
-
-        bool get(char* data, size_t size) noexcept
+        Error get(char* data, size_t size) noexcept
         {
             if (pos_ + size > maxSize_)
-                return false;
+            {
+                return Error::UnexpectedEnd;
+            }
+
             auto begin = data_ + pos_;
             std::copy(begin, begin + size, data);
             pos_ += size;
-            return true;
+            return Error::NoError;
+        }
+
+        template <class T>
+        Error get(T* data, size_t size) noexcept
+        {
+            const auto totalSize = size * sizeof(T);
+            return get(reinterpret_cast<char*>(data), totalSize);
         }
 
     private:
@@ -135,57 +151,72 @@ namespace spp
             WriteOnlyMemoryStorage(WriteOnlyMemoryStorage<MemoryManager>&&) = delete;
             WriteOnlyMemoryStorage<MemoryManager>& operator=(WriteOnlyMemoryStorage<MemoryManager>&&) = delete;
 
-            bool put(bool value)
+            Error put(bool value)
             {
                 auto ptr = memoryManager_.getPtr(sizeof(bool));
                 if (ptr == nullptr)
-                    return false;
+                {
+                    return Error::NotEnoughMemory;
+                }
+
                 *ptr = (value ? 1 : 0);
-                return true;
+                return Error::NoError;
             }
 
-            template <class T, typename std::enable_if<std::is_arithmetic<T>::value && sizeof(T) == 1, int>::type = 0>
-            bool put(T value)
+            template <class T, typename std::enable_if<sizeof(T) == 1, int>::type = 0>
+            Error put(T value)
             {
                 auto ptr = memoryManager_.getPtr(sizeof(T));
                 if (ptr == nullptr)
-                    return false;
+                {
+                    return Error::NotEnoughMemory;
+                }
+
                 *ptr = value;
-                return true;
+                return Error::NoError;
             }
 
-            template <class T, typename std::enable_if<std::is_arithmetic<T>::value && sizeof(T) == 2, int>::type = 0>
-            bool put(T value)
+            template <class T, typename std::enable_if<sizeof(T) == 2, int>::type = 0>
+            Error put(T value)
             {
                 auto to = memoryManager_.getPtr(sizeof(T));
                 if (to == nullptr)
-                    return false;
+                {
+                    return Error::NotEnoughMemory;
+                }
+
                 auto from = reinterpret_cast<char*>(&value);
                 to[0] = from[0];
                 to[1] = from[1];
-                return true;
+                return Error::NoError;
             }
 
-            template <class T, typename std::enable_if<std::is_arithmetic<T>::value && sizeof(T) == 4, int>::type = 0>
-            bool put(T value)
+            template <class T, typename std::enable_if<sizeof(T) == 4, int>::type = 0>
+            Error put(T value)
             {
                 auto to = memoryManager_.getPtr(sizeof(T));
                 if (to == nullptr)
-                    return false;
+                {
+                    return Error::NotEnoughMemory;
+                }
+
                 auto from = reinterpret_cast<char*>(&value);
                 to[0] = from[0];
                 to[1] = from[1];
                 to[2] = from[2];
                 to[3] = from[3];
-                return true;
+                return Error::NoError;
             }
 
-            template <class T, typename std::enable_if<std::is_arithmetic<T>::value && sizeof(T) == 8, int>::type = 0>
-            bool put(T value)
+            template <class T, typename std::enable_if<sizeof(T) == 8, int>::type = 0>
+            Error put(T value)
             {
                 auto to = memoryManager_.getPtr(sizeof(T));
                 if (to == nullptr)
-                    return false;
+                {
+                    return Error::NotEnoughMemory;
+                }
+
                 auto from = reinterpret_cast<char*>(&value);
                 to[0] = from[0];
                 to[1] = from[1];
@@ -195,22 +226,26 @@ namespace spp
                 to[5] = from[5];
                 to[6] = from[6];
                 to[7] = from[7];
-                return true;
+                return Error::NoError;
             }
 
-            template <class T, typename std::enable_if<std::is_enum<T>::value, int>::type = 0>
-            bool put(T value)
-            {
-                return put(static_cast<std::underlying_type_t<T>>(value));
-            }
-
-            bool put(const char* data, size_t size)
+            Error put(const char* data, size_t size)
             {
                 auto to = memoryManager_.getPtr(size);
                 if (to == nullptr)
-                    return false;
+                {
+                    return Error::NotEnoughMemory;
+                }
+
                 std::copy(data, data + size, to);
-                return true;
+                return Error::NoError;
+            }
+
+            template <class T>
+            Error put(const T* data, size_t size)
+            {
+                const auto totalSize = size * sizeof(T);
+                return put(reinterpret_cast<const char*>(data), totalSize);
             }
 
             const char* data() const noexcept

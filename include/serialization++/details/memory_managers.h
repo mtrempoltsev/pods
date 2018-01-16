@@ -25,7 +25,10 @@ namespace spp
             char* getPtr(size_t size) noexcept
             {
                 if (pos_ + size > maxSize_)
+                {
                     return nullptr;
+                }
+
                 auto ptr = data_ + pos_;
                 pos_ += size;
                 return ptr;
@@ -66,8 +69,12 @@ namespace spp
             {
                 const auto oldSize = data_.size();
                 const auto newSize = oldSize + size;
+
                 if (newSize > maxSize_)
+                {
                     return nullptr;
+                }
+
                 data_.resize(newSize);
                 return data_.data() + oldSize;
             }
