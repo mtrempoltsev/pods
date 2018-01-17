@@ -27,8 +27,6 @@ const double d2expected = std::numeric_limits<double>::max();
 
 const char c1expected = std::numeric_limits<char>::min();
 const char c2expected = std::numeric_limits<char>::max();
-const bool b1expected = std::numeric_limits<bool>::min();
-const bool b2expected = std::numeric_limits<bool>::max();
 
 const std::string data1expected = "hello";
 const std::string data2expected = "@#0123456789-=AaBbCcDdEeFf!";
@@ -177,16 +175,14 @@ void testFloatRead(ReadOnlyStorage& in)
 }
 
 template <class WriteOnlyStorage>
-void testCharBoolWrite(WriteOnlyStorage& out)
+void testCharWrite(WriteOnlyStorage& out)
 {
     EXPECT_EQ(out.put(c1expected), spp::Error::NoError);
     EXPECT_EQ(out.put(c2expected), spp::Error::NoError);
-    EXPECT_EQ(out.put(b1expected), spp::Error::NoError);
-    EXPECT_EQ(out.put(b2expected), spp::Error::NoError);
 }
 
 template <class ReadOnlyStorage>
-void testCharBoolRead(ReadOnlyStorage& in)
+void testCharRead(ReadOnlyStorage& in)
 {
     char c1actual = 0;
     EXPECT_EQ(in.get(c1actual), spp::Error::NoError);
@@ -195,14 +191,6 @@ void testCharBoolRead(ReadOnlyStorage& in)
     char c2actual = 0;
     EXPECT_EQ(in.get(c2actual), spp::Error::NoError);
     EXPECT_EQ(c2actual, c2expected);
-
-    bool b1actual = 0;
-    EXPECT_EQ(in.get(b1actual), spp::Error::NoError);
-    EXPECT_EQ(b1actual, b1expected);
-
-    bool b2actual = 0;
-    EXPECT_EQ(in.get(b2actual), spp::Error::NoError);
-    EXPECT_EQ(b2actual, b2expected);
 }
 
 template <class WriteOnlyStorage>

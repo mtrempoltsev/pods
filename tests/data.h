@@ -21,27 +21,28 @@ enum class Enum2 : unsigned char
 
 struct A
 {
+    A() = default;
+
+    A(const A&) = delete;
+    A& operator=(const A&) = delete;
+
+    A(A&&) = delete;
+    A& operator=(A&&) = delete;
+
     std::array<float, 5> floatData = { 1, 2, 3, 4, 5 };
 
-    constexpr spp::Version actualDataVersion() const
+    static constexpr spp::Version version()
     {
         return 5;
     }
 
     template <class Serializer>
-    spp::Error serialize(Serializer& serializer) const
+    spp::Error serialize(Serializer& serializer, spp::Version archiveVersion)
     {
         return serializer
         (
             SPP_OPT(floatData)
         );
-    }
-
-    template <class Serializer>
-    spp::Error deserialize(Serializer& serializer, spp::Version archiveVersion)
-    {
-        assert(archiveVersion == actualDataVersion());
-        return serialize(serializer);
     }
 };
 
@@ -61,13 +62,13 @@ struct TestData
             Enum1 e1 = ::BB;
             Enum2 e2 = Enum2::X;
 
-            constexpr spp::Version actualDataVersion() const
+            static constexpr spp::Version version()
             {
                 return 1;
             }
 
             template <class Serializer>
-            spp::Error serialize(Serializer& serializer) const
+            spp::Error serialize(Serializer& serializer, spp::Version archiveVersion)
             {
                 return serializer
                 (
@@ -76,36 +77,22 @@ struct TestData
                     SPP_MDR(e2)
                 );
             }
-
-            template <class Serializer>
-            spp::Error deserialize(Serializer& serializer, spp::Version archiveVersion)
-            {
-                assert(archiveVersion == actualDataVersion());
-                return serialize(serializer);
-            }
         };
 
         C c;
 
-        constexpr spp::Version actualDataVersion() const
+        static constexpr spp::Version version()
         {
             return 2;
         }
 
         template <class Serializer>
-        spp::Error serialize(Serializer& serializer) const
+        spp::Error serialize(Serializer& serializer, spp::Version archiveVersion)
         {
             return serializer
             (
                 SPP_MDR(c)
             );
-        }
-
-        template <class Serializer>
-        spp::Error deserialize(Serializer& serializer, spp::Version archiveVersion)
-        {
-            assert(archiveVersion == actualDataVersion());
-            return serialize(serializer);
         }
     };
 
@@ -116,13 +103,18 @@ struct TestData
         int x;
         int y;
 
-        constexpr spp::Version actualDataVersion() const
+        bool operator==(const Point other) const
+        {
+            return x == other.x && y == other.y;
+        }
+
+        static constexpr spp::Version version()
         {
             return 1;
         }
 
         template <class Serializer>
-        spp::Error serialize(Serializer& serializer) const
+        spp::Error serialize(Serializer& serializer, spp::Version archiveVersion)
         {
             return serializer
             (
@@ -130,26 +122,19 @@ struct TestData
                 SPP_OPT(y)
             );
         }
-
-        template <class Serializer>
-        spp::Error deserialize(Serializer& serializer, spp::Version archiveVersion)
-        {
-            assert(archiveVersion == actualDataVersion());
-            return serialize(serializer);
-        }
     };
 
     std::vector<Point> points = { { 1, 2}, { 3, 4 } };
 
     std::map<short, std::vector<char>> dict = { { 1, { 'a', 'b' } }, { -5, {} } };
 
-    constexpr spp::Version actualDataVersion() const
+    static constexpr spp::Version version()
     {
         return 1;
     }
 
     template <class Serializer>
-    spp::Error serialize(Serializer& serializer) const
+    spp::Error serialize(Serializer& serializer, spp::Version archiveVersion)
     {
         return serializer
         (
@@ -161,12 +146,5 @@ struct TestData
             SPP_OPT(points),
             SPP_MDR(dict)
         );
-    }
-
-    template <class Serializer>
-    spp::Error deserialize(Serializer& serializer, spp::Version archiveVersion)
-    {
-        assert(archiveVersion == actualDataVersion());
-        return serialize(serializer);
     }
 };

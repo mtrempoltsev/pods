@@ -40,10 +40,10 @@ TEST_F(fixedSizeMemoryStorage, testFloat)
 
 TEST_F(fixedSizeMemoryStorage, testCharBool)
 {
-    testCharBoolWrite(out);
+    testCharWrite(out);
 
     spp::ReadOnlyMemoryStorage in(out.data(), out.size());
-    testCharBoolRead(in);
+    testCharRead(in);
 }
 
 TEST_F(fixedSizeMemoryStorage, testRawData)

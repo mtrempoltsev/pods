@@ -27,18 +27,6 @@ namespace spp
         ReadOnlyMemoryStorage(ReadOnlyMemoryStorage&&) = delete;
         ReadOnlyMemoryStorage& operator=(ReadOnlyMemoryStorage&&) = delete;
 
-        Error get(bool& value) noexcept
-        {
-            if (pos_ + sizeof(bool) > maxSize_)
-            {
-                return Error::UnexpectedEnd;
-            }
-
-            value = data_[pos_] == 1;
-            pos_ += sizeof(bool);
-            return Error::NoError;
-        }
-
         template <class T>
         Error get(T& value, typename std::enable_if<std::is_arithmetic<T>::value && sizeof(T) == 1, int>::type = 0) noexcept
         {
@@ -150,18 +138,6 @@ namespace spp
 
             WriteOnlyMemoryStorage(WriteOnlyMemoryStorage<MemoryManager>&&) = delete;
             WriteOnlyMemoryStorage<MemoryManager>& operator=(WriteOnlyMemoryStorage<MemoryManager>&&) = delete;
-
-            Error put(bool value)
-            {
-                auto ptr = memoryManager_.getPtr(sizeof(bool));
-                if (ptr == nullptr)
-                {
-                    return Error::NotEnoughMemory;
-                }
-
-                *ptr = (value ? 1 : 0);
-                return Error::NoError;
-            }
 
             template <class T, typename std::enable_if<sizeof(T) == 1, int>::type = 0>
             Error put(T value)

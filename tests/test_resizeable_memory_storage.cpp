@@ -34,10 +34,10 @@ TEST(resizeableMemoryStorage, testFloat)
 TEST(resizeableMemoryStorage, testCharBool)
 {
     spp::ResizeableWriteOnlyMemoryStorage out;
-    testCharBoolWrite(out);
+    testCharWrite(out);
 
     spp::ReadOnlyMemoryStorage in(out.data(), out.size());
-    testCharBoolRead(in);
+    testCharRead(in);
 }
 
 TEST(resizeableMemoryStorage, testRawData)

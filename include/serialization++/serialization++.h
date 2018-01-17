@@ -1,6 +1,13 @@
 ﻿#pragma once
 
-#include "errors.h"
 #include "binary_serializer.h"
-#include "name_value.h"
-#include "types.h"
+
+#ifdef SPP_MDR
+#error Rename the macro
+#endif
+#define SPP_MDR(field) #field, field
+
+#ifdef SPP_OPT
+#error Rename the macro
+#endif
+#define SPP_OPT(field) #field, field
