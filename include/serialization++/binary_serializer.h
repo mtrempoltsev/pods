@@ -1,6 +1,9 @@
 ﻿#pragma once
 
+#include <array>
+#include <map>
 #include <type_traits>
+#include <vector>
 
 #include "errors.h"
 #include "types.h"
@@ -252,6 +255,7 @@ namespace spp
 
             value.clear();
 
+            auto hint = value.begin();
             for (Size i = 0; i < size; ++i)
             {
                 K key = K();
@@ -260,7 +264,7 @@ namespace spp
                 V val = V();
                 SPP_SAFE_CALL(doProcess(val));
 
-                value.emplace(key, val);
+                hint = value.emplace_hint(hint, std::move(key), std::move(val));
             }
 
             return Error::NoError;
@@ -306,16 +310,9 @@ namespace spp
             return Error::NoError;
         }
 
-        Error loadSize(size_t& size)
+        Error loadSize(Size& size)
         {
-            SPP_SAFE_CALL(storage_.get(size));
-
-            if (std::numeric_limits<Size>::max() < size)
-            {
-                return Error::SizeToLarge;
-            }
-
-            return Error::NoError;
+            return storage_.get(size);
         }
 
         template <class T, typename std::enable_if<std::is_class<T>::value, int>::type = 0>
