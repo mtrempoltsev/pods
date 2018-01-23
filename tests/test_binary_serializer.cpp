@@ -7,7 +7,7 @@
 
 TEST(binarySerializer, common)
 {
-    TestData expected;
+    const TestData expected;
 
     spp::ResizeableWriteOnlyMemoryStorage out;
     spp::BinarySerializer<spp::ResizeableWriteOnlyMemoryStorage> serializer(out);

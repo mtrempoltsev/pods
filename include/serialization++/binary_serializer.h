@@ -36,10 +36,10 @@ namespace spp
         BinarySerializer& operator=(const BinarySerializer&) = delete;
 
         template <class T>
-        Error save(const T& data)
+        Error save(T&& data)
         {
-            storage_.put(T::version());
-            return saveData(data);
+            SPP_SAFE_CALL(saveVersion<T>());
+            return saveData(std::forward<T&&>(data));
         }
 
         Error operator()() noexcept
@@ -48,7 +48,7 @@ namespace spp
         }
 
         template <class... T>
-        Error operator()(T&... args)
+        Error operator()(T&&... args)
         {
             return process(args...);
         }
@@ -160,7 +160,7 @@ namespace spp
         template <class T, typename std::enable_if<std::is_class<T>::value, int>::type = 0>
         Error saveRange(T* begin, size_t size)
         {
-            SPP_SAFE_CALL(storage_.put(T::version()));
+            SPP_SAFE_CALL(saveVersion<T>());
 
             for (auto end = begin + size; begin != end; ++begin)
             {
@@ -174,6 +174,12 @@ namespace spp
         Error saveRange(T* begin, size_t size)
         {
             return storage_.put(begin, size);
+        }
+
+        template <class T>
+        Error saveVersion()
+        {
+            return storage_.put(std::decay_t<T>::version());
         }
 
     private:
