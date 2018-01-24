@@ -1,9 +1,9 @@
-project(${SERIALIZATIONPP_TEST_PROJECT})
+project(${PODS_TEST_PROJECT})
 
 find_package(GTest REQUIRED)
 include_directories(${GTEST_INCLUDE_DIRS})
 
-include_directories(${SERIALIZATIONPP_INCLUDE})
+include_directories(${PODS_INCLUDE})
 
 set(HEADERS
    data.h
@@ -19,11 +19,11 @@ set(SOURCES
     main.cpp
     )
 
-add_executable(${SERIALIZATIONPP_TEST_PROJECT} ${HEADERS} ${SOURCES})
+add_executable(${PODS_TEST_PROJECT} ${HEADERS} ${SOURCES})
 
 find_package(Threads)
 
-target_link_libraries(${SERIALIZATIONPP_TEST_PROJECT}
+target_link_libraries(${PODS_TEST_PROJECT}
     ${GTEST_BOTH_LIBRARIES}
     ${CMAKE_THREAD_LIBS_INIT}
     )
