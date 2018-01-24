@@ -30,83 +30,42 @@ namespace spp
         template <class T>
         Error get(T& value, typename std::enable_if<std::is_arithmetic<T>::value && sizeof(T) == 1, int>::type = 0) noexcept
         {
-            if (pos_ + sizeof(T) > maxSize_)
+            if (pos_ + sizeof(T) <= maxSize_)
             {
-                return Error::UnexpectedEnd;
+                value = data_[pos_];
+                pos_ += sizeof(T);
+                return Error::NoError;
             }
 
-            value = data_[pos_];
-            pos_ += sizeof(T);
-            return Error::NoError;
+            return Error::UnexpectedEnd;
         }
 
         template <class T>
-        Error get(T& value, typename std::enable_if<std::is_arithmetic<T>::value && sizeof(T) == 2, int>::type = 0) noexcept
+        Error get(T& value, typename std::enable_if<std::is_arithmetic<T>::value && sizeof(T) != 1, int>::type = 0) noexcept
         {
-            if (pos_ + sizeof(T) > maxSize_)
+            if (pos_ + sizeof(T) <= maxSize_)
             {
-                return Error::UnexpectedEnd;
+                auto to = reinterpret_cast<char*>(&value);
+                auto from = data_ + pos_;
+                memcpy(to, from, sizeof(T));
+                pos_ += sizeof(T);
+                return Error::NoError;
             }
 
-            auto to = reinterpret_cast<char*>(&value);
-            auto from = data_ + pos_;
-            to[0] = from[0];
-            to[1] = from[1];
-            pos_ += sizeof(T);
-            return Error::NoError;
-        }
-
-        template <class T>
-        Error get(T& value, typename std::enable_if<std::is_arithmetic<T>::value && sizeof(T) == 4, int>::type = 0) noexcept
-        {
-            if (pos_ + sizeof(T) > maxSize_)
-            {
-                return Error::UnexpectedEnd;
-            }
-
-            auto to = reinterpret_cast<char*>(&value);
-            auto from = data_ + pos_;
-            to[0] = from[0];
-            to[1] = from[1];
-            to[2] = from[2];
-            to[3] = from[3];
-            pos_ += sizeof(T);
-            return Error::NoError;
-        }
-
-        template <class T>
-        Error get(T& value, typename std::enable_if<std::is_arithmetic<T>::value && sizeof(T) == 8, int>::type = 0) noexcept
-        {
-            if (pos_ + sizeof(T) > maxSize_)
-            {
-                return Error::UnexpectedEnd;
-            }
-
-            auto to = reinterpret_cast<char*>(&value);
-            auto from = data_ + pos_;
-            to[0] = from[0];
-            to[1] = from[1];
-            to[2] = from[2];
-            to[3] = from[3];
-            to[4] = from[4];
-            to[5] = from[5];
-            to[6] = from[6];
-            to[7] = from[7];
-            pos_ += sizeof(T);
-            return Error::NoError;
+            return Error::UnexpectedEnd;
         }
 
         Error get(char* data, size_t size) noexcept
         {
-            if (pos_ + size > maxSize_)
+            if (pos_ + size <= maxSize_)
             {
-                return Error::UnexpectedEnd;
+                auto begin = data_ + pos_;
+                memcpy(data, begin, size);
+                pos_ += size;
+                return Error::NoError;
             }
 
-            auto begin = data_ + pos_;
-            std::copy(begin, begin + size, data);
-            pos_ += size;
-            return Error::NoError;
+            return Error::UnexpectedEnd;
         }
 
         template <class T>
@@ -142,79 +101,40 @@ namespace spp
             template <class T, typename std::enable_if<sizeof(T) == 1, int>::type = 0>
             Error put(T value)
             {
-                auto ptr = memoryManager_.getPtr(sizeof(T));
-                if (ptr == nullptr)
+                auto to = memoryManager_.getPtr(sizeof(T));
+                if (to != nullptr)
                 {
-                    return Error::NotEnoughMemory;
+                    *to = value;
+                    return Error::NoError;
                 }
 
-                *ptr = value;
-                return Error::NoError;
+                return Error::NotEnoughMemory;
             }
 
-            template <class T, typename std::enable_if<sizeof(T) == 2, int>::type = 0>
+            template <class T, typename std::enable_if<sizeof(T) != 1, int>::type = 0>
             Error put(T value)
             {
                 auto to = memoryManager_.getPtr(sizeof(T));
-                if (to == nullptr)
+                if (to != nullptr)
                 {
-                    return Error::NotEnoughMemory;
+                    auto from = reinterpret_cast<char*>(&value);
+                    memcpy(to, from, sizeof(T));
+                    return Error::NoError;
                 }
 
-                auto from = reinterpret_cast<char*>(&value);
-                to[0] = from[0];
-                to[1] = from[1];
-                return Error::NoError;
-            }
-
-            template <class T, typename std::enable_if<sizeof(T) == 4, int>::type = 0>
-            Error put(T value)
-            {
-                auto to = memoryManager_.getPtr(sizeof(T));
-                if (to == nullptr)
-                {
-                    return Error::NotEnoughMemory;
-                }
-
-                auto from = reinterpret_cast<char*>(&value);
-                to[0] = from[0];
-                to[1] = from[1];
-                to[2] = from[2];
-                to[3] = from[3];
-                return Error::NoError;
-            }
-
-            template <class T, typename std::enable_if<sizeof(T) == 8, int>::type = 0>
-            Error put(T value)
-            {
-                auto to = memoryManager_.getPtr(sizeof(T));
-                if (to == nullptr)
-                {
-                    return Error::NotEnoughMemory;
-                }
-
-                auto from = reinterpret_cast<char*>(&value);
-                to[0] = from[0];
-                to[1] = from[1];
-                to[2] = from[2];
-                to[3] = from[3];
-                to[4] = from[4];
-                to[5] = from[5];
-                to[6] = from[6];
-                to[7] = from[7];
-                return Error::NoError;
+                return Error::NotEnoughMemory;
             }
 
             Error put(const char* data, size_t size)
             {
                 auto to = memoryManager_.getPtr(size);
-                if (to == nullptr)
+                if (to != nullptr)
                 {
-                    return Error::NotEnoughMemory;
+                    memcpy(to, data, size);
+                    return Error::NoError;
                 }
 
-                std::copy(data, data + size, to);
-                return Error::NoError;
+                return Error::NotEnoughMemory;
             }
 
             template <class T>

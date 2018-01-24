@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include <vector>
+#include <memory>
 
 namespace spp
 {
@@ -24,14 +24,14 @@ namespace spp
 
             char* getPtr(size_t size) noexcept
             {
-                if (pos_ + size > maxSize_)
+                if (pos_ + size <= maxSize_)
                 {
-                    return nullptr;
+                    auto ptr = data_ + pos_;
+                    pos_ += size;
+                    return ptr;
                 }
 
-                auto ptr = data_ + pos_;
-                pos_ += size;
-                return ptr;
+                return nullptr;
             }
 
             const char* data() const noexcept
@@ -55,8 +55,10 @@ namespace spp
         public:
             ResizeableMemoryManager(size_t initialSize, size_t maxSize)
                 : maxSize_(maxSize)
+                , pos_(0)
+                , capacity_(initialSize)
+                , data_(new char[initialSize])
             {
-                data_.reserve(initialSize);
             }
 
             ResizeableMemoryManager(const FixedSizeMemoryManager&) = delete;
@@ -67,31 +69,48 @@ namespace spp
 
             char* getPtr(size_t size)
             {
-                const auto oldSize = data_.size();
-                const auto newSize = oldSize + size;
+                const auto newPos = pos_ + size;
 
-                if (newSize > maxSize_)
+                if (newPos <= maxSize_)
                 {
-                    return nullptr;
+                    if (newPos > capacity_)
+                    {
+                        increaseSize();
+                    }
+
+                    const auto ptr = data_.get() + pos_;
+                    pos_ = newPos;
+                    return ptr;
                 }
 
-                data_.resize(newSize);
-                return data_.data() + oldSize;
+                return nullptr;
             }
 
             const char* data() const noexcept
             {
-                return data_.data();
+                return data_.get();
             }
 
             size_t size() const noexcept
             {
-                return data_.size();
+                return pos_;
+            }
+
+        private:
+            void increaseSize()
+            {
+                const auto newCapacity = capacity_ * 2;
+                auto newData = std::make_unique<char[]>(newCapacity);
+                memcpy(newData.get(), data_.get(), pos_);
+                data_.swap(newData);
+                capacity_ = newCapacity;
             }
 
         private:
             const size_t maxSize_;
-            std::vector<char> data_;
+            size_t pos_;
+            size_t capacity_;
+            std::unique_ptr<char[]> data_;
         };
     }
 }
