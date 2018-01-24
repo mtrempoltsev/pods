@@ -4,46 +4,53 @@ namespace pods
 {
     namespace details
     {
-        struct MemoryHolder
+        struct Buffer
         {
-            explicit MemoryHolder(size_t size)
-                : ptr(new char[size])
+            explicit Buffer(size_t size) noexcept
+                : ptr(static_cast<char*>(malloc(size)))
             {
             }
 
-            ~MemoryHolder()
+            ~Buffer() noexcept
             {
-                delete[] ptr;
+                free(ptr);
             }
 
-            MemoryHolder(const MemoryHolder&) = delete;
-            MemoryHolder& operator=(const MemoryHolder&) = delete;
+            Buffer(const Buffer&) = delete;
+            Buffer& operator=(const Buffer&) = delete;
 
-            MemoryHolder(MemoryHolder&& movied)
+            Buffer(Buffer&& movied) noexcept
                 : ptr(movied.ptr)
             {
                 movied.ptr = nullptr;
             }
 
-            MemoryHolder& operator=(MemoryHolder&& movied)
+            Buffer& operator=(Buffer&& movied) noexcept
             {
                 if (this != &movied)
                 {
                     if (ptr != nullptr)
                     {
-                        delete[] ptr;
+                        free(ptr);
                         ptr = nullptr;
                     }
 
-                    swap(movied);
+                    std::swap(ptr, movied.ptr);
                 }
 
                 return *this;
             }
 
-            void swap(MemoryHolder& other) noexcept
+            bool resize(size_t newSize) noexcept
             {
-                std::swap(ptr, other.ptr);
+                auto newPtr = realloc(ptr, newSize);
+                if (newPtr == nullptr)
+                {
+                    return false;
+                }
+
+                ptr = static_cast<char*>(newPtr);
+                return true;
             }
 
             char* ptr;
@@ -90,7 +97,7 @@ namespace pods
         private:
             const size_t maxSize_;
             size_t pos_;
-            MemoryHolder data_;
+            Buffer data_;
         };
 
         class ResizeableMemoryManager final
@@ -102,6 +109,10 @@ namespace pods
                 , capacity_(initialSize)
                 , data_(initialSize)
             {
+                if (data_.ptr == nullptr)
+                {
+                    throw std::bad_alloc();
+                }
             }
 
             ResizeableMemoryManager(const FixedSizeMemoryManager&) = delete;
@@ -110,7 +121,7 @@ namespace pods
             ResizeableMemoryManager(ResizeableMemoryManager&&) = default;
             ResizeableMemoryManager& operator=(ResizeableMemoryManager&&) = default;
 
-            char* getPtr(size_t size)
+            char* getPtr(size_t size) noexcept
             {
                 const auto newPos = pos_ + size;
 
@@ -118,7 +129,10 @@ namespace pods
                 {
                     if (newPos > capacity_)
                     {
-                        increaseSize();
+                        if (!increaseSize())
+                        {
+                            return nullptr;
+                        }
                     }
 
                     const auto ptr = data_.ptr + pos_;
@@ -140,20 +154,24 @@ namespace pods
             }
 
         private:
-            void increaseSize()
+            bool increaseSize() noexcept
             {
                 const auto newCapacity = capacity_ * 2;
-                MemoryHolder newData(newCapacity);
-                memcpy(newData.ptr, data_.ptr, pos_);
-                data_.swap(newData);
-                capacity_ = newCapacity;
+
+                if (data_.resize(newCapacity))
+                {
+                    capacity_ = newCapacity;
+                    return true;
+                }
+
+                return false;
             }
 
         private:
             const size_t maxSize_;
             size_t pos_;
             size_t capacity_;
-            MemoryHolder data_;
+            Buffer data_;
         };
     }
 }
