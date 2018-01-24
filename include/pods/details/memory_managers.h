@@ -2,7 +2,7 @@
 
 #include <memory>
 
-namespace spp
+namespace pods
 {
     namespace details
     {

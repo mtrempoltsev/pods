@@ -5,7 +5,7 @@
 #include <string>
 #include <vector>
 
-#include <serialization++/serialization++.h>
+#include <pods/pods.h>
 
 enum Enum1
 {
@@ -31,17 +31,17 @@ struct A
 
     std::array<float, 5> floatData = { 1, 2, 3, 4, 5 };
 
-    static constexpr spp::Version version()
+    static constexpr pods::Version version()
     {
         return 5;
     }
 
     template <class Serializer>
-    spp::Error serialize(Serializer& serializer, spp::Version archiveVersion)
+    pods::Error serialize(Serializer& serializer, pods::Version archiveVersion)
     {
         return serializer
         (
-            SPP_OPT(floatData)
+            PODS_OPT(floatData)
         );
     }
 };
@@ -62,36 +62,36 @@ struct TestData
             Enum1 e1 = ::BB;
             Enum2 e2 = Enum2::X;
 
-            static constexpr spp::Version version()
+            static constexpr pods::Version version()
             {
                 return 1;
             }
 
             template <class Serializer>
-            spp::Error serialize(Serializer& serializer, spp::Version archiveVersion)
+            pods::Error serialize(Serializer& serializer, pods::Version archiveVersion)
             {
                 return serializer
                 (
-                    SPP_OPT(b),
-                    SPP_MDR(e1),
-                    SPP_MDR(e2)
+                    PODS_OPT(b),
+                    PODS_MDR(e1),
+                    PODS_MDR(e2)
                 );
             }
         };
 
         C c;
 
-        static constexpr spp::Version version()
+        static constexpr pods::Version version()
         {
             return 2;
         }
 
         template <class Serializer>
-        spp::Error serialize(Serializer& serializer, spp::Version archiveVersion)
+        pods::Error serialize(Serializer& serializer, pods::Version archiveVersion)
         {
             return serializer
             (
-                SPP_MDR(c)
+                PODS_MDR(c)
             );
         }
     };
@@ -108,18 +108,18 @@ struct TestData
             return x == other.x && y == other.y;
         }
 
-        static constexpr spp::Version version()
+        static constexpr pods::Version version()
         {
             return 1;
         }
 
         template <class Serializer>
-        spp::Error serialize(Serializer& serializer, spp::Version archiveVersion)
+        pods::Error serialize(Serializer& serializer, pods::Version archiveVersion)
         {
             return serializer
             (
-                SPP_MDR(x),
-                SPP_OPT(y)
+                PODS_MDR(x),
+                PODS_OPT(y)
             );
         }
     };
@@ -128,23 +128,23 @@ struct TestData
 
     std::map<short, std::vector<char>> dict = { { 1, { 'a', 'b' } }, { -5, {} } };
 
-    static constexpr spp::Version version()
+    static constexpr pods::Version version()
     {
         return 1;
     }
 
     template <class Serializer>
-    spp::Error serialize(Serializer& serializer, spp::Version archiveVersion)
+    pods::Error serialize(Serializer& serializer, pods::Version archiveVersion)
     {
         return serializer
         (
-            SPP_MDR(x),
-            SPP_OPT(y),
-            SPP_MDR(z),
-            SPP_OPT(a),
-            SPP_MDR(b),
-            SPP_OPT(points),
-            SPP_MDR(dict)
+            PODS_MDR(x),
+            PODS_OPT(y),
+            PODS_MDR(z),
+            PODS_OPT(a),
+            PODS_MDR(b),
+            PODS_OPT(points),
+            PODS_MDR(dict)
         );
     }
 };

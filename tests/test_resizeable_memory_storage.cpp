@@ -1,51 +1,51 @@
 ﻿#include <gtest/gtest.h>
 
-#include <serialization++/memory_storage.h>
+#include <pods/memory_storage.h>
 
 #include "storage_data.h"
 
 TEST(resizeableMemoryStorage, testSigned)
 {
-    spp::ResizeableWriteOnlyMemoryStorage out;
+    pods::ResizeableWriteOnlyMemoryStorage out;
     testSignedWrite(out);
 
-    spp::ReadOnlyMemoryStorage in(out.data(), out.size());
+    pods::ReadOnlyMemoryStorage in(out.data(), out.size());
     testSignedRead(in);
 }
 
 TEST(resizeableMemoryStorage, testUnsigned)
 {
-    spp::ResizeableWriteOnlyMemoryStorage out;
+    pods::ResizeableWriteOnlyMemoryStorage out;
     testUnsignedWrite(out);
 
-    spp::ReadOnlyMemoryStorage in(out.data(), out.size());
+    pods::ReadOnlyMemoryStorage in(out.data(), out.size());
     testUnsignedRead(in);
 }
 
 TEST(resizeableMemoryStorage, testFloat)
 {
-    spp::ResizeableWriteOnlyMemoryStorage out;
+    pods::ResizeableWriteOnlyMemoryStorage out;
     testFloatWrite(out);
 
-    spp::ReadOnlyMemoryStorage in(out.data(), out.size());
+    pods::ReadOnlyMemoryStorage in(out.data(), out.size());
     testFloatRead(in);
 }
 
 TEST(resizeableMemoryStorage, testCharBool)
 {
-    spp::ResizeableWriteOnlyMemoryStorage out;
+    pods::ResizeableWriteOnlyMemoryStorage out;
     testCharWrite(out);
 
-    spp::ReadOnlyMemoryStorage in(out.data(), out.size());
+    pods::ReadOnlyMemoryStorage in(out.data(), out.size());
     testCharRead(in);
 }
 
 TEST(resizeableMemoryStorage, testRawData)
 {
-    spp::ResizeableWriteOnlyMemoryStorage out;
+    pods::ResizeableWriteOnlyMemoryStorage out;
     testRawDataWrite(out);
 
-    spp::ReadOnlyMemoryStorage in(out.data(), out.size());
+    pods::ReadOnlyMemoryStorage in(out.data(), out.size());
     testRawDataRead(in);
 }
 
@@ -55,15 +55,15 @@ TEST(resizeableMemoryStorage, testError)
     uint64_t big = 0;
 
     {
-        spp::ResizeableWriteOnlyMemoryStorage out(4, 4);
-        EXPECT_EQ(out.put(big), spp::Error::NotEnoughMemory);
+        pods::ResizeableWriteOnlyMemoryStorage out(4, 4);
+        EXPECT_EQ(out.put(big), pods::Error::NotEnoughMemory);
     }
 
     {
-        spp::ResizeableWriteOnlyMemoryStorage out;
-        EXPECT_EQ(out.put(small), spp::Error::NoError);
+        pods::ResizeableWriteOnlyMemoryStorage out;
+        EXPECT_EQ(out.put(small), pods::Error::NoError);
 
-        spp::ReadOnlyMemoryStorage in(out.data(), out.size());
-        EXPECT_EQ(in.get(big), spp::Error::UnexpectedEnd);
+        pods::ReadOnlyMemoryStorage in(out.data(), out.size());
+        EXPECT_EQ(in.get(big), pods::Error::UnexpectedEnd);
     }
 }

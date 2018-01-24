@@ -8,7 +8,7 @@
 
 #include "errors.h"
 
-namespace spp
+namespace pods
 {
     class ReadOnlyMemoryStorage final
     {

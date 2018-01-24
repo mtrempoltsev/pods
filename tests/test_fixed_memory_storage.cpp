@@ -2,7 +2,7 @@
 
 #include <memory>
 
-#include <serialization++/memory_storage.h>
+#include <pods/memory_storage.h>
 
 #include "storage_data.h"
 
@@ -11,14 +11,14 @@ class fixedSizeMemoryStorage
 {
     char data_[1024];
 protected:
-    spp::FixedSizeWriteOnlyMemoryStorage out { data_, sizeof(data_) };
+    pods::FixedSizeWriteOnlyMemoryStorage out { data_, sizeof(data_) };
 };
 
 TEST_F(fixedSizeMemoryStorage, testSigned)
 {
     testSignedWrite(out);
 
-    spp::ReadOnlyMemoryStorage in(out.data(), out.size());
+    pods::ReadOnlyMemoryStorage in(out.data(), out.size());
     testSignedRead(in);
 }
 
@@ -26,7 +26,7 @@ TEST_F(fixedSizeMemoryStorage, testUnsigned)
 {
     testUnsignedWrite(out);
 
-    spp::ReadOnlyMemoryStorage in(out.data(), out.size());
+    pods::ReadOnlyMemoryStorage in(out.data(), out.size());
     testUnsignedRead(in);
 }
 
@@ -34,7 +34,7 @@ TEST_F(fixedSizeMemoryStorage, testFloat)
 {
     testFloatWrite(out);
 
-    spp::ReadOnlyMemoryStorage in(out.data(), out.size());
+    pods::ReadOnlyMemoryStorage in(out.data(), out.size());
     testFloatRead(in);
 }
 
@@ -42,7 +42,7 @@ TEST_F(fixedSizeMemoryStorage, testCharBool)
 {
     testCharWrite(out);
 
-    spp::ReadOnlyMemoryStorage in(out.data(), out.size());
+    pods::ReadOnlyMemoryStorage in(out.data(), out.size());
     testCharRead(in);
 }
 
@@ -50,7 +50,7 @@ TEST_F(fixedSizeMemoryStorage, testRawData)
 {
     testRawDataWrite(out);
 
-    spp::ReadOnlyMemoryStorage in(out.data(), out.size());
+    pods::ReadOnlyMemoryStorage in(out.data(), out.size());
     testRawDataRead(in);
 }
 
@@ -61,16 +61,16 @@ TEST_F(fixedSizeMemoryStorage, testError)
 
     {
         char data[4];
-        spp::FixedSizeWriteOnlyMemoryStorage out(data, 4);
-        EXPECT_EQ(out.put(big), spp::Error::NotEnoughMemory);
+        pods::FixedSizeWriteOnlyMemoryStorage out(data, 4);
+        EXPECT_EQ(out.put(big), pods::Error::NotEnoughMemory);
     }
 
     {
         char data[sizeof(small)];
-        spp::FixedSizeWriteOnlyMemoryStorage out(data, sizeof(small));
-        EXPECT_EQ(out.put(small), spp::Error::NoError);
+        pods::FixedSizeWriteOnlyMemoryStorage out(data, sizeof(small));
+        EXPECT_EQ(out.put(small), pods::Error::NoError);
 
-        spp::ReadOnlyMemoryStorage in(out.data(), out.size());
-        EXPECT_EQ(in.get(big), spp::Error::UnexpectedEnd);
+        pods::ReadOnlyMemoryStorage in(out.data(), out.size());
+        EXPECT_EQ(in.get(big), pods::Error::UnexpectedEnd);
     }
 }

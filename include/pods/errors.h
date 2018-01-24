@@ -2,7 +2,7 @@
 
 #include <cstdint>
 
-namespace spp
+namespace pods
 {
     enum class Error : uint32_t
     {

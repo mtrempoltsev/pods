@@ -1,7 +1,7 @@
 ﻿#include <gtest/gtest.h>
 
-#include <serialization++/binary_serializer.h>
-#include <serialization++/memory_storage.h>
+#include <pods/binary_serializer.h>
+#include <pods/memory_storage.h>
 
 #include "data.h"
 
@@ -9,9 +9,9 @@ TEST(binarySerializer, common)
 {
     const TestData expected;
 
-    spp::ResizeableWriteOnlyMemoryStorage out;
-    spp::BinarySerializer<spp::ResizeableWriteOnlyMemoryStorage> serializer(out);
-    EXPECT_EQ(serializer.save(expected), spp::Error::NoError);
+    pods::ResizeableWriteOnlyMemoryStorage out;
+    pods::BinarySerializer<pods::ResizeableWriteOnlyMemoryStorage> serializer(out);
+    EXPECT_EQ(serializer.save(expected), pods::Error::NoError);
 
     TestData actual;
 
@@ -25,9 +25,9 @@ TEST(binarySerializer, common)
     actual.points = std::vector<TestData::Point>();
     actual.dict = std::map<short, std::vector<char>>();
 
-    spp::ReadOnlyMemoryStorage in(out.data(), out.size());
-    spp::BinaryDeserializer<spp::ReadOnlyMemoryStorage> deserializer(in);
-    EXPECT_EQ(deserializer.load(actual), spp::Error::NoError);
+    pods::ReadOnlyMemoryStorage in(out.data(), out.size());
+    pods::BinaryDeserializer<pods::ReadOnlyMemoryStorage> deserializer(in);
+    EXPECT_EQ(deserializer.load(actual), pods::Error::NoError);
 
     EXPECT_EQ(expected.x, actual.x);
     EXPECT_EQ(expected.y, actual.y);

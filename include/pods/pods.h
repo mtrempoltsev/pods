@@ -2,12 +2,12 @@
 
 #include "binary_serializer.h"
 
-#ifdef SPP_MDR
+#ifdef PODS_MDR
 #error Rename the macro
 #endif
-#define SPP_MDR(field) #field, field
+#define PODS_MDR(field) #field, field
 
-#ifdef SPP_OPT
+#ifdef PODS_OPT
 #error Rename the macro
 #endif
-#define SPP_OPT(field) #field, field
+#define PODS_OPT(field) #field, field

@@ -3,7 +3,7 @@
 #include <cstdint>
 #include <limits>
 
-namespace spp
+namespace pods
 {
     using Bool = uint8_t;
     using Size = uint32_t;
