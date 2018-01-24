@@ -11,4 +11,6 @@ namespace pods
 
     static constexpr Bool False = 0;
     static constexpr Bool True = 1;
+
+    static constexpr size_t PrefferedBufferSize = 4096;
 }

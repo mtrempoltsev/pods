@@ -7,6 +7,7 @@
 #include "details/memory_managers.h"
 
 #include "errors.h"
+#include "types.h"
 
 namespace pods
 {
@@ -163,8 +164,8 @@ namespace pods
         : public details::WriteOnlyMemoryStorage<details::FixedSizeMemoryManager>
     {
     public:
-        FixedSizeWriteOnlyMemoryStorage(char* data, size_t size) noexcept
-            : details::WriteOnlyMemoryStorage<details::FixedSizeMemoryManager>(details::FixedSizeMemoryManager(data, size))
+        explicit FixedSizeWriteOnlyMemoryStorage(size_t size) noexcept
+            : details::WriteOnlyMemoryStorage<details::FixedSizeMemoryManager>(details::FixedSizeMemoryManager(size))
         {
         }
     };
@@ -173,8 +174,11 @@ namespace pods
         : public details::WriteOnlyMemoryStorage<details::ResizeableMemoryManager>
     {
     public:
-        explicit ResizeableWriteOnlyMemoryStorage(size_t initialSize = 1024, size_t maxSize = std::numeric_limits<uint32_t>::max())
-            : details::WriteOnlyMemoryStorage<details::ResizeableMemoryManager>(details::ResizeableMemoryManager(initialSize, maxSize))
+        explicit ResizeableWriteOnlyMemoryStorage(
+            size_t initialSize = PrefferedBufferSize,
+            size_t maxSize = std::numeric_limits<uint32_t>::max())
+            : details::WriteOnlyMemoryStorage<details::ResizeableMemoryManager>(
+                details::ResizeableMemoryManager(initialSize, maxSize))
         {
             assert(initialSize <= maxSize);
         }

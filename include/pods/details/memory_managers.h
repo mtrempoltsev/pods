@@ -1,18 +1,61 @@
 ﻿#pragma once
 
-#include <memory>
-
 namespace pods
 {
     namespace details
     {
+        struct MemoryHolder
+        {
+            explicit MemoryHolder(size_t size)
+                : ptr(new char[size])
+            {
+            }
+
+            ~MemoryHolder()
+            {
+                delete[] ptr;
+            }
+
+            MemoryHolder(const MemoryHolder&) = delete;
+            MemoryHolder& operator=(const MemoryHolder&) = delete;
+
+            MemoryHolder(MemoryHolder&& movied)
+                : ptr(movied.ptr)
+            {
+                movied.ptr = nullptr;
+            }
+
+            MemoryHolder& operator=(MemoryHolder&& movied)
+            {
+                if (this != &movied)
+                {
+                    if (ptr != nullptr)
+                    {
+                        delete[] ptr;
+                        ptr = nullptr;
+                    }
+
+                    swap(movied);
+                }
+
+                return *this;
+            }
+
+            void swap(MemoryHolder& other) noexcept
+            {
+                std::swap(ptr, other.ptr);
+            }
+
+            char* ptr;
+        };
+
         class FixedSizeMemoryManager final
         {
         public:
-            FixedSizeMemoryManager(char* data, size_t size) noexcept
+            explicit FixedSizeMemoryManager(size_t size) noexcept
                 : maxSize_(size)
-                , data_(data)
                 , pos_(0)
+                , data_(size)
             {
             }
 
@@ -26,7 +69,7 @@ namespace pods
             {
                 if (pos_ + size <= maxSize_)
                 {
-                    auto ptr = data_ + pos_;
+                    auto ptr = data_.ptr + pos_;
                     pos_ += size;
                     return ptr;
                 }
@@ -36,7 +79,7 @@ namespace pods
 
             const char* data() const noexcept
             {
-                return data_;
+                return data_.ptr;
             }
 
             size_t size() const noexcept
@@ -46,8 +89,8 @@ namespace pods
 
         private:
             const size_t maxSize_;
-            char* const data_;
             size_t pos_;
+            MemoryHolder data_;
         };
 
         class ResizeableMemoryManager final
@@ -57,7 +100,7 @@ namespace pods
                 : maxSize_(maxSize)
                 , pos_(0)
                 , capacity_(initialSize)
-                , data_(new char[initialSize])
+                , data_(initialSize)
             {
             }
 
@@ -78,7 +121,7 @@ namespace pods
                         increaseSize();
                     }
 
-                    const auto ptr = data_.get() + pos_;
+                    const auto ptr = data_.ptr + pos_;
                     pos_ = newPos;
                     return ptr;
                 }
@@ -88,7 +131,7 @@ namespace pods
 
             const char* data() const noexcept
             {
-                return data_.get();
+                return data_.ptr;
             }
 
             size_t size() const noexcept
@@ -100,8 +143,8 @@ namespace pods
             void increaseSize()
             {
                 const auto newCapacity = capacity_ * 2;
-                auto newData = std::make_unique<char[]>(newCapacity);
-                memcpy(newData.get(), data_.get(), pos_);
+                MemoryHolder newData(newCapacity);
+                memcpy(newData.ptr, data_.ptr, pos_);
                 data_.swap(newData);
                 capacity_ = newCapacity;
             }
@@ -110,7 +153,7 @@ namespace pods
             const size_t maxSize_;
             size_t pos_;
             size_t capacity_;
-            std::unique_ptr<char[]> data_;
+            MemoryHolder data_;
         };
     }
 }
