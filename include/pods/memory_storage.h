@@ -155,6 +155,11 @@ namespace pods
                 return memoryManager_.size();
             }
 
+            void clear() noexcept
+            {
+                memoryManager_.reset();
+            }
+
         private:
             MemoryManager memoryManager_;
         };

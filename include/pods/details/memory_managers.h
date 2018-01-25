@@ -94,6 +94,11 @@ namespace pods
                 return pos_;
             }
 
+            void reset()
+            {
+                pos_ = 0;
+            }
+
         private:
             const size_t maxSize_;
             size_t pos_;
@@ -129,7 +134,7 @@ namespace pods
                 {
                     if (newPos > capacity_)
                     {
-                        if (!increaseSize())
+                        if (!increaseSize(newPos))
                         {
                             return nullptr;
                         }
@@ -153,10 +158,19 @@ namespace pods
                 return pos_;
             }
 
-        private:
-            bool increaseSize() noexcept
+            void reset()
             {
-                const auto newCapacity = capacity_ * 2;
+                pos_ = 0;
+            }
+
+        private:
+            bool increaseSize(size_t required) noexcept
+            {
+                auto newCapacity = capacity_ * 2;
+                while (newCapacity < required)
+                {
+                    newCapacity *= 2;
+                }
 
                 if (data_.resize(newCapacity))
                 {
