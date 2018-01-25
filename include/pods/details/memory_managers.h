@@ -99,6 +99,12 @@ namespace pods
                 pos_ = 0;
             }
 
+            size_t available() const noexcept
+            {
+                assert(maxSize_ >= pos_);
+                return maxSize_ - pos_;
+            }
+
         private:
             const size_t maxSize_;
             size_t pos_;
@@ -161,6 +167,12 @@ namespace pods
             void reset()
             {
                 pos_ = 0;
+            }
+
+            size_t available() const noexcept
+            {
+                assert(maxSize_ >= pos_);
+                return maxSize_ - pos_;
             }
 
         private:

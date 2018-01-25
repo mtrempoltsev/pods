@@ -160,6 +160,11 @@ namespace pods
                 memoryManager_.reset();
             }
 
+            size_t available() const noexcept
+            {
+                return memoryManager_.available();
+            }
+
         private:
             MemoryManager memoryManager_;
         };
