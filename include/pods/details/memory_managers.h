@@ -178,6 +178,8 @@ namespace pods
         private:
             bool increaseSize(size_t required) noexcept
             {
+                assert(capacity_ < required);
+
                 auto newCapacity = capacity_ * 2;
                 while (newCapacity < required)
                 {

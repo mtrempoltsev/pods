@@ -11,7 +11,7 @@
 
 namespace pods
 {
-    class ReadOnlyMemoryStorage final
+    class ReadOnlyMemoryStorage
     {
     public:
         ReadOnlyMemoryStorage(const char* data, size_t size) noexcept
@@ -76,9 +76,23 @@ namespace pods
             return get(reinterpret_cast<char*>(data), totalSize);
         }
 
-    private:
-        const size_t maxSize_;
-        const char* const data_;
+    protected:
+        ReadOnlyMemoryStorage() noexcept
+            : maxSize_(0)
+            , data_(nullptr)
+            , pos_(0)
+        {
+        }
+
+        void setBuffer(const char* data, size_t size)
+        {
+            maxSize_ = size;
+            data_ = data;
+        }
+
+    protected:
+        size_t maxSize_;
+        const char* data_;
         size_t pos_;
     };
 
@@ -193,4 +207,47 @@ namespace pods
             assert(initialSize <= maxSize);
         }
     };
+
+    namespace details
+    {
+        class BufferedReadOnlyMemoryStorage final
+            : public ReadOnlyMemoryStorage
+        {
+        public:
+            explicit BufferedReadOnlyMemoryStorage(size_t size = PrefferedBufferSize)
+                : buffer_(PrefferedBufferSize)
+            {
+                setBuffer(buffer_.ptr, size);
+            }
+
+            char* mutableData() const noexcept
+            {
+                return buffer_.ptr;
+            }
+
+            void decreaseSize(size_t newSize) noexcept
+            {
+                assert(newSize < maxSize_);
+                maxSize_ = newSize;
+            }
+
+            void gotoBegin() noexcept
+            {
+                pos_ = 0;
+            }
+
+            void gotoEnd() noexcept
+            {
+                pos_ = maxSize_;
+            }
+
+            size_t available() const noexcept
+            {
+                return maxSize_ - pos_;
+            }
+
+        private:
+            Buffer buffer_;
+        };
+    }
 }

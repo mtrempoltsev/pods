@@ -14,6 +14,7 @@ namespace pods
         SizeToLarge,
         WriteError,
         ReadError,
+        Eof,
 
         UnknownError
     };

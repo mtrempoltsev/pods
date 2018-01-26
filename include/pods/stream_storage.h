@@ -13,7 +13,9 @@ namespace pods
         explicit ReadOnlyStreamStorage(std::istream& stream)
             : in_(stream)
             , buffer_(PrefferedBufferSize)
+            , eof_(false)
         {
+            buffer_.gotoEnd();
         }
 
         ReadOnlyStreamStorage(const ReadOnlyStreamStorage&) = delete;
@@ -25,26 +27,61 @@ namespace pods
         template <class T>
         Error get(T& value) noexcept
         {
-            if (in_.read(reinterpret_cast<char*>(&value), sizeof(T)))
+            if (!eof_)
             {
-                return Error::NoError;
+                if (buffer_.available() >= sizeof(T))
+                {
+                    return buffer_.get(value);
+                }
+
+                const auto bytesLeft = buffer_.available();
+                if (bytesLeft > 0)
+                {
+                    auto pos = in_.tellg();
+                    pos -= bytesLeft;
+                    in_.seekg(pos, std::ios_base::beg);
+                }
+
+                const auto error = readBuffer();
+                if (error != Error::NoError)
+                {
+                    return error;
+                }
+
+                return buffer_.get(value);
             }
 
-            return in_.eof()
-                ? Error::NoError
-                : Error::ReadError;
+            return Error::UnexpectedEnd;
         }
 
         Error get(char* data, size_t size) noexcept
         {
-            if (in_.read(data, size))
+            if (!eof_)
             {
-                return Error::NoError;
+                if (buffer_.available() >= size)
+                {
+                    return buffer_.get(data, size);
+                }
+
+                const auto bytesReaded = buffer_.available();
+                const auto needToReed = size - bytesReaded;
+
+                auto error = buffer_.get(data, bytesReaded);
+                if (error != Error::NoError)
+                {
+                    return error;
+                }
+
+                error = read(data + bytesReaded, needToReed);
+                if (error == Error::NoError || error == Error::Eof)
+                {
+                    return Error::NoError;
+                }
+
+                return error;
             }
 
-            return in_.eof()
-                ? Error::NoError
-                : Error::ReadError;
+            return Error::UnexpectedEnd;
         }
 
         template <class T>
@@ -55,8 +92,42 @@ namespace pods
         }
 
     private:
+        Error read(char* data, size_t size) noexcept
+        {
+            const bool success = !!in_.read(data, size);
+            if (!success)
+            {
+                eof_ = in_.eof();
+                return eof_
+                    ? Error::Eof
+                    : Error::ReadError;
+            }
+
+            return Error::NoError;
+        }
+
+        Error readBuffer() noexcept
+        {
+            buffer_.gotoBegin();
+
+            const auto error = read(buffer_.mutableData(), PrefferedBufferSize);
+
+            if (error == Error::Eof)
+            {
+                const auto bytesReaded = in_.gcount();
+                if (bytesReaded < PrefferedBufferSize)
+                {
+                    buffer_.decreaseSize(bytesReaded);
+                }
+            }
+
+            return error;
+        }
+
+    private:
         std::istream& in_;
-        FixedSizeWriteOnlyMemoryStorage buffer_;
+        details::BufferedReadOnlyMemoryStorage buffer_;
+        bool eof_;
     };
 
     class WriteOnlyStreamStorage final
