@@ -13,6 +13,7 @@ namespace pods
         UnexpectedEnd,
         SizeToLarge,
         WriteError,
+        ReadError,
 
         UnknownError
     };

@@ -32,5 +32,21 @@ TEST(streamStorage, common)
 
     EXPECT_EQ(out.put(e3.data(), e3.size()), pods::Error::NoError);
 
+    pods::ReadOnlyStreamStorage in(buffer);
 
+    for (size_t i = 0; i < n; ++i)
+    {
+        bool a1 = true;
+        EXPECT_EQ(in.get(a1), pods::Error::NoError);
+        EXPECT_EQ(e1, a1);
+
+        uint64_t a2 = 0;
+        EXPECT_EQ(in.get(a2), pods::Error::NoError);
+        EXPECT_EQ(e2, a2);
+    }
+
+    std::vector<uint64_t> a3;
+    a3.resize(n);
+    EXPECT_EQ(in.get(a3.data(), a3.size()), pods::Error::NoError);
+    EXPECT_EQ(e3, a3);
 }

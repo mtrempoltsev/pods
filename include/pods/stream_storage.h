@@ -7,6 +7,58 @@
 
 namespace pods
 {
+    class ReadOnlyStreamStorage final
+    {
+    public:
+        explicit ReadOnlyStreamStorage(std::istream& stream)
+            : in_(stream)
+            , buffer_(PrefferedBufferSize)
+        {
+        }
+
+        ReadOnlyStreamStorage(const ReadOnlyStreamStorage&) = delete;
+        ReadOnlyStreamStorage& operator=(const ReadOnlyStreamStorage&) = delete;
+
+        ReadOnlyStreamStorage(ReadOnlyStreamStorage&&) = delete;
+        ReadOnlyStreamStorage& operator=(ReadOnlyStreamStorage&&) = delete;
+
+        template <class T>
+        Error get(T& value) noexcept
+        {
+            if (in_.read(reinterpret_cast<char*>(&value), sizeof(T)))
+            {
+                return Error::NoError;
+            }
+
+            return in_.eof()
+                ? Error::NoError
+                : Error::ReadError;
+        }
+
+        Error get(char* data, size_t size) noexcept
+        {
+            if (in_.read(data, size))
+            {
+                return Error::NoError;
+            }
+
+            return in_.eof()
+                ? Error::NoError
+                : Error::ReadError;
+        }
+
+        template <class T>
+        Error get(T* data, size_t size) noexcept
+        {
+            const auto totalSize = size * sizeof(T);
+            return get(reinterpret_cast<char*>(data), totalSize);
+        }
+
+    private:
+        std::istream& in_;
+        FixedSizeWriteOnlyMemoryStorage buffer_;
+    };
+
     class WriteOnlyStreamStorage final
     {
     public:
@@ -15,6 +67,12 @@ namespace pods
             , buffer_(PrefferedBufferSize)
         {
         }
+
+        WriteOnlyStreamStorage(const WriteOnlyStreamStorage&) = delete;
+        WriteOnlyStreamStorage& operator=(const WriteOnlyStreamStorage&) = delete;
+
+        WriteOnlyStreamStorage(WriteOnlyStreamStorage&&) = delete;
+        WriteOnlyStreamStorage& operator=(WriteOnlyStreamStorage&&) = delete;
 
         template <class T>
         Error put(T value)
@@ -50,7 +108,7 @@ namespace pods
                 return error;
             }
 
-            const bool success = !!out_.write(buffer_.data(), buffer_.size());
+            const bool success = !!out_.write(data, size);
             return success
                 ? Error::NoError
                 : Error::WriteError;
