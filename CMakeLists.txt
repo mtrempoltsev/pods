@@ -25,6 +25,7 @@ set(HEADERS
     ${PODS_HEADERS}/json_serializer.h
     ${PODS_HEADERS}/memory_storage.h
     ${PODS_HEADERS}/pods.h
+    ${PODS_HEADERS}/stream_storage.h
     ${PODS_HEADERS}/types.h
     )
 

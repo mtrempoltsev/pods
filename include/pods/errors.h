@@ -12,6 +12,8 @@ namespace pods
         NotEnoughMemory,
         UnexpectedEnd,
         SizeToLarge,
+        WriteError,
+        ReadError,
 
         UnknownError
     };

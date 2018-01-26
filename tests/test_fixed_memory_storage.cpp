@@ -9,9 +9,8 @@
 class fixedSizeMemoryStorage
     : public ::testing::Test
 {
-    char data_[1024];
 protected:
-    pods::FixedSizeWriteOnlyMemoryStorage out { data_, sizeof(data_) };
+    pods::FixedSizeWriteOnlyMemoryStorage out { 1024 };
 };
 
 TEST_F(fixedSizeMemoryStorage, testSigned)
@@ -60,14 +59,12 @@ TEST_F(fixedSizeMemoryStorage, testError)
     uint64_t big = 0;
 
     {
-        char data[4];
-        pods::FixedSizeWriteOnlyMemoryStorage out(data, 4);
+        pods::FixedSizeWriteOnlyMemoryStorage out(4);
         EXPECT_EQ(out.put(big), pods::Error::NotEnoughMemory);
     }
 
     {
-        char data[sizeof(small)];
-        pods::FixedSizeWriteOnlyMemoryStorage out(data, sizeof(small));
+        pods::FixedSizeWriteOnlyMemoryStorage out(sizeof(small));
         EXPECT_EQ(out.put(small), pods::Error::NoError);
 
         pods::ReadOnlyMemoryStorage in(out.data(), out.size());
