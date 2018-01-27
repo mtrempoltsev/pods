@@ -29,7 +29,7 @@ struct A
     A(A&&) = delete;
     A& operator=(A&&) = delete;
 
-    std::array<float, 5> floatData = { 1, 2, 3, 4, 5 };
+    std::array<float, 5> floatData = { { 1, 2, 3, 4, 5 } };
 
     static constexpr pods::Version version()
     {
