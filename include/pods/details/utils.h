@@ -2,6 +2,8 @@
 
 #include <type_traits>
 
+#include "../types.h"
+
 namespace pods
 {
     namespace details
