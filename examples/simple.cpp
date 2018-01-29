@@ -11,18 +11,12 @@ struct Server
     std::string address;
     uint16_t port;
 
-    static constexpr pods::Version version() { return 1; }
-
-    template <class Serializer>
-    pods::Error serialize(Serializer& serializer, pods::Version /*version*/)
-    {
-        return serializer(
-            PODS_OPT(isDefault),
-            PODS_MDR(name),
-            PODS_MDR(publicKey),
-            PODS_MDR(address),
-            PODS_MDR(port));
-    }
+    PODS_SERIALIZABLE(1,
+        PODS_OPT(isDefault),
+        PODS_MDR(name),
+        PODS_MDR(publicKey),
+        PODS_MDR(address),
+        PODS_MDR(port))
 };
 
 struct ServerList
@@ -35,15 +29,9 @@ struct ServerList
 
     uint32_t clientId = 100;
 
-    static constexpr pods::Version version() { return 1; }
-
-    template <class Serializer>
-    pods::Error serialize(Serializer& serializer, pods::Version /*version*/)
-    {
-        return serializer(
-            PODS_MDR(servers),
-            PODS_MDR(clientId));
-    }
+    PODS_SERIALIZABLE(1,
+        PODS_MDR(servers),
+        PODS_MDR(clientId))
 };
 
 int main(int argc, char* argv[])
