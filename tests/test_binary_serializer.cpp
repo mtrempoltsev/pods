@@ -22,8 +22,9 @@ TEST(binarySerializer, common)
     actual.b.c.b = true;
     actual.b.c.e1 = AA;
     actual.b.c.e2 = Enum2::Y;
-    actual.points = std::vector<TestData::Point>();
-    actual.dict = std::map<short, std::vector<char>>();
+    actual.points.clear();
+    actual.dict.clear();
+    actual.strings.clear();
 
     pods::ReadOnlyMemoryStorage in(out.data(), out.size());
     pods::BinaryDeserializer<pods::ReadOnlyMemoryStorage> deserializer(in);
@@ -38,4 +39,5 @@ TEST(binarySerializer, common)
     EXPECT_EQ(expected.b.c.e2, actual.b.c.e2);
     EXPECT_EQ(expected.points, actual.points);
     EXPECT_EQ(expected.dict, actual.dict);
+    EXPECT_EQ(expected.strings, actual.strings);
 }

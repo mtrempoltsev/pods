@@ -146,7 +146,7 @@ namespace pods
             return storage_.put(static_cast<Size>(size));
         }
 
-        template <class T, typename std::enable_if<std::is_class<T>::value, int>::type = 0>
+        template <class T, typename std::enable_if<details::IsPodsSerializable<T>::value, int>::type = 0>
         Error saveRange(T* begin, size_t size)
         {
             PODS_SAFE_CALL(saveVersion<T>());
@@ -154,6 +154,17 @@ namespace pods
             for (auto end = begin + size; begin != end; ++begin)
             {
                 PODS_SAFE_CALL(saveData(*begin));
+            }
+
+            return Error::NoError;
+        }
+
+        template <class T, typename std::enable_if<std::is_class<T>::value && !details::IsPodsSerializable<T>::value, int>::type = 0>
+        Error saveRange(T* begin, size_t size)
+        {
+            for (auto end = begin + size; begin != end; ++begin)
+            {
+                PODS_SAFE_CALL(doProcess(*begin));
             }
 
             return Error::NoError;
@@ -310,7 +321,7 @@ namespace pods
             return storage_.get(size);
         }
 
-        template <class T, typename std::enable_if<std::is_class<T>::value, int>::type = 0>
+        template <class T, typename std::enable_if<details::IsPodsSerializable<T>::value, int>::type = 0>
         Error loadRange(T* begin, size_t size)
         {
             Version version = 0;
@@ -319,6 +330,17 @@ namespace pods
             for (auto end = begin + size; begin != end; ++begin)
             {
                 PODS_SAFE_CALL(loadData(*begin, version));
+            }
+
+            return Error::NoError;
+        }
+
+        template <class T, typename std::enable_if<std::is_class<T>::value && !details::IsPodsSerializable<T>::value, int>::type = 0>
+        Error loadRange(T* begin, size_t size)
+        {
+            for (auto end = begin + size; begin != end; ++begin)
+            {
+                PODS_SAFE_CALL(doProcess(*begin));
             }
 
             return Error::NoError;

@@ -128,6 +128,8 @@ struct TestData
 
     std::map<short, std::vector<char>> dict = { { 1, { 'a', 'b' } }, { -5, {} } };
 
+    std::vector<std::string> strings = { "hello", "world" };
+
     static constexpr pods::Version version()
     {
         return 1;
@@ -144,7 +146,8 @@ struct TestData
             PODS_OPT(a),
             PODS_MDR(b),
             PODS_OPT(points),
-            PODS_MDR(dict)
+            PODS_MDR(dict),
+            PODS_MDR(strings)
         );
     }
 };
