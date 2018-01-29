@@ -5,21 +5,10 @@
 #include <type_traits>
 #include <vector>
 
+#include "details/utils.h"
+
 #include "errors.h"
 #include "types.h"
-
-#ifdef PODS_SAFE_CALL
-#error Rename the macro
-#endif
-#define PODS_SAFE_CALL(foo)              \
-    do                                  \
-    {                                   \
-        const auto error = (foo);       \
-        if (error != Error::NoError)    \
-        {                               \
-            return error;               \
-        }                               \
-    } while (false)
 
 namespace pods
 {
@@ -345,5 +334,3 @@ namespace pods
         Storage& storage_;
     };
 }
-
-#undef PODS_SAFE_CALL

@@ -9,6 +9,7 @@ namespace pods
         NoError,
 
         ArchiveVersionMismatch,
+        CorruptedArchive,
         NotEnoughMemory,
         UnexpectedEnd,
         SizeToLarge,

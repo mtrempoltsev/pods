@@ -6,6 +6,8 @@
 #include <type_traits>
 
 #include "details/memory_managers.h"
+#include "details/settings.h"
+#include "details/utils.h"
 
 #include "errors.h"
 #include "types.h"
@@ -28,6 +30,25 @@ namespace pods
 
         ReadOnlyMemoryStorage(ReadOnlyMemoryStorage&&) = delete;
         ReadOnlyMemoryStorage& operator=(ReadOnlyMemoryStorage&&) = delete;
+
+        Error get(bool& value) noexcept
+        {
+            Bool tmp = False;
+
+            PODS_SAFE_CALL(get(tmp));
+
+            switch (tmp)
+            {
+            case False:
+                value = false;
+                return Error::NoError;
+            case True:
+                value = true;
+                return Error::NoError;
+            }
+
+            return Error::CorruptedArchive;
+        }
 
         template <class T>
         Error get(T& value, typename std::enable_if<std::is_arithmetic<T>::value && sizeof(T) == 1, int>::type = 0) noexcept
@@ -200,7 +221,7 @@ namespace pods
     {
     public:
         explicit ResizeableWriteOnlyMemoryStorage(
-            size_t initialSize = PrefferedBufferSize,
+            size_t initialSize = details::PrefferedBufferSize,
             size_t maxSize = std::numeric_limits<uint32_t>::max())
             : details::WriteOnlyMemoryStorage<details::ResizeableMemoryManager>(
                 details::ResizeableMemoryManager(initialSize, maxSize))
@@ -215,8 +236,8 @@ namespace pods
             : public ReadOnlyMemoryStorage
         {
         public:
-            explicit BufferedReadOnlyMemoryStorage(size_t size = PrefferedBufferSize)
-                : buffer_(PrefferedBufferSize)
+            explicit BufferedReadOnlyMemoryStorage(size_t size = details::PrefferedBufferSize)
+                : buffer_(size)
             {
                 setBuffer(buffer_.ptr, size);
             }

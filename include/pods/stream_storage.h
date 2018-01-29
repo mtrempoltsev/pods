@@ -3,16 +3,20 @@
 #include <istream>
 #include <ostream>
 
+#include "details/settings.h"
+#include "details/utils.h"
+
 #include "memory_storage.h"
 
 namespace pods
 {
     class ReadOnlyStreamStorage final
     {
+        static constexpr auto BufferSize = details::PrefferedBufferSize;
     public:
         explicit ReadOnlyStreamStorage(std::istream& stream)
             : in_(stream)
-            , buffer_(PrefferedBufferSize)
+            , buffer_(BufferSize)
             , eof_(false)
         {
             buffer_.gotoEnd();
@@ -42,11 +46,7 @@ namespace pods
                     in_.seekg(pos, std::ios_base::beg);
                 }
 
-                const auto error = readBuffer();
-                if (error != Error::NoError)
-                {
-                    return error;
-                }
+                PODS_SAFE_CALL(readBuffer());
 
                 return buffer_.get(value);
             }
@@ -66,13 +66,9 @@ namespace pods
                 const auto bytesReaded = buffer_.available();
                 const auto needToReed = size - bytesReaded;
 
-                auto error = buffer_.get(data, bytesReaded);
-                if (error != Error::NoError)
-                {
-                    return error;
-                }
+                PODS_SAFE_CALL(buffer_.get(data, bytesReaded));
 
-                error = read(data + bytesReaded, needToReed);
+                const auto error = read(data + bytesReaded, needToReed);
                 if (error == Error::NoError || error == Error::Eof)
                 {
                     return Error::NoError;
@@ -110,12 +106,12 @@ namespace pods
         {
             buffer_.gotoBegin();
 
-            const auto error = read(buffer_.mutableData(), PrefferedBufferSize);
+            const auto error = read(buffer_.mutableData(), BufferSize);
 
             if (error == Error::Eof)
             {
-                const auto bytesReaded = in_.gcount();
-                if (bytesReaded < PrefferedBufferSize)
+                const auto bytesReaded = static_cast<size_t>(in_.gcount());
+                if (bytesReaded < BufferSize)
                 {
                     buffer_.decreaseSize(bytesReaded);
                 }
@@ -132,10 +128,11 @@ namespace pods
 
     class WriteOnlyStreamStorage final
     {
+        static constexpr auto BufferSize = details::PrefferedBufferSize;
     public:
         explicit WriteOnlyStreamStorage(std::ostream& stream)
             : out_(stream)
-            , buffer_(PrefferedBufferSize)
+            , buffer_(BufferSize)
         {
         }
 
@@ -156,11 +153,7 @@ namespace pods
 
             if (error == Error::NotEnoughMemory)
             {
-                error = writeBuffer();
-                if (error != Error::NoError)
-                {
-                    return error;
-                }
+                PODS_SAFE_CALL(writeBuffer());
             }
 
             return buffer_.put(value);
@@ -173,11 +166,7 @@ namespace pods
                 return buffer_.put(data, size);
             }
 
-            auto error = writeBuffer();
-            if (error != Error::NoError)
-            {
-                return error;
-            }
+            PODS_SAFE_CALL(writeBuffer());
 
             const bool success = !!out_.write(data, size);
             return success

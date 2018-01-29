@@ -27,6 +27,10 @@ set(HEADERS
     ${PODS_HEADERS}/pods.h
     ${PODS_HEADERS}/stream_storage.h
     ${PODS_HEADERS}/types.h
+
+    ${PODS_HEADERS}/details/memory_managers.h
+    ${PODS_HEADERS}/details/settings.h
+    ${PODS_HEADERS}/details/utils.h
     )
 
 add_library(${PROJECT_NAME} STATIC ${HEADERS})
