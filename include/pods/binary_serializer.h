@@ -27,8 +27,7 @@ namespace pods
         template <class T>
         Error save(T&& data)
         {
-            PODS_SAFE_CALL(saveVersion<T>());
-            return saveData(std::forward<T&&>(data));
+            return serialize(std::forward<T&&>(data));
         }
 
         Error operator()() noexcept
@@ -39,12 +38,19 @@ namespace pods
         template <class... T>
         Error operator()(T&&... args)
         {
-            return process(args...);
+            return process(std::forward<T>(args)...);
         }
 
     private:
         template <class T>
-        Error saveData(const T& value)
+        Error serialize(const T& value)
+        {
+            PODS_SAFE_CALL(saveVersion<T>());
+            return serializeWithoutVersion(value);
+        }
+
+        template <class T>
+        Error serializeWithoutVersion(const T& value)
         {
             return const_cast<T&>(value).serialize(*this, T::version());
         }
@@ -121,7 +127,7 @@ namespace pods
         template <class T, typename std::enable_if<std::is_class<T>::value, int>::type = 0>
         Error doProcess(const T& value)
         {
-            return save(value);
+            return serialize(value);
         }
 
         template <class T, typename std::enable_if<std::is_arithmetic<T>::value, int>::type = 0>
@@ -153,7 +159,7 @@ namespace pods
 
             for (auto end = begin + size; begin != end; ++begin)
             {
-                PODS_SAFE_CALL(saveData(*begin));
+                PODS_SAFE_CALL(serializeWithoutVersion(*begin));
             }
 
             return Error::NoError;
@@ -179,6 +185,8 @@ namespace pods
         template <class T>
         Error saveVersion()
         {
+            static_assert(details::IsPodsSerializable<T>::value,
+                "you must define the methods version() and serialize() for each serializable class or struct");
             return storage_.put(std::decay_t<T>::version());
         }
 
@@ -203,7 +211,7 @@ namespace pods
         {
             Version version = 0;
             PODS_SAFE_CALL(storage_.get(version));
-            return loadData(data, version);
+            return deserialize(data, version);
         }
 
         Error operator()() noexcept
@@ -219,7 +227,7 @@ namespace pods
 
     private:
         template <class T>
-        Error loadData(T& value, Version version)
+        Error deserialize(T& value, Version version)
         {
             return value.serialize(*this, version);
         }
@@ -329,7 +337,7 @@ namespace pods
 
             for (auto end = begin + size; begin != end; ++begin)
             {
-                PODS_SAFE_CALL(loadData(*begin, version));
+                PODS_SAFE_CALL(deserialize(*begin, version));
             }
 
             return Error::NoError;

@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 
 #include <array>
 #include <map>
@@ -29,7 +29,7 @@ struct A
     A(A&&) = delete;
     A& operator=(A&&) = delete;
 
-    std::array<float, 5> floatData = { { 1, 2, 3, 4, 5 } };
+    std::array<float, 5> floatData = { { 1.1f, 2.2f, 3.3f, 4.4f, 5.5f } };
 
     static constexpr pods::Version version()
     {
@@ -128,7 +128,7 @@ struct TestData
 
     std::map<short, std::vector<char>> dict = { { 1, { 'a', 'b' } }, { -5, {} } };
 
-    std::vector<std::string> strings = { "hello", "world" };
+    std::vector<std::string> strings = { "hello", "мир" };
 
     static constexpr pods::Version version()
     {

@@ -15,7 +15,6 @@ set(SOURCES
     test_fixed_memory_storage.cpp
     test_json_serializer.cpp
     test_memory_managers.cpp
-    test_portable_binary_serializer.cpp
     test_resizeable_memory_storage.cpp
     test_stream_storage.cpp
     main.cpp

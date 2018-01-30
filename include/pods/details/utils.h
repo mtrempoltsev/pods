@@ -19,7 +19,7 @@ namespace pods
 
         public:
             static constexpr bool value =
-                std::is_same<Version, decltype(IsPodsSerializableImpl<T>::check(static_cast<T*>(nullptr)))>::value;
+                std::is_same<Version, decltype(IsPodsSerializableImpl<T>::check(static_cast<std::remove_reference_t<T>*>(nullptr)))>::value;
         };
 
         template <class T>

@@ -19,9 +19,7 @@ set(PODS_HEADERS "${PODS_INCLUDE}/pods")
 
 set(HEADERS
     ${PODS_HEADERS}/errors.h
-    ${PODS_HEADERS}/details/memory_managers.h
     ${PODS_HEADERS}/binary_serializer.h
-    ${PODS_HEADERS}/file_storage.h
     ${PODS_HEADERS}/json_serializer.h
     ${PODS_HEADERS}/memory_storage.h
     ${PODS_HEADERS}/pods.h
