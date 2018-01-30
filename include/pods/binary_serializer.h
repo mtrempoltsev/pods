@@ -21,8 +21,8 @@ namespace pods
         {
         }
 
-        BinarySerializer(const BinarySerializer&) = delete;
-        BinarySerializer& operator=(const BinarySerializer&) = delete;
+        BinarySerializer(const BinarySerializer<Storage>&) = delete;
+        BinarySerializer& operator=(const BinarySerializer<Storage>&) = delete;
 
         template <class T>
         Error save(T&& data)
