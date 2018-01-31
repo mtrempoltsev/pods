@@ -1,6 +1,5 @@
-#include <string>
-
 #include <pods/pods.h>
+#include <pods/binary_serializer.h>
 #include <pods/memory_storage.h>
 
 struct Server

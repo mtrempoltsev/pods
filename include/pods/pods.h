@@ -1,7 +1,5 @@
 ﻿#pragma once
 
-#include "binary_serializer.h"
-
 #ifdef PODS_MDR
 #error Rename the macro
 #endif
@@ -21,6 +19,6 @@
     template <class Serializer>                                         \
     pods::Error serialize(Serializer& serializer, pods::Version)        \
     {                                                                   \
-        return serializer(##__VA_ARGS__);                               \
+        return serializer(__VA_ARGS__);                                 \
     }                                                                   \
 

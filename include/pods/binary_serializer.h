@@ -91,7 +91,7 @@ namespace pods
             return storage_.put(n);
         }
 
-        template <class T, Size ArraySize>
+        template <class T, size_t ArraySize>
         Error doProcess(const std::array<T, ArraySize>& value)
         {
             return saveRange(value.data(), ArraySize);
@@ -255,7 +255,7 @@ namespace pods
             return Error::NoError;
         }
 
-        template <class T, Size ArraySize>
+        template <class T, size_t ArraySize>
         Error doProcess(std::array<T, ArraySize>& value)
         {
             return loadRange(value.data(), ArraySize);

@@ -10,11 +10,11 @@
 #include <rapidjson/prettywriter.h>
 #include <rapidjson/writer.h>
 
-#include "details/rapidjson_wrappers.h"
-#include "details/utils.h"
-
 #include "errors.h"
 #include "types.h"
+
+#include "details/rapidjson_wrappers.h"
+#include "details/utils.h"
 
 namespace pods
 {
@@ -200,7 +200,7 @@ namespace pods
                 return serialize(value);
             }
 
-            template <class T, Size ArraySize>
+            template <class T, size_t ArraySize>
             Error writeValue(const std::array<T, ArraySize>& value)
             {
                 return writeRange(value.data(), ArraySize);
@@ -462,7 +462,7 @@ namespace pods
             return Error::CorruptedArchive;
         }
 
-        template <class T, Size ArraySize>
+        template <class T, size_t ArraySize>
         Error read(Value& data, std::array<T, ArraySize>& value)
         {
             return readRange<T, T*>(data, value,
