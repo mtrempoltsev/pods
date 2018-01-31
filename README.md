@@ -2,16 +2,6 @@
 
 ![](doc/images/pod.png)
 
-## How to build
-
-From this directory:
-```
-mkdir build
-cd build
-cmake ..
-make
-```
-
 ## Feature List
 
 - header only
@@ -25,6 +15,48 @@ make
   - memory buffer
   - resizable memory buffer
   - standard C++ streams
+
+## Benchmarks
+
+```
+performing 100000 iterations
+
+thrift-binary: version = 0.10.0
+thrift-binary: size = 17017 bytes
+thrift-binary: time = 2259 milliseconds
+
+protobuf: version = 3001000
+protobuf: size = 16116 bytes
+protobuf: time = 2797 milliseconds
+
+capnproto: version = 6001
+capnproto: size = 17768 bytes
+capnproto: time = 486 milliseconds
+
+boost: version = 106200
+boost: size = 17470 bytes
+boost: time = 1365 milliseconds
+
+msgpack: version = 2.1.3
+msgpack: size = 13402 bytes
+msgpack: time = 3638 milliseconds
+
+cereal: size = 17416 bytes
+cereal: time = 1034 milliseconds
+
+avro: size = 16384 bytes
+avro: time = 4780 milliseconds
+
+flatbuffers: size = 17632 bytes
+flatbuffers: time = 433 milliseconds
+
+yas: version = 6.0.2
+yas: size = 17416 bytes
+yas: time = 317 milliseconds
+
+pods: size = 17012 bytes
+pods: time = 235 milliseconds
+```
 
 ## Using PODS
 
