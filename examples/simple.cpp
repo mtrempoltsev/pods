@@ -36,7 +36,7 @@ struct ServerList
         PODS_MDR(clientId))
 };
 
-int main(int argc, char* argv[])
+int main(int /*argc*/, char** /*argv*/)
 {
     bool success = false;
 

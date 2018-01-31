@@ -37,7 +37,7 @@ struct A
     }
 
     template <class Serializer>
-    pods::Error serialize(Serializer& serializer, pods::Version archiveVersion)
+    pods::Error serialize(Serializer& serializer, pods::Version /*archiveVersion*/)
     {
         return serializer
         (
@@ -68,7 +68,7 @@ struct TestData
             }
 
             template <class Serializer>
-            pods::Error serialize(Serializer& serializer, pods::Version archiveVersion)
+            pods::Error serialize(Serializer& serializer, pods::Version /*archiveVersion*/)
             {
                 return serializer
                 (
@@ -87,7 +87,7 @@ struct TestData
         }
 
         template <class Serializer>
-        pods::Error serialize(Serializer& serializer, pods::Version archiveVersion)
+        pods::Error serialize(Serializer& serializer, pods::Version /*archiveVersion*/)
         {
             return serializer
             (
@@ -119,7 +119,7 @@ struct TestData
         }
 
         template <class Serializer>
-        pods::Error serialize(Serializer& serializer, pods::Version archiveVersion)
+        pods::Error serialize(Serializer& serializer, pods::Version /*archiveVersion*/)
         {
             return serializer
             (
@@ -145,7 +145,7 @@ struct TestData
     }
 
     template <class Serializer>
-    pods::Error serialize(Serializer& serializer, pods::Version archiveVersion)
+    pods::Error serialize(Serializer& serializer, pods::Version /*archiveVersion*/)
     {
         return serializer
         (

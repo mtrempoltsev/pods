@@ -465,7 +465,7 @@ namespace pods
         template <class T, size_t ArraySize>
         Error read(Value& data, std::array<T, ArraySize>& value)
         {
-            return readRange<T, T*>(data, value,
+            return readRange<T, T*>(data,
                 [&](Size size, T*& it)
                 {
                     if (size == ArraySize)
@@ -475,8 +475,6 @@ namespace pods
                     }
                     return Error::CorruptedArchive;
                 });
-
-            return Error::NoError;
         }
 
         template <class K, class V>
@@ -523,15 +521,13 @@ namespace pods
         template <class T>
         Error read(Value& data, std::vector<T>& value)
         {
-            return readRange<T, T*>(data, value,
+            return readRange<T, T*>(data,
                 [&value](Size size, T*& it)
                 {
                     value.resize(size);
                     it = value.data();
                     return Error::NoError;
                 });
-
-            return Error::NoError;
         }
 
         Error getMember(const char* name, rapidjson::Document::MemberIterator& it)
@@ -556,9 +552,9 @@ namespace pods
             return Error::NoError;
         }
 
-        template <class T, class Iterator, class Container, class InitFunction,
+        template <class T, class Iterator, class InitFunction,
             typename std::enable_if<details::IsPodsSerializable<T>::value, int>::type = 0>
-        Error readRange(Value& data, Container& value, InitFunction init)
+        Error readRange(Value& data, InitFunction init)
         {
             if (!data.IsObject())
             {
@@ -593,9 +589,9 @@ namespace pods
             return Error::NoError;
         }
 
-        template <class T, class Iterator, class Container, class InitFunction,
+        template <class T, class Iterator, class InitFunction,
             typename std::enable_if<!details::IsPodsSerializable<T>::value, int>::type = 0>
-        Error readRange(Value& data, Container& value, InitFunction init)
+        Error readRange(Value& data, InitFunction init)
         {
             if (!data.IsArray())
             {

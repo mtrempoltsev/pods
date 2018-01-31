@@ -24,7 +24,7 @@ TEST(streamStorage, common)
     uint64_t i = 0;
     std::generate_n(std::back_inserter(e3), n, [&i]() { return i++; });
 
-    for (size_t i = 0; i < n; ++i)
+    for (size_t j = 0; j < n; ++j)
     {
         EXPECT_EQ(out.put(e1), pods::Error::NoError);
         EXPECT_EQ(out.put(e2), pods::Error::NoError);
@@ -34,7 +34,7 @@ TEST(streamStorage, common)
 
     pods::ReadOnlyStreamStorage in(buffer);
 
-    for (size_t i = 0; i < n; ++i)
+    for (size_t j = 0; j < n; ++j)
     {
         bool a1 = true;
         EXPECT_EQ(in.get(a1), pods::Error::NoError);

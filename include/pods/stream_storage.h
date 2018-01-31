@@ -145,7 +145,7 @@ namespace pods
         template <class T>
         Error put(T value)
         {
-            auto error = buffer_.put(value);
+            const auto error = buffer_.put(value);
             if (error == Error::NoError)
             {
                 return Error::NoError;

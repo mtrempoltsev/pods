@@ -59,15 +59,15 @@ TEST_F(fixedSizeMemoryStorage, testError)
     uint64_t big = 0;
 
     {
-        pods::FixedSizeWriteOnlyMemoryStorage out(4);
-        EXPECT_EQ(out.put(big), pods::Error::NotEnoughMemory);
+        pods::FixedSizeWriteOnlyMemoryStorage out1(4);
+        EXPECT_EQ(out1.put(big), pods::Error::NotEnoughMemory);
     }
 
     {
-        pods::FixedSizeWriteOnlyMemoryStorage out(sizeof(small));
-        EXPECT_EQ(out.put(small), pods::Error::NoError);
+        pods::FixedSizeWriteOnlyMemoryStorage out2(sizeof(small));
+        EXPECT_EQ(out2.put(small), pods::Error::NoError);
 
-        pods::ReadOnlyMemoryStorage in(out.data(), out.size());
+        pods::ReadOnlyMemoryStorage in(out2.data(), out2.size());
         EXPECT_EQ(in.get(big), pods::Error::UnexpectedEnd);
     }
 }
