@@ -2,12 +2,15 @@
 
 #include <array>
 #include <map>
+#include <stack>
 #include <type_traits>
 #include <vector>
 
+#include <rapidjson/document.h>
 #include <rapidjson/prettywriter.h>
 #include <rapidjson/writer.h>
 
+#include "details/rapidjson_wrappers.h"
 #include "details/utils.h"
 
 #include "errors.h"
@@ -21,41 +24,6 @@ namespace pods
         static constexpr char PODS_KEY_STR[] = "key";
         static constexpr char PODS_VALUE_STR[] = "value";
         static constexpr char PODS_DATA_STR[] = "data";
-
-        template <class Storage>
-        struct RapidJsonStreamWrapper
-        {
-            typedef char Ch;
-
-            RapidJsonStreamWrapper(Storage& storage)
-                : storage_(storage)
-                , good_(true)
-            {
-            }
-
-            void Put(Ch c)
-            {
-                if (storage_.put(c) == Error::NoError)
-                {
-                    return;
-                }
-
-                good_ = false;
-            }
-
-            void Flush() noexcept
-            {
-            }
-
-            bool good() const noexcept
-            {
-                return good_;
-            }
-
-        private:
-            Storage& storage_;
-            bool good_;
-        };
 
         template <class Storage, class RapidjsonWriter>
         class JsonSerializerImpl final
@@ -130,7 +98,7 @@ namespace pods
             template <class T>
             Error writeVersion()
             {
-                static_assert(details::IsPodsSerializable<T>::value,
+                static_assert(IsPodsSerializable<T>::value,
                     "you must define the methods version() and serialize() for each serializable class or struct");
                 PODS_SAFE_CALL(writeKey(PODS_VERSION_STR));
                 return writeValue(std::decay_t<T>::version());
@@ -226,21 +194,26 @@ namespace pods
                     : Error::WriteError;
             }
 
-            template <class T, typename std::enable_if<details::IsPodsSerializable<T>::value, int>::type = 0>
+            template <class T, typename std::enable_if<IsPodsSerializable<T>::value, int>::type = 0>
             Error writeValue(const T& value)
             {
                 return serialize(value);
             }
 
-            template <class T, size_t Size>
-            Error writeValue(const std::array<T, Size>& value)
+            template <class T, Size ArraySize>
+            Error writeValue(const std::array<T, ArraySize>& value)
             {
-                return writeRange(value.data(), value.size());
+                return writeRange(value.data(), ArraySize);
             }
 
             template <class K, class V>
             Error writeValue(const std::map<K, V>& value)
             {
+                if (value.size() > std::numeric_limits<Size>::max())
+                {
+                    return Error::SizeToLarge;
+                }
+
                 PODS_SAFE_CALL(startArray());
 
                 for (const auto& pair : value)
@@ -260,11 +233,16 @@ namespace pods
             template <class T>
             Error writeValue(const std::vector<T>& value)
             {
+                if (value.size() > std::numeric_limits<Size>::max())
+                {
+                    return Error::SizeToLarge;
+                }
+
                 return writeRange(value.data(), value.size());
             }
 
-            template <class T, typename std::enable_if<details::IsPodsSerializable<T>::value, int>::type = 0>
-            Error writeRange(T* begin, size_t size)
+            template <class T, typename std::enable_if<IsPodsSerializable<T>::value, int>::type = 0>
+            Error writeRange(T* begin, Size size)
             {
                 PODS_SAFE_CALL(startObject());
                 PODS_SAFE_CALL(writeVersion<T>());
@@ -280,8 +258,8 @@ namespace pods
                 return endObject();
             }
 
-            template <class T, typename std::enable_if<std::is_class<T>::value && !details::IsPodsSerializable<T>::value, int>::type = 0>
-            Error writeRange(T* begin, size_t size)
+            template <class T, typename std::enable_if<std::is_class<T>::value && !IsPodsSerializable<T>::value, int>::type = 0>
+            Error writeRange(T* begin, Size size)
             {
                 PODS_SAFE_CALL(startArray());
 
@@ -294,7 +272,7 @@ namespace pods
             }
 
             template <class T, typename std::enable_if<std::is_arithmetic<T>::value, int>::type = 0>
-            Error writeRange(T* begin, size_t size)
+            Error writeRange(T* begin, Size size)
             {
                 PODS_SAFE_CALL(startArray());
 
@@ -307,14 +285,362 @@ namespace pods
             }
 
         private:
-            RapidJsonStreamWrapper<Storage> stream_;
+            OutputRapidJsonStreamWrapper<Storage> stream_;
             RapidjsonWriter writer_;
         };
     }
 
     template <class Storage>
-    using JsonSerializer = details::JsonSerializerImpl<Storage, rapidjson::Writer<details::RapidJsonStreamWrapper<Storage>>>;
+    using JsonSerializer = details::JsonSerializerImpl<Storage, rapidjson::Writer<details::OutputRapidJsonStreamWrapper<Storage>>>;
 
     template <class Storage>
-    using PrettyJsonSerializer = details::JsonSerializerImpl<Storage, rapidjson::PrettyWriter<details::RapidJsonStreamWrapper<Storage>>>;
+    using PrettyJsonSerializer = details::JsonSerializerImpl<Storage, rapidjson::PrettyWriter<details::OutputRapidJsonStreamWrapper<Storage>>>;
+
+    template <class Storage>
+    class JsonDeserializer final
+    {
+    public:
+        explicit JsonDeserializer(Storage& storage)
+        {
+            details::InputRapidJsonStreamWrapper<Storage> stream(storage);
+            document_.ParseStream(stream);
+        }
+
+        JsonDeserializer(const JsonDeserializer<Storage>&) = delete;
+        JsonDeserializer& operator=(const JsonDeserializer<Storage>&) = delete;
+
+        template <class T>
+        Error load(T& data)
+        {
+            if (document_.HasParseError())
+            {
+                return Error::CorruptedArchive;
+            }
+
+            nodes_.push(&document_);
+
+            return deserialize(data);
+        }
+
+        Error operator()() noexcept
+        {
+            return Error::NoError;
+        }
+
+        template <class... T>
+        Error operator()(T&... args)
+        {
+            return process(args...);
+        }
+
+    private:
+        using Member = rapidjson::Document::MemberIterator;
+        using Value = rapidjson::Document::ValueType;
+        using Array = rapidjson::Document::ValueType::Array;
+
+        template <class T>
+        Error deserialize(T& value)
+        {
+            Version version = 0;
+            PODS_SAFE_CALL(readValue(details::PODS_VERSION_STR, version));
+            return value.serialize(*this, version);
+        }
+
+        template <class T>
+        Error deserializeWithoutVersion(T& value, Version version)
+        {
+            return value.serialize(*this, version);
+        }
+
+        template <class T>
+        Error process(const char* name, T& value)
+        {
+            return readValue(name, value);
+        }
+
+        template <class T, class... ArgsT>
+        Error process(const char* name, T& value, ArgsT&... args)
+        {
+            const auto error = readValue(name, value);
+            return error == Error::NoError
+                ? process(args...)
+                : error;
+        }
+
+        template <class T>
+        Error readValue(const char* name, T& value)
+        {
+            Member it;
+            PODS_SAFE_CALL(getMember(name, it));
+            return read(it->value, value);
+        }
+
+        Error read(Value& data, bool& value)
+        {
+            if (data.IsBool())
+            {
+                value = data.GetBool();
+                return Error::NoError;
+            }
+            return Error::CorruptedArchive;
+        }
+
+        template <class T, typename std::enable_if<std::is_enum<T>::value, int>::type = 0>
+        Error read(Value& data, T& value)
+        {
+            std::underlying_type_t<T> i = 0;
+            PODS_SAFE_CALL(read(data, i));
+            value = static_cast<T>(i);
+            return Error::NoError;
+        }
+
+        template <class T, typename std::enable_if<std::is_floating_point<T>::value, int>::type = 0>
+        Error read(Value& data, T& value)
+        {
+            if (data.IsDouble())
+            {
+                value = static_cast<T>(data.GetDouble());
+                return Error::NoError;
+            }
+            return Error::CorruptedArchive;
+        }
+
+        template <class T, typename std::enable_if<std::is_signed<T>::value && !std::is_floating_point<T>::value, int>::type = 0>
+        Error read(Value& data, T& value)
+        {
+            if (data.IsInt64())
+            {
+                const auto i = data.GetInt64();
+                if (i < std::numeric_limits<T>::min() || i > std::numeric_limits<T>::max())
+                {
+                    return Error::CorruptedArchive;
+                }
+
+                value = static_cast<T>(i);
+                return Error::NoError;
+            }
+            return Error::CorruptedArchive;
+        }
+
+        template <class T, typename std::enable_if<std::is_unsigned<T>::value, int>::type = 0>
+        Error read(Value& data, T& value)
+        {
+            if (data.IsUint64())
+            {
+                const auto i = data.GetUint64();
+                if (i > std::numeric_limits<T>::max())
+                {
+                    return Error::CorruptedArchive;
+                }
+
+                value = static_cast<T>(i);
+                return Error::NoError;
+            }
+            return Error::CorruptedArchive;
+        }
+
+        Error read(Value& data, std::string& value)
+        {
+            if (data.IsString())
+            {
+                value = data.GetString();
+                return Error::NoError;
+            }
+            return Error::CorruptedArchive;
+        }
+
+        template <class T, typename std::enable_if<details::IsPodsSerializable<T>::value, int>::type = 0>
+        Error read(Value& data, T& value)
+        {
+            if (data.IsObject())
+            {
+                nodes_.push(&data);
+                PODS_SAFE_CALL(deserialize(value));
+                nodes_.pop();
+                return Error::NoError;
+            }
+            return Error::CorruptedArchive;
+        }
+
+        template <class T, Size ArraySize>
+        Error read(Value& data, std::array<T, ArraySize>& value)
+        {
+            return readRange<T, T*>(data, value,
+                [&](Size size, T*& it)
+                {
+                    if (size == ArraySize)
+                    {
+                        it = value.data();
+                        return Error::NoError;
+                    }
+                    return Error::CorruptedArchive;
+                });
+
+            return Error::NoError;
+        }
+
+        template <class K, class V>
+        Error read(Value& data, std::map<K, V>& value)
+        {
+            if (!data.IsArray())
+            {
+                return Error::CorruptedArchive;
+            }
+
+            const Array& array = data.GetArray();
+
+            Size size = 0;
+            PODS_SAFE_CALL(readSize(array, size));
+
+            value.clear();
+
+            auto hint = value.begin();
+            for (Size i = 0; i < size; ++i)
+            {
+                auto& elem = array[i];
+
+                if (!elem.IsObject())
+                {
+                    return Error::CorruptedArchive;
+                }
+
+                nodes_.push(&elem);
+
+                K key;
+                PODS_SAFE_CALL(readValue(details::PODS_KEY_STR, key));
+
+                V val;
+                PODS_SAFE_CALL(readValue(details::PODS_VALUE_STR, val));
+
+                hint = value.emplace_hint(hint, std::move(key), std::move(val));
+
+                nodes_.pop();
+            }
+
+            return Error::NoError;
+        }
+
+        template <class T>
+        Error read(Value& data, std::vector<T>& value)
+        {
+            return readRange<T, T*>(data, value,
+                [&value](Size size, T*& it)
+                {
+                    value.resize(size);
+                    it = value.data();
+                    return Error::NoError;
+                });
+
+            return Error::NoError;
+        }
+
+        Error getMember(const char* name, rapidjson::Document::MemberIterator& it)
+        {
+            auto node = nodes_.top();
+            it = node->FindMember(name);
+            return it != node->MemberEnd()
+                ? Error::NoError
+                : Error::CorruptedArchive;
+        }
+
+        Error readSize(const Array& array, Size& size)
+        {
+            const auto n = array.Size();
+            if (n > std::numeric_limits<Size>::max())
+            {
+                return Error::CorruptedArchive;
+            }
+
+            size = static_cast<Size>(n);
+
+            return Error::NoError;
+        }
+
+        template <class T, class Iterator, class Container, class InitFunction,
+            typename std::enable_if<details::IsPodsSerializable<T>::value, int>::type = 0>
+        Error readRange(Value& data, Container& value, InitFunction init)
+        {
+            if (!data.IsObject())
+            {
+                return Error::CorruptedArchive;
+            }
+
+            nodes_.push(&data);
+
+            Version version = 0;
+            PODS_SAFE_CALL(readValue(details::PODS_VERSION_STR, version));
+
+            Member member;
+            PODS_SAFE_CALL(getMember(details::PODS_DATA_STR, member));
+
+            if (!member->value.IsArray())
+            {
+                return Error::CorruptedArchive;
+            }
+
+            const Array& array = member->value.GetArray();
+
+            Size size = 0;
+            PODS_SAFE_CALL(readSize(array, size));
+
+            Iterator it;
+            PODS_SAFE_CALL(init(size, it));
+
+            PODS_SAFE_CALL(readRangeImpl<T>(array, it, version));
+
+            nodes_.pop();
+
+            return Error::NoError;
+        }
+
+        template <class T, class Iterator, class Container, class InitFunction,
+            typename std::enable_if<!details::IsPodsSerializable<T>::value, int>::type = 0>
+        Error readRange(Value& data, Container& value, InitFunction init)
+        {
+            if (!data.IsArray())
+            {
+                return Error::CorruptedArchive;
+            }
+
+            const Array& array = data.GetArray();
+
+            Size size = 0;
+            PODS_SAFE_CALL(readSize(array, size));
+
+            Iterator it;
+            PODS_SAFE_CALL(init(size, it));
+
+            PODS_SAFE_CALL(readRangeImpl<T>(array, it));
+
+            return Error::NoError;
+        }
+
+        template <class T, class Iterator>
+        Error readRangeImpl(const Array& array, Iterator begin, Version version)
+        {
+            for (Size i = 0, size = array.Size(); i < size; ++i, ++begin)
+            {
+                nodes_.push(&array[i]);
+                PODS_SAFE_CALL(deserializeWithoutVersion(*begin, version));
+                nodes_.pop();
+            }
+
+            return Error::NoError;
+        }
+
+        template <class T, class Iterator>
+        Error readRangeImpl(const Array& array, Iterator begin)
+        {
+            for (Size i = 0, size = array.Size(); i < size; ++i, ++begin)
+            {
+                PODS_SAFE_CALL(read(array[i], *begin));
+            }
+
+            return Error::NoError;
+        }
+
+    private:
+        rapidjson::Document document_;
+        std::stack<rapidjson::Document::ValueType*> nodes_;
+    };
 }

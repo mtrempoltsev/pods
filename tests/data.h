@@ -103,6 +103,11 @@ struct TestData
         int x;
         int y;
 
+        bool operator<(const Point other) const
+        {
+            return x < other.x && y < other.y;
+        }
+
         bool operator==(const Point other) const
         {
             return x == other.x && y == other.y;
@@ -130,6 +135,10 @@ struct TestData
 
     std::vector<std::string> strings = { "hello", "мир" };
 
+    std::array<Point, 1> arr = { { 5, 6 } };
+
+    std::map<Point, Point> map = { { { 7, 8 }, { 9, 10 } } };
+
     static constexpr pods::Version version()
     {
         return 1;
@@ -147,7 +156,9 @@ struct TestData
             PODS_MDR(b),
             PODS_OPT(points),
             PODS_MDR(dict),
-            PODS_MDR(strings)
+            PODS_MDR(strings),
+            PODS_OPT(arr),
+            PODS_OPT(map)
         );
     }
 };

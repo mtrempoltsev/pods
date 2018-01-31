@@ -91,10 +91,10 @@ namespace pods
             return storage_.put(n);
         }
 
-        template <class T, size_t Size>
-        Error doProcess(const std::array<T, Size>& value)
+        template <class T, Size ArraySize>
+        Error doProcess(const std::array<T, ArraySize>& value)
         {
-            return saveRange(value.data(), Size);
+            return saveRange(value.data(), ArraySize);
         }
 
         template <class K, class V>
@@ -153,7 +153,7 @@ namespace pods
         }
 
         template <class T, typename std::enable_if<details::IsPodsSerializable<T>::value, int>::type = 0>
-        Error saveRange(T* begin, size_t size)
+        Error saveRange(T* begin, Size size)
         {
             PODS_SAFE_CALL(saveVersion<T>());
 
@@ -166,7 +166,7 @@ namespace pods
         }
 
         template <class T, typename std::enable_if<std::is_class<T>::value && !details::IsPodsSerializable<T>::value, int>::type = 0>
-        Error saveRange(T* begin, size_t size)
+        Error saveRange(T* begin, Size size)
         {
             for (auto end = begin + size; begin != end; ++begin)
             {
@@ -177,7 +177,7 @@ namespace pods
         }
 
         template <class T, typename std::enable_if<std::is_arithmetic<T>::value, int>::type = 0>
-        Error saveRange(T* begin, size_t size)
+        Error saveRange(T* begin, Size size)
         {
             return storage_.put(begin, size);
         }
@@ -203,8 +203,8 @@ namespace pods
         {
         }
 
-        BinaryDeserializer(const BinaryDeserializer&) = delete;
-        BinaryDeserializer& operator=(const BinaryDeserializer&) = delete;
+        BinaryDeserializer(const BinaryDeserializer<Storage>&) = delete;
+        BinaryDeserializer& operator=(const BinaryDeserializer<Storage>&) = delete;
 
         template <class T>
         Error load(T& data)
@@ -255,10 +255,10 @@ namespace pods
             return Error::NoError;
         }
 
-        template <class T, size_t Size>
-        Error doProcess(std::array<T, Size>& value)
+        template <class T, Size ArraySize>
+        Error doProcess(std::array<T, ArraySize>& value)
         {
-            return loadRange(value.data(), Size);
+            return loadRange(value.data(), ArraySize);
         }
 
         template <class K, class V>
@@ -330,7 +330,7 @@ namespace pods
         }
 
         template <class T, typename std::enable_if<details::IsPodsSerializable<T>::value, int>::type = 0>
-        Error loadRange(T* begin, size_t size)
+        Error loadRange(T* begin, Size size)
         {
             Version version = 0;
             PODS_SAFE_CALL(storage_.get(version));
@@ -344,7 +344,7 @@ namespace pods
         }
 
         template <class T, typename std::enable_if<std::is_class<T>::value && !details::IsPodsSerializable<T>::value, int>::type = 0>
-        Error loadRange(T* begin, size_t size)
+        Error loadRange(T* begin, Size size)
         {
             for (auto end = begin + size; begin != end; ++begin)
             {
@@ -355,7 +355,7 @@ namespace pods
         }
 
         template <class T, typename std::enable_if<std::is_arithmetic<T>::value, int>::type = 0>
-        Error loadRange(T* begin, size_t size)
+        Error loadRange(T* begin, Size size)
         {
             return storage_.get(begin, size);
         }

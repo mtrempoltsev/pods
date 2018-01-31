@@ -27,6 +27,7 @@ set(HEADERS
     ${PODS_HEADERS}/types.h
 
     ${PODS_HEADERS}/details/memory_managers.h
+    ${PODS_HEADERS}/details/rapidjson_wrappers.h
     ${PODS_HEADERS}/details/settings.h
     ${PODS_HEADERS}/details/utils.h
     )

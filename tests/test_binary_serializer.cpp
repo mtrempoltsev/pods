@@ -25,6 +25,8 @@ TEST(binarySerializer, common)
     actual.points.clear();
     actual.dict.clear();
     actual.strings.clear();
+    actual.arr = { { 0, 0 } };
+    actual.map.clear();
 
     pods::ReadOnlyMemoryStorage in(out.data(), out.size());
     pods::BinaryDeserializer<pods::ReadOnlyMemoryStorage> deserializer(in);
@@ -40,4 +42,6 @@ TEST(binarySerializer, common)
     EXPECT_EQ(expected.points, actual.points);
     EXPECT_EQ(expected.dict, actual.dict);
     EXPECT_EQ(expected.strings, actual.strings);
+    EXPECT_EQ(expected.arr, actual.arr);
+    EXPECT_EQ(expected.map, actual.map);
 }
