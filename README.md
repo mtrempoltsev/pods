@@ -1,3 +1,34 @@
+﻿Plain Old Data Serializer (PODS)
+
+![](doc/images/pod.png)
+
+## How to build
+
+From this directory:
+```
+mkdir build
+cd build
+cmake ..
+make
+```
+
+## Feature List
+
+- header only
+- high performance (perhaps binary serialization is the fastest on the Earth)
+- optional values
+- versioning
+- supported archive formats:
+  - JSON
+  - binary
+- serialization from/to:
+  - memory buffer
+  - resizable memory buffer
+  - standard C++ streams
+
+## Using PODS
+
+```c++
 #include <pods/pods.h>
 #include <pods/binary_serializer.h>
 #include <pods/memory_storage.h>
@@ -56,4 +87,4 @@ int main(int argc, char* argv[])
 
     return 0;
 }
-
+```
