@@ -16,7 +16,6 @@ TEST(streamStorage, common)
     const uint64_t e2 = 100;
 
     const size_t n = 1000;
-    const size_t bytes = n * sizeof(uint64_t);
 
     std::vector<uint64_t> e3;
     e3.reserve(n);

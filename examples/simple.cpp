@@ -38,13 +38,14 @@ struct ServerList
 
 int main(int /*argc*/, char** /*argv*/)
 {
-    bool success = false;
-
     const ServerList original;
 
     pods::ResizeableWriteOnlyMemoryStorage out;
     pods::BinarySerializer<decltype(out)> serializer(out);
-    success = (serializer.save(original) == pods::Error::NoError);
+    if (serializer.save(original) != pods::Error::NoError)
+    {
+        return -1;
+    }
 
     ServerList loaded;
     loaded.servers.clear();
@@ -52,7 +53,10 @@ int main(int /*argc*/, char** /*argv*/)
 
     pods::ReadOnlyMemoryStorage in(out.data(), out.size());
     pods::BinaryDeserializer<decltype(in)> deserializer(in);
-    success = (deserializer.load(loaded) == pods::Error::NoError);
+    if (deserializer.load(loaded) != pods::Error::NoError)
+    {
+        return -1;
+    }
 
     return 0;
 }
