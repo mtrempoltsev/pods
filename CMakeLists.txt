@@ -12,6 +12,8 @@ endif()
 
 get_filename_component(PODS_ROOT "${CMAKE_CURRENT_LIST_DIR}" ABSOLUTE)
 
+include_directories("${PODS_ROOT}externals/rapidjson/include/")
+
 set(PODS_INCLUDE "${PODS_ROOT}/include")
 include_directories(${PODS_INCLUDE})
 
