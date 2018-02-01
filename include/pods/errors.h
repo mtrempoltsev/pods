@@ -9,6 +9,7 @@ namespace pods
         NoError,
 
         ArchiveVersionMismatch,
+        MandatoryFieldMissed,
         CorruptedArchive,
         NotEnoughMemory,
         UnexpectedEnd,

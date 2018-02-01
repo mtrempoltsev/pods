@@ -25,6 +25,18 @@ namespace pods
         static constexpr char PODS_VALUE_STR[] = "value";
         static constexpr char PODS_DATA_STR[] = "data";
 
+        static bool isOptional(const char* name) noexcept
+        {
+            return *name == 0;
+        }
+
+        static const char* getName(const char* name) noexcept
+        {
+            return isOptional(name)
+                ? name + 1
+                : name;
+        }
+
         template <class Storage, class RapidjsonWriter>
         class JsonSerializerImpl final
         {
@@ -134,7 +146,7 @@ namespace pods
 
             Error writeKey(const char* key)
             {
-                return writer_.Key(key) && stream_.good()
+                return writer_.Key(getName(key)) && stream_.good()
                     ? Error::NoError
                     : Error::WriteError;
             }
@@ -317,7 +329,7 @@ namespace pods
                 return Error::CorruptedArchive;
             }
 
-            nodes_.push(&document_);
+            auto sentry = goDeeperAndBackOnExit(document_);
 
             return deserialize(data);
         }
@@ -371,7 +383,12 @@ namespace pods
         Error readValue(const char* name, T& value)
         {
             Member it;
-            PODS_SAFE_CALL(getMember(name, it));
+            if (getMember(name, it) != Error::NoError)
+            {
+                return details::isOptional(name)
+                    ? Error::NoError
+                    : Error::MandatoryFieldMissed;
+            }
             return read(it->value, value);
         }
 
@@ -454,9 +471,8 @@ namespace pods
         {
             if (data.IsObject())
             {
-                nodes_.push(&data);
+                auto sentry = goDeeperAndBackOnExit(data);
                 PODS_SAFE_CALL(deserialize(value));
-                nodes_.pop();
                 return Error::NoError;
             }
             return Error::CorruptedArchive;
@@ -502,7 +518,7 @@ namespace pods
                     return Error::CorruptedArchive;
                 }
 
-                nodes_.push(&elem);
+                auto sentry = goDeeperAndBackOnExit(elem);
 
                 K key;
                 PODS_SAFE_CALL(readValue(details::PODS_KEY_STR, key));
@@ -511,8 +527,6 @@ namespace pods
                 PODS_SAFE_CALL(readValue(details::PODS_VALUE_STR, val));
 
                 hint = value.emplace_hint(hint, std::move(key), std::move(val));
-
-                nodes_.pop();
             }
 
             return Error::NoError;
@@ -533,7 +547,7 @@ namespace pods
         Error getMember(const char* name, rapidjson::Document::MemberIterator& it)
         {
             auto node = nodes_.top();
-            it = node->FindMember(name);
+            it = node->FindMember(details::getName(name));
             return it != node->MemberEnd()
                 ? Error::NoError
                 : Error::CorruptedArchive;
@@ -561,7 +575,7 @@ namespace pods
                 return Error::CorruptedArchive;
             }
 
-            nodes_.push(&data);
+            auto sentry = goDeeperAndBackOnExit(data);
 
             Version version = 0;
             PODS_SAFE_CALL(readValue(details::PODS_VERSION_STR, version));
@@ -583,8 +597,6 @@ namespace pods
             PODS_SAFE_CALL(init(size, it));
 
             PODS_SAFE_CALL(readRangeImpl<T>(array, it, version));
-
-            nodes_.pop();
 
             return Error::NoError;
         }
@@ -616,9 +628,8 @@ namespace pods
         {
             for (Size i = 0, size = array.Size(); i < size; ++i, ++begin)
             {
-                nodes_.push(&array[i]);
+                auto sentry = goDeeperAndBackOnExit(array[i]);
                 PODS_SAFE_CALL(deserializeWithoutVersion(*begin, version));
-                nodes_.pop();
             }
 
             return Error::NoError;
@@ -636,7 +647,30 @@ namespace pods
         }
 
     private:
+        class AutoNodeLevel final
+        {
+        public:
+            explicit AutoNodeLevel(std::stack<Value*>& nodes, Value* current)
+                : nodes_(nodes)
+            {
+                nodes_.push(current);
+            }
+
+            ~AutoNodeLevel()
+            {
+                nodes_.pop();
+            }
+
+        private:
+            std::stack<Value*>& nodes_;
+        };
+
+        AutoNodeLevel goDeeperAndBackOnExit(Value& value)
+        {
+            return AutoNodeLevel(nodes_, &value);
+        }
+
         rapidjson::Document document_;
-        std::stack<rapidjson::Document::ValueType*> nodes_;
+        std::stack<Value*> nodes_;
     };
 }

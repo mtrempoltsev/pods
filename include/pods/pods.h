@@ -1,5 +1,8 @@
 ﻿#pragma once
 
+#include "errors.h"
+#include "types.h"
+
 #ifdef PODS_MDR
 #error Rename the macro
 #endif
@@ -8,7 +11,7 @@
 #ifdef PODS_OPT
 #error Rename the macro
 #endif
-#define PODS_OPT(field) #field, field
+#define PODS_OPT(field) "\0" #field, field
 
 #ifdef PODS_SERIALIZABLE
 #error Rename the macro

@@ -59,3 +59,85 @@ TEST(jsonSerializer, error)
     pods::PrettyJsonSerializer<pods::FixedSizeWriteOnlyMemoryStorage> serializer(out);
     EXPECT_EQ(serializer.save(expected), pods::Error::WriteError);
 }
+
+struct InnerData
+{
+    uint32_t z;
+    uint32_t a;
+
+    PODS_SERIALIZABLE(
+        2,
+        PODS_MDR(z),
+        PODS_MDR(a))
+};
+
+struct OptionalTestData
+{
+    uint32_t x;
+    uint32_t y;
+
+    InnerData z;
+
+    PODS_SERIALIZABLE(
+        1,
+        PODS_OPT(x),
+        PODS_MDR(y),
+        PODS_OPT(z))
+};
+
+TEST(jsonSerializer, optionalFields1)
+{
+    const std::string json = "{\"version\": 1,\"x\": 7,\"y\": 8,\"z\":{\"version\":2,\"z\":9,\"a\":5}}";
+
+    OptionalTestData data = {};
+
+    pods::ReadOnlyMemoryStorage in(json.c_str(), json.length());
+
+    pods::JsonDeserializer<decltype(in)> serializer(in);
+    EXPECT_EQ(serializer.load(data), pods::Error::NoError);
+
+    EXPECT_EQ(data.x, 7);
+    EXPECT_EQ(data.y, 8);
+    EXPECT_EQ(data.z.z, 9);
+    EXPECT_EQ(data.z.a, 5);
+}
+
+TEST(jsonSerializer, optionalFields2)
+{
+    const std::string json = "{\"version\": 1,\"y\": 8}";
+
+    OptionalTestData data = {};
+
+    pods::ReadOnlyMemoryStorage in(json.c_str(), json.length());
+
+    pods::JsonDeserializer<decltype(in)> serializer(in);
+    EXPECT_EQ(serializer.load(data), pods::Error::NoError);
+
+    EXPECT_EQ(data.x, 0);
+    EXPECT_EQ(data.y, 8);
+    EXPECT_EQ(data.z.z, 0);
+}
+
+TEST(jsonSerializer, optionalFields3)
+{
+    const std::string json = "{\"version\": 1,\"x\": 7}";
+
+    OptionalTestData data = {};
+
+    pods::ReadOnlyMemoryStorage in(json.c_str(), json.length());
+
+    pods::JsonDeserializer<decltype(in)> serializer(in);
+    EXPECT_EQ(serializer.load(data), pods::Error::MandatoryFieldMissed);
+}
+
+TEST(jsonSerializer, optionalFields4)
+{
+    const std::string json = "{\"version\": 1,\"x\": 7,\"y\": 8,\"z\":{\"version\":2,\"a\":5}}";
+
+    OptionalTestData data = {};
+
+    pods::ReadOnlyMemoryStorage in(json.c_str(), json.length());
+
+    pods::JsonDeserializer<decltype(in)> serializer(in);
+    EXPECT_EQ(serializer.load(data), pods::Error::MandatoryFieldMissed);
+}
