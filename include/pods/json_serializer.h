@@ -25,12 +25,12 @@ namespace pods
         static constexpr char PODS_VALUE_STR[] = "value";
         static constexpr char PODS_DATA_STR[] = "data";
 
-        static bool isOptional(const char* name) noexcept
+        constexpr bool isOptional(const char* name) noexcept
         {
             return *name == 0;
         }
 
-        static const char* getName(const char* name) noexcept
+        constexpr const char* getName(const char* name) noexcept
         {
             return isOptional(name)
                 ? name + 1
@@ -201,7 +201,7 @@ namespace pods
 
             Error writeValue(const std::string& value)
             {
-                return writer_.String(value.c_str(), value.length()) && stream_.good()
+                return writer_.String(value.c_str(), static_cast<rapidjson::SizeType>(value.length())) && stream_.good()
                     ? Error::NoError
                     : Error::WriteError;
             }
@@ -250,7 +250,7 @@ namespace pods
                     return Error::SizeToLarge;
                 }
 
-                return writeRange(value.data(), value.size());
+                return writeRange(value.data(), toSize(value.size()));
             }
 
             template <class T, typename std::enable_if<IsPodsSerializable<T>::value, int>::type = 0>

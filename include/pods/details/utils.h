@@ -28,6 +28,11 @@ namespace pods
         {
         };
     }
+
+    constexpr Size toSize(size_t value)
+    {
+        return static_cast<Size>(value);
+    }
 }
 
 #ifdef PODS_SAFE_CALL
