@@ -45,3 +45,21 @@ TEST(binarySerializer, common)
     EXPECT_EQ(expected.arr, actual.arr);
     EXPECT_EQ(expected.map, actual.map);
 }
+
+TEST(binarySerializer, binary)
+{
+    const BinData expected;
+
+    pods::ResizeableWriteOnlyMemoryStorage out;
+    pods::BinarySerializer<pods::ResizeableWriteOnlyMemoryStorage> serializer(out);
+    EXPECT_EQ(serializer.save(expected), pods::Error::NoError);
+
+    BinData actual;
+    std::fill(actual.x.begin(), actual.x.end(), 0);
+
+    pods::ReadOnlyMemoryStorage in(out.data(), out.size());
+    pods::BinaryDeserializer<pods::ReadOnlyMemoryStorage> deserializer(in);
+    EXPECT_EQ(deserializer.load(actual), pods::Error::NoError);
+
+    EXPECT_EQ(expected.x, actual.x);
+}

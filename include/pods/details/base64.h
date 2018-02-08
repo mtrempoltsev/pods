@@ -2,11 +2,14 @@
 
 #include <string>
 
+#pragma warning(push)
+#pragma warning(disable : 4505)
+
 namespace pods
 {
     namespace details
     {
-        size_t getBase64EncodedSize(size_t size)
+        static size_t getBase64EncodedSize(size_t size)
         {
             const auto result = 4 * ((size + 2) / 3);
             return result < size
@@ -14,9 +17,9 @@ namespace pods
                 : result;
         }
 
-        std::string base64Encode(const char* source, size_t size)
+        static std::string base64Encode(const char* source, size_t size)
         {
-            static constexpr char Base64Chars[65] =
+            static constexpr char* Base64Chars =
                 "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
 
             const auto resultSize = getBase64EncodedSize(size);
@@ -61,23 +64,23 @@ namespace pods
             return result;
         }
 
-        size_t getBase64DecodedSize(const char* encoded, size_t size)
+        static size_t getBase64DecodedSize(const char* encoded, size_t encodedSize)
         {
-            const auto padding = size < 4
+            const auto padding = encodedSize < 4
                 ? 0
-                : encoded[size - 2] == '='
+                : encoded[encodedSize - 2] == '='
                     ? 2
-                    : encoded[size - 1] == '='
+                    : encoded[encodedSize - 1] == '='
                         ? 1
                         : 0;
-            return (size * 3) / 4 - padding;
+            return (encodedSize * 3) / 4 - padding;
         }
 
-        void base64Decode(const char* encoded, size_t size, char* destination)
+        static void base64Decode(const char* encoded, size_t encodedSize, char* destination)
         {
-            assert(size % 4 == 0);
+            assert(encodedSize % 4 == 0);
 
-            if (size == 0)
+            if (encodedSize == 0)
             {
                 return;
             }
@@ -91,10 +94,10 @@ namespace pods
                 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51
             };
 
-            const bool hasPadding = (encoded[size - 1] == '=');
-            const auto end = encoded + size;
+            const bool hasPadding = (encoded[encodedSize - 1] == '=');
+            const auto end = encoded + encodedSize;
 
-            for (size_t i = hasPadding ? 1 : 0; i < size / 4; ++i)
+            for (size_t i = hasPadding ? 1 : 0; i < encodedSize / 4; ++i)
             {
                 uint32_t n = Base64Index[*encoded++] << 18;
                 n |= Base64Index[*encoded++] << 12;
@@ -102,8 +105,8 @@ namespace pods
                 n |= Base64Index[*encoded++];
 
                 *destination++ = static_cast<char>(n >> 16);
-                *destination++ = static_cast<char>(n >> 8 & 0xFF);
-                *destination++ = static_cast<char>(n & 0xFF);
+                *destination++ = static_cast<char>(n >> 8 & 0xff);
+                *destination++ = static_cast<char>(n & 0xff);
             }
 
             if (encoded != end)
@@ -117,9 +120,11 @@ namespace pods
                 {
                     n |= Base64Index[*encoded++] << 6;
 
-                    *destination++ = static_cast<char>(n >> 8 & 0xFF);
+                    *destination++ = static_cast<char>(n >> 8 & 0xff);
                 }
             }
         }
     }
 }
+
+#pragma warning(pop)

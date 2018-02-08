@@ -11,6 +11,7 @@ set(HEADERS
    )
 
 set(SOURCES
+    test_base64.cpp
     test_binary_serializer.cpp
     test_fixed_memory_storage.cpp
     test_json_serializer.cpp

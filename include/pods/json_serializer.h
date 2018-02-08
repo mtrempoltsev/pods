@@ -10,9 +10,11 @@
 #include <rapidjson/prettywriter.h>
 #include <rapidjson/writer.h>
 
+#include "binary.h"
 #include "errors.h"
 #include "types.h"
 
+#include "details/base64.h"
 #include "details/rapidjson_wrappers.h"
 #include "details/utils.h"
 
@@ -85,13 +87,28 @@ namespace pods
                 return endObject();
             }
 
-            template <class T>
+            template <class T, typename std::enable_if<std::is_same<T, Binary>::value, int>::type = 0>
+            Error process(const char* name, T value)
+            {
+                return writeKeyValue(name, value);
+            }
+
+            template <class T, typename std::enable_if<!std::is_same<T, Binary>::value, int>::type = 0>
             Error process(const char* name, const T& value)
             {
                 return writeKeyValue(name, value);
             }
 
-            template <class T, class... ArgsT>
+            template <class T, class... ArgsT, typename std::enable_if<std::is_same<T, Binary>::value, int>::type = 0 >
+            Error process(const char* name, T value, ArgsT&... args)
+            {
+                const auto error = writeKeyValue(name, value);
+                return error == Error::NoError
+                    ? process(args...)
+                    : error;
+            }
+
+            template <class T, class... ArgsT, typename std::enable_if<!std::is_same<T, Binary>::value, int>::type = 0 >
             Error process(const char* name, const T& value, ArgsT&... args)
             {
                 const auto error = writeKeyValue(name, value);
@@ -100,7 +117,14 @@ namespace pods
                     : error;
             }
 
-            template <class T>
+            template <class T, typename std::enable_if<std::is_same<T, Binary>::value, int>::type = 0>
+            Error writeKeyValue(const char* name, T value)
+            {
+                PODS_SAFE_CALL(writeKey(name));
+                return writeValue(value);
+            }
+
+            template <class T, typename std::enable_if<!std::is_same<T, Binary>::value, int>::type = 0>
             Error writeKeyValue(const char* name, const T& value)
             {
                 PODS_SAFE_CALL(writeKey(name));
@@ -210,6 +234,12 @@ namespace pods
             Error writeValue(const T& value)
             {
                 return serialize(value);
+            }
+
+            Error writeValue(Binary value)
+            {
+                const auto base64 = details::base64Encode(reinterpret_cast<char*>(value.data), value.size);
+                return writeValue(base64);
             }
 
             template <class T, size_t ArraySize>
@@ -340,7 +370,7 @@ namespace pods
         }
 
         template <class... T>
-        Error operator()(T&... args)
+        Error operator()(T&&... args)
         {
             return process(args...);
         }
@@ -474,6 +504,22 @@ namespace pods
                 auto sentry = goDeeperAndBackOnExit(data);
                 PODS_SAFE_CALL(deserialize(value));
                 return Error::NoError;
+            }
+            return Error::CorruptedArchive;
+        }
+
+        Error read(Value& data, Binary value)
+        {
+            if (data.IsString())
+            {
+                const auto encoded = data.GetString();
+                const auto encodedSize = data.GetStringLength();
+                const auto decodedSize = details::getBase64DecodedSize(encoded, encodedSize);
+                if (decodedSize == value.size)
+                {
+                    details::base64Decode(encoded, encodedSize, reinterpret_cast<char*>(value.data));
+                    return Error::NoError;
+                }
             }
             return Error::CorruptedArchive;
         }

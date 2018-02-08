@@ -162,3 +162,9 @@ struct TestData
         );
     }
 };
+
+struct BinData
+{
+    std::vector<uint32_t> x = { 0xfedcba98, 0x76543210, 0x648823fe };
+    PODS_SERIALIZABLE(1, PODS_MDR_BIN(x))
+};

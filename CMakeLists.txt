@@ -5,8 +5,8 @@ project(pods)
 set(CMAKE_CXX_STANDARD 14)
 
 if(MSVC)
-    set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /MT /W4")
-    set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /MTd /W4")
+    set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /W4")
+    set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /W4")
     add_definitions(-D_SCL_SECURE_NO_WARNINGS)
 else()
     set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -Wall -Wpedantic")
@@ -23,6 +23,7 @@ include_directories(${PODS_INCLUDE})
 set(PODS_HEADERS "${PODS_INCLUDE}/pods")
 
 set(HEADERS
+    ${PODS_HEADERS}/binary.h
     ${PODS_HEADERS}/errors.h
     ${PODS_HEADERS}/binary_serializer.h
     ${PODS_HEADERS}/json_serializer.h
@@ -31,6 +32,7 @@ set(HEADERS
     ${PODS_HEADERS}/stream_storage.h
     ${PODS_HEADERS}/types.h
 
+    ${PODS_HEADERS}/details/base64.h
     ${PODS_HEADERS}/details/memory_managers.h
     ${PODS_HEADERS}/details/rapidjson_wrappers.h
     ${PODS_HEADERS}/details/settings.h

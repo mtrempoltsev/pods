@@ -7,6 +7,7 @@
 
 #include "details/utils.h"
 
+#include "binary.h"
 #include "errors.h"
 #include "types.h"
 
@@ -55,13 +56,28 @@ namespace pods
             return const_cast<T&>(value).serialize(*this, T::version());
         }
 
-        template <class T, typename std::enable_if<std::is_class<T>::value, int>::type = 0>
+        template <class T, typename std::enable_if<std::is_same<T, Binary>::value, int>::type = 0>
+        Error process(const char*, T value)
+        {
+            return doProcess(value);
+        }
+
+        template <class T, class... ArgsT, typename std::enable_if<std::is_same<T, Binary>::value, int>::type = 0>
+        Error process(const char*, T value, ArgsT&... args)
+        {
+            const auto error = doProcess(value);
+            return error == Error::NoError
+                ? process(args...)
+                : error;
+        }
+
+        template <class T, typename std::enable_if<std::is_class<T>::value && !std::is_same<T, Binary>::value, int>::type = 0>
         Error process(const char*, const T& value)
         {
             return doProcess(value);
         }
 
-        template <class T, class... ArgsT, typename std::enable_if<std::is_class<T>::value, int>::type = 0>
+        template <class T, class... ArgsT, typename std::enable_if<std::is_class<T>::value && !std::is_same<T, Binary>::value, int>::type = 0>
         Error process(const char*, const T& value, ArgsT&... args)
         {
             const auto error = doProcess(value);
@@ -91,6 +107,11 @@ namespace pods
             return storage_.put(n);
         }
 
+        Error doProcess(Binary value)
+        {
+            return saveRange(value.data, toSize(value.size));
+        }
+
         template <class T, size_t ArraySize>
         Error doProcess(const std::array<T, ArraySize>& value)
         {
@@ -115,7 +136,7 @@ namespace pods
         Error doProcess(const std::vector<T>& value)
         {
             PODS_SAFE_CALL(saveSize(value.size()));
-            return saveRange(value.data(), value.size());
+            return saveRange(value.data(), toSize(value.size()));
         }
 
         Error doProcess(const std::string& value)
@@ -220,7 +241,7 @@ namespace pods
         }
 
         template <class... T>
-        Error operator()(T&... args)
+        Error operator()(T&&... args)
         {
             return process(args...);
         }
@@ -253,6 +274,11 @@ namespace pods
             PODS_SAFE_CALL(storage_.get(n));
             value = (n == True);
             return Error::NoError;
+        }
+
+        Error doProcess(Binary value)
+        {
+            return loadRange(value.data, toSize(value.size));
         }
 
         template <class T, size_t ArraySize>

@@ -141,3 +141,25 @@ TEST(jsonSerializer, optionalFields4)
     pods::JsonDeserializer<decltype(in)> serializer(in);
     EXPECT_EQ(serializer.load(data), pods::Error::MandatoryFieldMissed);
 }
+
+TEST(jsonSerializer, binary)
+{
+    const BinData expected;
+
+    pods::ResizeableWriteOnlyMemoryStorage out;
+    pods::JsonSerializer<pods::ResizeableWriteOnlyMemoryStorage> serializer(out);
+    EXPECT_EQ(serializer.save(expected), pods::Error::NoError);
+
+    BinData actual;
+    std::fill(actual.x.begin(), actual.x.end(), 0);
+
+    const std::string json = "{\"version\":1,\"x\":\"mLrc/hAyVHb+I4hk\"}";
+
+    EXPECT_EQ(std::string(out.data(), out.size()), json);
+
+    pods::ReadOnlyMemoryStorage in(out.data(), out.size());
+    pods::JsonDeserializer<pods::ReadOnlyMemoryStorage> deserializer(in);
+    EXPECT_EQ(deserializer.load(actual), pods::Error::NoError);
+
+    EXPECT_EQ(expected.x, actual.x);
+}
