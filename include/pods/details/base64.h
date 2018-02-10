@@ -19,7 +19,7 @@ namespace pods
 
         static std::string base64Encode(const char* source, size_t size)
         {
-            static constexpr char* Base64Chars =
+            static const char* Base64Chars =
                 "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
 
             const auto resultSize = getBase64EncodedSize(size);
