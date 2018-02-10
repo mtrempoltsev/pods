@@ -23,7 +23,6 @@ include_directories(${PODS_INCLUDE})
 set(PODS_HEADERS "${PODS_INCLUDE}/pods")
 
 set(HEADERS
-    ${PODS_HEADERS}/binary.h
     ${PODS_HEADERS}/errors.h
     ${PODS_HEADERS}/binary_serializer.h
     ${PODS_HEADERS}/json_serializer.h
@@ -33,6 +32,7 @@ set(HEADERS
     ${PODS_HEADERS}/types.h
 
     ${PODS_HEADERS}/details/base64.h
+    ${PODS_HEADERS}/details/binary.h
     ${PODS_HEADERS}/details/memory_managers.h
     ${PODS_HEADERS}/details/rapidjson_wrappers.h
     ${PODS_HEADERS}/details/settings.h

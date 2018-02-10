@@ -10,11 +10,11 @@
 #include <rapidjson/prettywriter.h>
 #include <rapidjson/writer.h>
 
-#include "binary.h"
 #include "errors.h"
 #include "types.h"
 
 #include "details/base64.h"
+#include "details/binary.h"
 #include "details/rapidjson_wrappers.h"
 #include "details/utils.h"
 
@@ -87,20 +87,14 @@ namespace pods
                 return endObject();
             }
 
-            template <class T, typename std::enable_if<std::is_same<T, Binary>::value, int>::type = 0>
-            Error process(const char* name, T value)
-            {
-                return writeKeyValue(name, value);
-            }
-
-            template <class T, typename std::enable_if<!std::is_same<T, Binary>::value, int>::type = 0>
+            template <class T>
             Error process(const char* name, const T& value)
             {
                 return writeKeyValue(name, value);
             }
 
-            template <class T, class... ArgsT, typename std::enable_if<std::is_same<T, Binary>::value, int>::type = 0 >
-            Error process(const char* name, T value, ArgsT&... args)
+            template <class T, class... ArgsT>
+            Error process(const char* name, const T& value, ArgsT&&... args)
             {
                 const auto error = writeKeyValue(name, value);
                 return error == Error::NoError
@@ -108,23 +102,7 @@ namespace pods
                     : error;
             }
 
-            template <class T, class... ArgsT, typename std::enable_if<!std::is_same<T, Binary>::value, int>::type = 0 >
-            Error process(const char* name, const T& value, ArgsT&... args)
-            {
-                const auto error = writeKeyValue(name, value);
-                return error == Error::NoError
-                    ? process(args...)
-                    : error;
-            }
-
-            template <class T, typename std::enable_if<std::is_same<T, Binary>::value, int>::type = 0>
-            Error writeKeyValue(const char* name, T value)
-            {
-                PODS_SAFE_CALL(writeKey(name));
-                return writeValue(value);
-            }
-
-            template <class T, typename std::enable_if<!std::is_same<T, Binary>::value, int>::type = 0>
+            template <class T>
             Error writeKeyValue(const char* name, const T& value)
             {
                 PODS_SAFE_CALL(writeKey(name));
@@ -236,9 +214,16 @@ namespace pods
                 return serialize(value);
             }
 
-            Error writeValue(Binary value)
+            Error writeValue(const details::BinaryArray& value)
             {
-                const auto base64 = details::base64Encode(reinterpret_cast<char*>(value.data), value.size);
+                const auto base64 = details::base64Encode(value.data(), value.size());
+                return writeValue(base64);
+            }
+
+            template <class T>
+            Error writeValue(const details::BinaryVector<T>& value)
+            {
+                const auto base64 = details::base64Encode(value.data(), value.size());
                 return writeValue(base64);
             }
 
@@ -508,18 +493,35 @@ namespace pods
             return Error::CorruptedArchive;
         }
 
-        Error read(Value& data, Binary value)
+        Error read(Value& data, details::BinaryArray& value)
         {
             if (data.IsString())
             {
                 const auto encoded = data.GetString();
                 const auto encodedSize = data.GetStringLength();
                 const auto decodedSize = details::getBase64DecodedSize(encoded, encodedSize);
-                if (decodedSize == value.size)
+                if (decodedSize == value.size())
                 {
-                    details::base64Decode(encoded, encodedSize, reinterpret_cast<char*>(value.data));
+                    details::base64Decode(encoded, encodedSize, value.data());
                     return Error::NoError;
                 }
+            }
+            return Error::CorruptedArchive;
+        }
+
+        template <class T>
+        Error read(Value& data, details::BinaryVector<T>& value)
+        {
+            if (data.IsString())
+            {
+                const auto encoded = data.GetString();
+                const auto encodedSize = data.GetStringLength();
+                const auto decodedSize = details::getBase64DecodedSize(encoded, encodedSize);
+
+                PODS_SAFE_CALL(value.allocate(decodedSize));
+
+                details::base64Decode(encoded, encodedSize, value.data());
+                return Error::NoError;
             }
             return Error::CorruptedArchive;
         }

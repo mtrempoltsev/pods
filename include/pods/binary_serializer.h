@@ -5,9 +5,9 @@
 #include <type_traits>
 #include <vector>
 
+#include "details/binary.h"
 #include "details/utils.h"
 
-#include "binary.h"
 #include "errors.h"
 #include "types.h"
 
@@ -56,29 +56,14 @@ namespace pods
             return const_cast<T&>(value).serialize(*this, T::version());
         }
 
-        template <class T, typename std::enable_if<std::is_same<T, Binary>::value, int>::type = 0>
-        Error process(const char*, T value)
-        {
-            return doProcess(value);
-        }
-
-        template <class T, class... ArgsT, typename std::enable_if<std::is_same<T, Binary>::value, int>::type = 0>
-        Error process(const char*, T value, ArgsT&... args)
-        {
-            const auto error = doProcess(value);
-            return error == Error::NoError
-                ? process(args...)
-                : error;
-        }
-
-        template <class T, typename std::enable_if<std::is_class<T>::value && !std::is_same<T, Binary>::value, int>::type = 0>
+        template <class T, typename std::enable_if<std::is_class<T>::value, int>::type = 0>
         Error process(const char*, const T& value)
         {
             return doProcess(value);
         }
 
-        template <class T, class... ArgsT, typename std::enable_if<std::is_class<T>::value && !std::is_same<T, Binary>::value, int>::type = 0>
-        Error process(const char*, const T& value, ArgsT&... args)
+        template <class T, class... ArgsT, typename std::enable_if<std::is_class<T>::value, int>::type = 0>
+        Error process(const char*, const T& value, ArgsT&&... args)
         {
             const auto error = doProcess(value);
             return error == Error::NoError
@@ -107,9 +92,15 @@ namespace pods
             return storage_.put(n);
         }
 
-        Error doProcess(Binary value)
+        Error doProcess(const details::BinaryArray& value)
         {
-            return saveRange(value.data, toSize(value.size));
+            return saveRange(value.data(), toSize(value.size()));
+        }
+
+        template <class T>
+        Error doProcess(const details::BinaryVector<T>& value)
+        {
+            return saveRange(value.data(), toSize(value.size()));
         }
 
         template <class T, size_t ArraySize>
@@ -135,7 +126,6 @@ namespace pods
         template <class T>
         Error doProcess(const std::vector<T>& value)
         {
-            PODS_SAFE_CALL(saveSize(value.size()));
             return saveRange(value.data(), toSize(value.size()));
         }
 
@@ -176,6 +166,7 @@ namespace pods
         template <class T, typename std::enable_if<details::IsPodsSerializable<T>::value, int>::type = 0>
         Error saveRange(T* begin, Size size)
         {
+            PODS_SAFE_CALL(saveSize(size));
             PODS_SAFE_CALL(saveVersion<T>());
 
             for (auto end = begin + size; begin != end; ++begin)
@@ -189,6 +180,8 @@ namespace pods
         template <class T, typename std::enable_if<std::is_class<T>::value && !details::IsPodsSerializable<T>::value, int>::type = 0>
         Error saveRange(T* begin, Size size)
         {
+            PODS_SAFE_CALL(saveSize(size));
+
             for (auto end = begin + size; begin != end; ++begin)
             {
                 PODS_SAFE_CALL(doProcess(*begin));
@@ -200,6 +193,8 @@ namespace pods
         template <class T, typename std::enable_if<std::is_arithmetic<T>::value, int>::type = 0>
         Error saveRange(T* begin, Size size)
         {
+            PODS_SAFE_CALL(saveSize(size));
+
             return storage_.put(begin, size);
         }
 
@@ -276,15 +271,14 @@ namespace pods
             return Error::NoError;
         }
 
-        Error doProcess(Binary value)
-        {
-            return loadRange(value.data, toSize(value.size));
-        }
-
         template <class T, size_t ArraySize>
         Error doProcess(std::array<T, ArraySize>& value)
         {
-            return loadRange(value.data(), ArraySize);
+            Size size = 0;
+            PODS_SAFE_CALL(loadSize(size));
+            return size == ArraySize
+                ? loadRange(value.data(), ArraySize)
+                : Error::CorruptedArchive;
         }
 
         template <class K, class V>
@@ -327,6 +321,23 @@ namespace pods
             return size > 0
                 ? storage_.get(&value[0], size)
                 : Error::NoError;
+        }
+
+        Error doProcess(details::BinaryArray& value)
+        {
+            Size size = 0;
+            PODS_SAFE_CALL(loadSize(size));
+            PODS_SAFE_CALL(value.allocate(size));
+            return loadRange(value.data(), toSize(value.size()));
+        }
+
+        template <class T>
+        Error doProcess(details::BinaryVector<T>& value)
+        {
+            Size size = 0;
+            PODS_SAFE_CALL(loadSize(size));
+            PODS_SAFE_CALL(value.allocate(size));
+            return loadRange(value.data(), toSize(value.size()));
         }
 
         template <class T, typename std::enable_if<std::is_class<T>::value, int>::type = 0>

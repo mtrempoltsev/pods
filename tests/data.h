@@ -2,6 +2,7 @@
 
 #include <array>
 #include <map>
+#include <memory>
 #include <string>
 #include <vector>
 
@@ -163,8 +164,30 @@ struct TestData
     }
 };
 
-struct BinData
+struct BinData1
 {
     std::vector<uint32_t> x = { 0xfedcba98, 0x76543210, 0x648823fe };
+    PODS_SERIALIZABLE(1, PODS_MDR_BIN(x))
+};
+
+struct BinData2
+{
+    static constexpr size_t size = 3;
+    std::unique_ptr<int16_t[]> x;
+    int16_t* y;
+    PODS_SERIALIZABLE(1,
+        PODS_MDR_BIN_2(x, size),
+        PODS_MDR_BIN_2(y, size))
+};
+
+struct Array1
+{
+    std::array<uint32_t, 3> x = { 0xfedcba98, 0x76543210, 0x648823fe };
+    PODS_SERIALIZABLE(1, PODS_MDR_BIN(x))
+};
+
+struct Array2
+{
+    std::array<uint32_t, 1> x = { 100 };
     PODS_SERIALIZABLE(1, PODS_MDR_BIN(x))
 };
