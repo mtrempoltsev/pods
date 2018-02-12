@@ -201,6 +201,10 @@ namespace pods
                 return memoryManager_.available();
             }
 
+            void flush() noexcept
+            {
+            }
+
         private:
             MemoryManager memoryManager_;
         };
