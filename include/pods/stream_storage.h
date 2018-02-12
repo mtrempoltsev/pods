@@ -115,6 +115,7 @@ namespace pods
                 {
                     buffer_.decreaseSize(bytesReaded);
                 }
+                return Error::NoError;
             }
 
             return error;
@@ -134,6 +135,11 @@ namespace pods
             : out_(stream)
             , buffer_(BufferSize)
         {
+        }
+
+        ~WriteOnlyStreamStorage()
+        {
+            flush();
         }
 
         WriteOnlyStreamStorage(const WriteOnlyStreamStorage&) = delete;
@@ -179,6 +185,15 @@ namespace pods
         {
             const auto totalSize = size * sizeof(T);
             return put(reinterpret_cast<const char*>(data), totalSize);
+        }
+
+        Error flush() noexcept
+        {
+            if (buffer_.size() > 0)
+            {
+                return writeBuffer();
+            }
+            return Error::NoError;
         }
 
     private:

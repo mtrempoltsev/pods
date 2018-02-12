@@ -49,3 +49,21 @@ TEST(streamStorage, common)
     EXPECT_EQ(in.get(a3.data(), a3.size()), pods::Error::NoError);
     EXPECT_EQ(e3, a3);
 }
+
+TEST(streamStorage, flush)
+{
+    std::stringstream buffer;
+
+    const uint16_t expected = 1;
+
+    {
+        pods::WriteOnlyStreamStorage out(buffer);
+        EXPECT_EQ(out.put(expected), pods::Error::NoError);
+    }
+
+    uint16_t actual = 0;
+
+    pods::ReadOnlyStreamStorage out(buffer);
+    EXPECT_EQ(out.get(actual), pods::Error::NoError);
+    EXPECT_EQ(expected, actual);
+}
