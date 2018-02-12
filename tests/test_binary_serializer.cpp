@@ -72,10 +72,10 @@ TEST(binarySerializer, binary2)
 
     const BinData2 expected = { std::make_unique<int16_t[]>(expected.size), buf1 };
 
-    for (int16_t i = 0; i < expected.size; ++i)
+    for (size_t i = 0; i < expected.size; ++i)
     {
-        expected.x.get()[i] = i + 1;
-        expected.y[i] = i + 10;
+        expected.x.get()[i] = static_cast<int16_t>(i + 1);
+        expected.y[i] = static_cast<int16_t>(i + 10);
     }
 
     pods::ResizeableWriteOnlyMemoryStorage out;
@@ -90,10 +90,10 @@ TEST(binarySerializer, binary2)
     pods::BinaryDeserializer<pods::ReadOnlyMemoryStorage> deserializer(in);
     EXPECT_EQ(deserializer.load(actual), pods::Error::NoError);
 
-    for (int16_t i = 0; i < expected.size; ++i)
+    for (size_t i = 0; i < expected.size; ++i)
     {
-        EXPECT_EQ(actual.x.get()[i], i + 1);
-        EXPECT_EQ(actual.y[i], i + 10);
+        EXPECT_EQ(actual.x.get()[i], static_cast<int16_t>(i + 1));
+        EXPECT_EQ(actual.y[i], static_cast<int16_t>(i + 10));
     }
 }
 
