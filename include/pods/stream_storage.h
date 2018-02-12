@@ -31,27 +31,27 @@ namespace pods
         template <class T>
         Error get(T& value) noexcept
         {
-            if (!eof_)
+            if (buffer_.available() >= sizeof(T))
             {
-                if (buffer_.available() >= sizeof(T))
-                {
-                    return buffer_.get(value);
-                }
-
-                const auto bytesLeft = buffer_.available();
-                if (bytesLeft > 0)
-                {
-                    auto pos = in_.tellg();
-                    pos -= bytesLeft;
-                    in_.seekg(pos, std::ios_base::beg);
-                }
-
-                PODS_SAFE_CALL(readBuffer());
-
                 return buffer_.get(value);
             }
 
-            return Error::UnexpectedEnd;
+            const auto bytesLeft = buffer_.available();
+            if (bytesLeft > 0)
+            {
+                auto pos = in_.tellg();
+                pos -= bytesLeft;
+                in_.seekg(pos, std::ios_base::beg);
+            }
+
+            if (eof_)
+            {
+                return Error::UnexpectedEnd;
+            }
+
+            PODS_SAFE_CALL(readBuffer());
+
+            return buffer_.get(value);
         }
 
         Error get(char* data, size_t size) noexcept

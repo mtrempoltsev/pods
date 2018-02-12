@@ -2,6 +2,7 @@
 
 #include <pods/json_serializer.h>
 #include <pods/memory_storage.h>
+#include <pods/stream_storage.h>
 
 #include "data.h"
 
@@ -240,4 +241,23 @@ TEST(jsonSerializer, binarySmallerArray)
     pods::ReadOnlyMemoryStorage in(out.data(), out.size());
     pods::JsonDeserializer<pods::ReadOnlyMemoryStorage> deserializer(in);
     EXPECT_EQ(deserializer.load(actual), pods::Error::CorruptedArchive);
+}
+
+TEST(jsonSerializer, stream)
+{
+    const char* json =
+        R"({
+            "version": 1,
+            "a": 100,
+            "z": 300
+        })";
+
+    InnerData actual = {};
+
+    std::stringstream stream(json);
+    pods::ReadOnlyStreamStorage in(stream);
+    pods::JsonDeserializer<pods::ReadOnlyStreamStorage> deserializer(in);
+    EXPECT_EQ(deserializer.load(actual), pods::Error::NoError);
+    EXPECT_EQ(actual.a, 100);
+    EXPECT_EQ(actual.z, 300);
 }
