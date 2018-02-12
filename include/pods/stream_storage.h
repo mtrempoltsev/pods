@@ -56,28 +56,27 @@ namespace pods
 
         Error get(char* data, size_t size) noexcept
         {
-            if (!eof_)
+            if (buffer_.available() >= size)
             {
-                if (buffer_.available() >= size)
-                {
-                    return buffer_.get(data, size);
-                }
-
-                const auto bytesReaded = buffer_.available();
-                const auto needToReed = size - bytesReaded;
-
-                PODS_SAFE_CALL(buffer_.get(data, bytesReaded));
-
-                const auto error = read(data + bytesReaded, needToReed);
-                if (error == Error::NoError || error == Error::Eof)
-                {
-                    return Error::NoError;
-                }
-
-                return error;
+                return buffer_.get(data, size);
             }
 
-            return Error::UnexpectedEnd;
+            if (eof_)
+            {
+                return Error::UnexpectedEnd;
+            }
+
+            const auto bytesReaded = buffer_.available();
+            const auto needToReed = size - bytesReaded;
+
+            PODS_SAFE_CALL(buffer_.get(data, bytesReaded));
+
+            const auto error = read(data + bytesReaded, needToReed);
+            if (error == Error::NoError || error == Error::Eof)
+            {
+                return Error::NoError;
+            }
+            return error;
         }
 
         template <class T>

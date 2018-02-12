@@ -174,8 +174,8 @@ TEST(jsonSerializer, binary2)
 
     for (size_t i = 0; i < expected.size; ++i)
     {
-        expected.x.get()[i] = i + 1;
-        expected.y[i] = i + 10;
+        expected.x.get()[i] = static_cast<int16_t>(i + 1);
+        expected.y[i] = static_cast<int16_t>(i + 10);
     }
 
     pods::ResizeableWriteOnlyMemoryStorage out;

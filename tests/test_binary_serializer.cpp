@@ -2,6 +2,7 @@
 
 #include <pods/binary_serializer.h>
 #include <pods/memory_storage.h>
+#include <pods/stream_storage.h>
 
 #include "data.h"
 
@@ -142,4 +143,26 @@ TEST(binarySerializer, binarySmallerArray)
     pods::ReadOnlyMemoryStorage in(out.data(), out.size());
     pods::BinaryDeserializer<pods::ReadOnlyMemoryStorage> deserializer(in);
     EXPECT_EQ(deserializer.load(actual), pods::Error::CorruptedArchive);
+}
+
+TEST(binarySerializer, stream)
+{
+    const BinData1 expected;
+
+    std::stringstream buf;
+
+    pods::WriteOnlyStreamStorage out(buf);
+    pods::BinarySerializer<decltype(out)> serializer(out);
+    EXPECT_EQ(serializer.save(expected), pods::Error::NoError);
+
+    out.flush();
+
+    BinData1 actual;
+    actual.x.clear();
+
+    pods::ReadOnlyStreamStorage in(buf);
+    pods::BinaryDeserializer<decltype(in)> deserializer(in);
+    EXPECT_EQ(deserializer.load(actual), pods::Error::NoError);
+
+    EXPECT_EQ(expected.x, actual.x);
 }
