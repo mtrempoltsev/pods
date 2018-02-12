@@ -111,7 +111,7 @@ namespace pods
             Ch* PutBegin() noexcept
             {
                 assert(false);
-                return '\0';
+                return nullptr;
             }
 
             size_t PutEnd(Ch*) noexcept

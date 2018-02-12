@@ -39,8 +39,8 @@ set(HEADERS
     ${PODS_HEADERS}/details/utils.h
     )
 
-add_library(${PROJECT_NAME} STATIC ${HEADERS})
-set_target_properties(${PROJECT_NAME} PROPERTIES LINKER_LANGUAGE CXX)
+add_library(${PROJECT_NAME} INTERFACE)
+target_sources(${PROJECT_NAME} INTERFACE ${HEADERS})
 
 set(PODS_EXAMPLES ${PROJECT_NAME}_examples)
 add_subdirectory(examples)
