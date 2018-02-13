@@ -1,2 +1,2 @@
-﻿brew update
+brew update
 brew install ragel
