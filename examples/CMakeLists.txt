@@ -2,11 +2,14 @@ project(${PODS_EXAMPLES})
 
 include_directories(${PODS_INCLUDE})
 
-set(HEADERS
-   )
-
 set(SOURCES
-    simple.cpp
+    binary.cpp
+    json.cpp
+    use_buffer.cpp
+    streams.cpp
     )
 
-add_executable(${PODS_EXAMPLES} ${HEADERS} ${SOURCES})
+add_executable(binary binary.cpp)
+add_executable(json json.cpp)
+add_executable(use_buffer use_buffer.cpp)
+add_executable(streams streams.cpp)

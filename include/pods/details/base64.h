@@ -2,7 +2,7 @@
 
 #include <string>
 
-#ifdef _MSVC_LANG
+#ifdef _MSC_VER
 #pragma warning(push)
 #pragma warning(disable : 4505)
 #endif
