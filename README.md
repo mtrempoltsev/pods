@@ -1,4 +1,5 @@
 ﻿[![Build Status](https://travis-ci.org/mtrempoltsev/pods.svg?branch=master)](https://travis-ci.org/mtrempoltsev/pods#)
+[![Coverage Status](https://coveralls.io/repos/mtrempoltsev/pods/badge.png?branch=master)](https://coveralls.io/r/mtrempoltsev/pods?branch=master)
 
 # Plain Old Data Serializer (PODS)
 

@@ -28,6 +28,9 @@ matrix:
         - os: osx
           env: TARGET_CPU=x86 BUILD_CONFIGURATION=Release
 
+before_install:
+    - pip install --user cpp-coveralls
+
 install:
     - source ci/travis/install-$TRAVIS_OS_NAME.sh
 
@@ -37,3 +40,6 @@ script:
     - cmake .. -DCMAKE_BUILD_TYPE=$BUILD_CONFIGURATION -DTARGET_CPU=$TARGET_CPU -DPODS_BUILD_GTEST=ON
     - cmake --build .
     - ctest --output-on-failure
+
+after_success:
+    - coveralls --root .. -E ".*external.*" -E ".*CMakeFiles.*" -E ".*test/.*.cpp.*" -E ../externals/*
