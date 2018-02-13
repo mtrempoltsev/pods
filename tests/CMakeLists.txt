@@ -1,7 +1,21 @@
 project(${PODS_TEST_PROJECT})
 
-find_package(GTest REQUIRED)
-include_directories(${GTEST_INCLUDE_DIRS})
+if(PODS_BUILD_GTEST)
+    set(PODS_GTEST_ROOT "${PODS_ROOT}/externals/googletest/googletest")
+    include_directories(${PODS_GTEST_ROOT}/include)
+    include_directories(${PODS_GTEST_ROOT})
+
+    set(PODS_GOOGLETEST_SOURCES
+        ${PODS_GTEST_ROOT}/src/gtest-all.cc
+        ${PODS_GTEST_ROOT}/src/gtest_main.cc
+        )
+
+    add_library(googletest ${PODS_GOOGLETEST_SOURCES})
+    set(GTEST_BOTH_LIBRARIES googletest)
+else()
+    find_package(GTest REQUIRED)
+    include_directories(${GTEST_INCLUDE_DIRS})
+endif()
 
 include_directories(${PODS_INCLUDE})
 
