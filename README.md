@@ -1,4 +1,6 @@
-﻿# Plain Old Data Serializer (PODS)
+﻿[![Build Status](https://travis-ci.org/mtrempoltsev/pods.svg?branch=master)](https://travis-ci.org/mtrempoltsev/pods#)
+
+# Plain Old Data Serializer (PODS)
 
 ![](doc/images/pod.png)
 
