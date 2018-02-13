@@ -136,7 +136,7 @@ struct TestData
 
     std::vector<std::string> strings = { "hello", "мир" };
 
-    std::array<Point, 1> arr = { { 5, 6 } };
+    std::array<Point, 1> arr = { { { 5, 6 } } };
 
     std::map<Point, Point> map = { { { 7, 8 }, { 9, 10 } } };
 
@@ -182,12 +182,12 @@ struct BinData2
 
 struct Array1
 {
-    std::array<uint32_t, 3> x = { 0xfedcba98, 0x76543210, 0x648823fe };
+    std::array<uint32_t, 3> x = { { 0xfedcba98, 0x76543210, 0x648823fe } };
     PODS_SERIALIZABLE(1, PODS_MDR_BIN(x))
 };
 
 struct Array2
 {
-    std::array<uint32_t, 1> x = { 100 };
+    std::array<uint32_t, 1> x = { { 100 } };
     PODS_SERIALIZABLE(1, PODS_MDR_BIN(x))
 };
