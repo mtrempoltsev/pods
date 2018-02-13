@@ -4,13 +4,13 @@
 #include <sstream>
 #include <vector>
 
-#include <pods/stream_storage.h>
+#include <pods/streams.h>
 
 TEST(streamStorage, common)
 {
     std::stringstream buffer;
 
-    pods::WriteOnlyStreamStorage out(buffer);
+    pods::OutputStream out(buffer);
 
     const bool e1 = false;
     const uint64_t e2 = 100;
@@ -31,7 +31,7 @@ TEST(streamStorage, common)
 
     EXPECT_EQ(out.put(e3.data(), e3.size()), pods::Error::NoError);
 
-    pods::ReadOnlyStreamStorage in(buffer);
+    pods::InputStream in(buffer);
 
     for (size_t j = 0; j < n; ++j)
     {
@@ -57,13 +57,13 @@ TEST(streamStorage, flush)
     const uint16_t expected = 1;
 
     {
-        pods::WriteOnlyStreamStorage out(buffer);
+        pods::OutputStream out(buffer);
         EXPECT_EQ(out.put(expected), pods::Error::NoError);
     }
 
     uint16_t actual = 0;
 
-    pods::ReadOnlyStreamStorage out(buffer);
+    pods::InputStream out(buffer);
     EXPECT_EQ(out.get(actual), pods::Error::NoError);
     EXPECT_EQ(expected, actual);
 }

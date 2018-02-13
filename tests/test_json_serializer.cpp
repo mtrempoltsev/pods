@@ -1,8 +1,8 @@
 #include <gtest/gtest.h>
 
 #include <pods/json_serializer.h>
-#include <pods/memory_storage.h>
-#include <pods/stream_storage.h>
+#include <pods/buffers.h>
+#include <pods/streams.h>
 
 #include "data.h"
 
@@ -10,8 +10,8 @@ TEST(jsonSerializer, common)
 {
     const TestData expected;
 
-    pods::ResizeableWriteOnlyMemoryStorage out;
-    pods::JsonSerializer<pods::ResizeableWriteOnlyMemoryStorage> serializer(out);
+    pods::ResizableOutputBuffer out;
+    pods::JsonSerializer<pods::ResizableOutputBuffer> serializer(out);
     EXPECT_EQ(serializer.save(expected), pods::Error::NoError);
 
     TestData actual;
@@ -35,8 +35,8 @@ TEST(jsonSerializer, common)
 
     EXPECT_EQ(expectedJson, json);
 
-    pods::ReadOnlyMemoryStorage in(out.data(), out.size());
-    pods::JsonDeserializer<pods::ReadOnlyMemoryStorage> deserializer(in);
+    pods::InputBuffer in(out.data(), out.size());
+    pods::JsonDeserializer<pods::InputBuffer> deserializer(in);
     EXPECT_EQ(deserializer.load(actual), pods::Error::NoError);
 
     EXPECT_EQ(expected.x, actual.x);
@@ -56,8 +56,8 @@ TEST(jsonSerializer, common)
 TEST(jsonSerializer, error)
 {
     const TestData expected;
-    pods::FixedSizeWriteOnlyMemoryStorage out(128);
-    pods::PrettyJsonSerializer<pods::FixedSizeWriteOnlyMemoryStorage> serializer(out);
+    pods::OutputBuffer out(128);
+    pods::PrettyJsonSerializer<pods::OutputBuffer> serializer(out);
     EXPECT_EQ(serializer.save(expected), pods::Error::WriteError);
 }
 
@@ -92,7 +92,7 @@ TEST(jsonSerializer, optionalFields1)
 
     OptionalTestData data = {};
 
-    pods::ReadOnlyMemoryStorage in(json.c_str(), json.length());
+    pods::InputBuffer in(json.c_str(), json.length());
 
     pods::JsonDeserializer<decltype(in)> serializer(in);
     EXPECT_EQ(serializer.load(data), pods::Error::NoError);
@@ -109,7 +109,7 @@ TEST(jsonSerializer, optionalFields2)
 
     OptionalTestData data = {};
 
-    pods::ReadOnlyMemoryStorage in(json.c_str(), json.length());
+    pods::InputBuffer in(json.c_str(), json.length());
 
     pods::JsonDeserializer<decltype(in)> serializer(in);
     EXPECT_EQ(serializer.load(data), pods::Error::NoError);
@@ -125,7 +125,7 @@ TEST(jsonSerializer, optionalFields3)
 
     OptionalTestData data = {};
 
-    pods::ReadOnlyMemoryStorage in(json.c_str(), json.length());
+    pods::InputBuffer in(json.c_str(), json.length());
 
     pods::JsonDeserializer<decltype(in)> serializer(in);
     EXPECT_EQ(serializer.load(data), pods::Error::MandatoryFieldMissed);
@@ -137,7 +137,7 @@ TEST(jsonSerializer, optionalFields4)
 
     OptionalTestData data = {};
 
-    pods::ReadOnlyMemoryStorage in(json.c_str(), json.length());
+    pods::InputBuffer in(json.c_str(), json.length());
 
     pods::JsonDeserializer<decltype(in)> serializer(in);
     EXPECT_EQ(serializer.load(data), pods::Error::MandatoryFieldMissed);
@@ -147,8 +147,8 @@ TEST(jsonSerializer, binary)
 {
     const BinData1 expected;
 
-    pods::ResizeableWriteOnlyMemoryStorage out;
-    pods::JsonSerializer<pods::ResizeableWriteOnlyMemoryStorage> serializer(out);
+    pods::ResizableOutputBuffer out;
+    pods::JsonSerializer<pods::ResizableOutputBuffer> serializer(out);
     EXPECT_EQ(serializer.save(expected), pods::Error::NoError);
 
     BinData1 actual;
@@ -158,8 +158,8 @@ TEST(jsonSerializer, binary)
 
     EXPECT_EQ(std::string(out.data(), out.size()), json);
 
-    pods::ReadOnlyMemoryStorage in(out.data(), out.size());
-    pods::JsonDeserializer<pods::ReadOnlyMemoryStorage> deserializer(in);
+    pods::InputBuffer in(out.data(), out.size());
+    pods::JsonDeserializer<pods::InputBuffer> deserializer(in);
     EXPECT_EQ(deserializer.load(actual), pods::Error::NoError);
 
     EXPECT_EQ(expected.x, actual.x);
@@ -178,16 +178,16 @@ TEST(jsonSerializer, binary2)
         expected.y[i] = static_cast<int16_t>(i + 10);
     }
 
-    pods::ResizeableWriteOnlyMemoryStorage out;
-    pods::JsonSerializer<pods::ResizeableWriteOnlyMemoryStorage> serializer(out);
+    pods::ResizableOutputBuffer out;
+    pods::JsonSerializer<pods::ResizableOutputBuffer> serializer(out);
     EXPECT_EQ(serializer.save(expected), pods::Error::NoError);
 
     BinData2 actual = { std::make_unique<int16_t[]>(expected.size), buf2 };
     std::fill_n(actual.x.get(), expected.size, 0);
     std::fill_n(actual.y, expected.size, 0);
 
-    pods::ReadOnlyMemoryStorage in(out.data(), out.size());
-    pods::JsonDeserializer<pods::ReadOnlyMemoryStorage> deserializer(in);
+    pods::InputBuffer in(out.data(), out.size());
+    pods::JsonDeserializer<pods::InputBuffer> deserializer(in);
     EXPECT_EQ(deserializer.load(actual), pods::Error::NoError);
 
     for (size_t i = 0; i < expected.size; ++i)
@@ -206,8 +206,8 @@ TEST(jsonSerializer, binaryLarger)
     BinData1 actual;
     actual.x.clear();
 
-    pods::ReadOnlyMemoryStorage in(json.data(), json.length());
-    pods::JsonDeserializer<pods::ReadOnlyMemoryStorage> deserializer(in);
+    pods::InputBuffer in(json.data(), json.length());
+    pods::JsonDeserializer<pods::InputBuffer> deserializer(in);
     EXPECT_EQ(deserializer.load(actual), pods::Error::NoError);
 
     EXPECT_EQ(expected.x, actual.x);
@@ -217,14 +217,14 @@ TEST(jsonSerializer, binaryLargerArray)
 {
     const Array1 expected;
 
-    pods::ResizeableWriteOnlyMemoryStorage out;
-    pods::JsonSerializer<pods::ResizeableWriteOnlyMemoryStorage> serializer(out);
+    pods::ResizableOutputBuffer out;
+    pods::JsonSerializer<pods::ResizableOutputBuffer> serializer(out);
     EXPECT_EQ(serializer.save(expected), pods::Error::NoError);
 
     Array2 actual;
 
-    pods::ReadOnlyMemoryStorage in(out.data(), out.size());
-    pods::JsonDeserializer<pods::ReadOnlyMemoryStorage> deserializer(in);
+    pods::InputBuffer in(out.data(), out.size());
+    pods::JsonDeserializer<pods::InputBuffer> deserializer(in);
     EXPECT_EQ(deserializer.load(actual), pods::Error::CorruptedArchive);
 }
 
@@ -232,14 +232,14 @@ TEST(jsonSerializer, binarySmallerArray)
 {
     const Array2 expected;
 
-    pods::ResizeableWriteOnlyMemoryStorage out;
-    pods::JsonSerializer<pods::ResizeableWriteOnlyMemoryStorage> serializer(out);
+    pods::ResizableOutputBuffer out;
+    pods::JsonSerializer<pods::ResizableOutputBuffer> serializer(out);
     EXPECT_EQ(serializer.save(expected), pods::Error::NoError);
 
     Array1 actual;
 
-    pods::ReadOnlyMemoryStorage in(out.data(), out.size());
-    pods::JsonDeserializer<pods::ReadOnlyMemoryStorage> deserializer(in);
+    pods::InputBuffer in(out.data(), out.size());
+    pods::JsonDeserializer<pods::InputBuffer> deserializer(in);
     EXPECT_EQ(deserializer.load(actual), pods::Error::CorruptedArchive);
 }
 
@@ -255,8 +255,8 @@ TEST(jsonSerializer, stream)
     InnerData actual = {};
 
     std::stringstream stream(json);
-    pods::ReadOnlyStreamStorage in(stream);
-    pods::JsonDeserializer<pods::ReadOnlyStreamStorage> deserializer(in);
+    pods::InputStream in(stream);
+    pods::JsonDeserializer<pods::InputStream> deserializer(in);
     EXPECT_EQ(deserializer.load(actual), pods::Error::NoError);
     EXPECT_EQ(actual.a, 100);
     EXPECT_EQ(actual.z, 300);

@@ -1,8 +1,8 @@
 ﻿#include <gtest/gtest.h>
 
 #include <pods/binary_serializer.h>
-#include <pods/memory_storage.h>
-#include <pods/stream_storage.h>
+#include <pods/buffers.h>
+#include <pods/streams.h>
 
 #include "data.h"
 
@@ -10,8 +10,8 @@ TEST(binarySerializer, common)
 {
     const TestData expected;
 
-    pods::ResizeableWriteOnlyMemoryStorage out;
-    pods::BinarySerializer<pods::ResizeableWriteOnlyMemoryStorage> serializer(out);
+    pods::ResizableOutputBuffer out;
+    pods::BinarySerializer<pods::ResizableOutputBuffer> serializer(out);
     EXPECT_EQ(serializer.save(expected), pods::Error::NoError);
 
     TestData actual;
@@ -29,8 +29,8 @@ TEST(binarySerializer, common)
     actual.arr = { { 0, 0 } };
     actual.map.clear();
 
-    pods::ReadOnlyMemoryStorage in(out.data(), out.size());
-    pods::BinaryDeserializer<pods::ReadOnlyMemoryStorage> deserializer(in);
+    pods::InputBuffer in(out.data(), out.size());
+    pods::BinaryDeserializer<pods::InputBuffer> deserializer(in);
     EXPECT_EQ(deserializer.load(actual), pods::Error::NoError);
 
     EXPECT_EQ(expected.x, actual.x);
@@ -51,15 +51,15 @@ TEST(binarySerializer, binary1)
 {
     const BinData1 expected;
 
-    pods::ResizeableWriteOnlyMemoryStorage out;
-    pods::BinarySerializer<pods::ResizeableWriteOnlyMemoryStorage> serializer(out);
+    pods::ResizableOutputBuffer out;
+    pods::BinarySerializer<pods::ResizableOutputBuffer> serializer(out);
     EXPECT_EQ(serializer.save(expected), pods::Error::NoError);
 
     BinData1 actual;
     std::fill(actual.x.begin(), actual.x.end(), 0);
 
-    pods::ReadOnlyMemoryStorage in(out.data(), out.size());
-    pods::BinaryDeserializer<pods::ReadOnlyMemoryStorage> deserializer(in);
+    pods::InputBuffer in(out.data(), out.size());
+    pods::BinaryDeserializer<pods::InputBuffer> deserializer(in);
     EXPECT_EQ(deserializer.load(actual), pods::Error::NoError);
 
     EXPECT_EQ(expected.x, actual.x);
@@ -78,16 +78,16 @@ TEST(binarySerializer, binary2)
         expected.y[i] = static_cast<int16_t>(i + 10);
     }
 
-    pods::ResizeableWriteOnlyMemoryStorage out;
-    pods::BinarySerializer<pods::ResizeableWriteOnlyMemoryStorage> serializer(out);
+    pods::ResizableOutputBuffer out;
+    pods::BinarySerializer<pods::ResizableOutputBuffer> serializer(out);
     EXPECT_EQ(serializer.save(expected), pods::Error::NoError);
 
     BinData2 actual = { std::make_unique<int16_t[]>(expected.size), buf2 };
     std::fill_n(actual.x.get(), expected.size, 0);
     std::fill_n(actual.y, expected.size, 0);
 
-    pods::ReadOnlyMemoryStorage in(out.data(), out.size());
-    pods::BinaryDeserializer<pods::ReadOnlyMemoryStorage> deserializer(in);
+    pods::InputBuffer in(out.data(), out.size());
+    pods::BinaryDeserializer<pods::InputBuffer> deserializer(in);
     EXPECT_EQ(deserializer.load(actual), pods::Error::NoError);
 
     for (size_t i = 0; i < expected.size; ++i)
@@ -101,15 +101,15 @@ TEST(binarySerializer, binaryLarger)
 {
     const BinData1 expected;
 
-    pods::ResizeableWriteOnlyMemoryStorage out;
-    pods::BinarySerializer<pods::ResizeableWriteOnlyMemoryStorage> serializer(out);
+    pods::ResizableOutputBuffer out;
+    pods::BinarySerializer<pods::ResizableOutputBuffer> serializer(out);
     EXPECT_EQ(serializer.save(expected), pods::Error::NoError);
 
     BinData1 actual;
     actual.x.clear();
 
-    pods::ReadOnlyMemoryStorage in(out.data(), out.size());
-    pods::BinaryDeserializer<pods::ReadOnlyMemoryStorage> deserializer(in);
+    pods::InputBuffer in(out.data(), out.size());
+    pods::BinaryDeserializer<pods::InputBuffer> deserializer(in);
     EXPECT_EQ(deserializer.load(actual), pods::Error::NoError);
 
     EXPECT_EQ(expected.x, actual.x);
@@ -119,14 +119,14 @@ TEST(binarySerializer, binaryLargerArray)
 {
     const Array1 expected;
 
-    pods::ResizeableWriteOnlyMemoryStorage out;
-    pods::BinarySerializer<pods::ResizeableWriteOnlyMemoryStorage> serializer(out);
+    pods::ResizableOutputBuffer out;
+    pods::BinarySerializer<pods::ResizableOutputBuffer> serializer(out);
     EXPECT_EQ(serializer.save(expected), pods::Error::NoError);
 
     Array2 actual;
 
-    pods::ReadOnlyMemoryStorage in(out.data(), out.size());
-    pods::BinaryDeserializer<pods::ReadOnlyMemoryStorage> deserializer(in);
+    pods::InputBuffer in(out.data(), out.size());
+    pods::BinaryDeserializer<pods::InputBuffer> deserializer(in);
     EXPECT_EQ(deserializer.load(actual), pods::Error::CorruptedArchive);
 }
 
@@ -134,14 +134,14 @@ TEST(binarySerializer, binarySmallerArray)
 {
     const Array2 expected;
 
-    pods::ResizeableWriteOnlyMemoryStorage out;
-    pods::BinarySerializer<pods::ResizeableWriteOnlyMemoryStorage> serializer(out);
+    pods::ResizableOutputBuffer out;
+    pods::BinarySerializer<pods::ResizableOutputBuffer> serializer(out);
     EXPECT_EQ(serializer.save(expected), pods::Error::NoError);
 
     Array1 actual;
 
-    pods::ReadOnlyMemoryStorage in(out.data(), out.size());
-    pods::BinaryDeserializer<pods::ReadOnlyMemoryStorage> deserializer(in);
+    pods::InputBuffer in(out.data(), out.size());
+    pods::BinaryDeserializer<pods::InputBuffer> deserializer(in);
     EXPECT_EQ(deserializer.load(actual), pods::Error::CorruptedArchive);
 }
 
@@ -151,7 +151,7 @@ TEST(binarySerializer, stream)
 
     std::stringstream buf;
 
-    pods::WriteOnlyStreamStorage out(buf);
+    pods::OutputStream out(buf);
     pods::BinarySerializer<decltype(out)> serializer(out);
     EXPECT_EQ(serializer.save(expected), pods::Error::NoError);
 
@@ -160,7 +160,7 @@ TEST(binarySerializer, stream)
     BinData1 actual;
     actual.x.clear();
 
-    pods::ReadOnlyStreamStorage in(buf);
+    pods::InputStream in(buf);
     pods::BinaryDeserializer<decltype(in)> deserializer(in);
     EXPECT_EQ(deserializer.load(actual), pods::Error::NoError);
 

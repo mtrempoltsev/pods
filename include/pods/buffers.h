@@ -14,10 +14,10 @@
 
 namespace pods
 {
-    class ReadOnlyMemoryStorage
+    class InputBuffer
     {
     public:
-        ReadOnlyMemoryStorage(const char* data, size_t size) noexcept
+        InputBuffer(const char* data, size_t size) noexcept
             : maxSize_(size)
             , data_(data)
             , pos_(0)
@@ -25,11 +25,11 @@ namespace pods
             assert(size > 0);
         }
 
-        ReadOnlyMemoryStorage(const ReadOnlyMemoryStorage&) = delete;
-        ReadOnlyMemoryStorage& operator=(const ReadOnlyMemoryStorage&) = delete;
+        InputBuffer(const InputBuffer&) = delete;
+        InputBuffer& operator=(const InputBuffer&) = delete;
 
-        ReadOnlyMemoryStorage(ReadOnlyMemoryStorage&&) = delete;
-        ReadOnlyMemoryStorage& operator=(ReadOnlyMemoryStorage&&) = delete;
+        InputBuffer(InputBuffer&&) = delete;
+        InputBuffer& operator=(InputBuffer&&) = delete;
 
         Error get(bool& value) noexcept
         {
@@ -99,7 +99,7 @@ namespace pods
         }
 
     protected:
-        ReadOnlyMemoryStorage() noexcept
+        InputBuffer() noexcept
             : maxSize_(0)
             , data_(nullptr)
             , pos_(0)
@@ -121,19 +121,19 @@ namespace pods
     namespace details
     {
         template <class MemoryManager>
-        class WriteOnlyMemoryStorage
+        class OutputBufferBase
         {
         public:
-            explicit WriteOnlyMemoryStorage(MemoryManager&& memoryManager) noexcept
+            explicit OutputBufferBase(MemoryManager&& memoryManager) noexcept
                 : memoryManager_(std::forward<MemoryManager>(memoryManager))
             {
             }
 
-            WriteOnlyMemoryStorage(const WriteOnlyMemoryStorage<MemoryManager>&) = delete;
-            WriteOnlyMemoryStorage<MemoryManager>& operator=(const WriteOnlyMemoryStorage<MemoryManager>&) = delete;
+            OutputBufferBase(const OutputBufferBase<MemoryManager>&) = delete;
+            OutputBufferBase<MemoryManager>& operator=(const OutputBufferBase<MemoryManager>&) = delete;
 
-            WriteOnlyMemoryStorage(WriteOnlyMemoryStorage<MemoryManager>&&) = delete;
-            WriteOnlyMemoryStorage<MemoryManager>& operator=(WriteOnlyMemoryStorage<MemoryManager>&&) = delete;
+            OutputBufferBase(OutputBufferBase<MemoryManager>&&) = delete;
+            OutputBufferBase<MemoryManager>& operator=(OutputBufferBase<MemoryManager>&&) = delete;
 
             template <class T, typename std::enable_if<sizeof(T) == 1, int>::type = 0>
             Error put(T value)
@@ -210,70 +210,27 @@ namespace pods
         };
     }
 
-    class FixedSizeWriteOnlyMemoryStorage final
-        : public details::WriteOnlyMemoryStorage<details::FixedSizeMemoryManager>
+    class OutputBuffer final
+        : public details::OutputBufferBase<details::FixedSizeMemoryManager>
     {
     public:
-        explicit FixedSizeWriteOnlyMemoryStorage(size_t size) noexcept
-            : details::WriteOnlyMemoryStorage<details::FixedSizeMemoryManager>(details::FixedSizeMemoryManager(size))
+        explicit OutputBuffer(size_t size) noexcept
+            : details::OutputBufferBase<details::FixedSizeMemoryManager>(details::FixedSizeMemoryManager(size))
         {
         }
     };
 
-    class ResizeableWriteOnlyMemoryStorage final
-        : public details::WriteOnlyMemoryStorage<details::ResizeableMemoryManager>
+    class ResizableOutputBuffer final
+        : public details::OutputBufferBase<details::ResizeableMemoryManager>
     {
     public:
-        explicit ResizeableWriteOnlyMemoryStorage(
+        explicit ResizableOutputBuffer(
             size_t initialSize = details::PrefferedBufferSize,
             size_t maxSize = std::numeric_limits<uint32_t>::max())
-            : details::WriteOnlyMemoryStorage<details::ResizeableMemoryManager>(
+            : details::OutputBufferBase<details::ResizeableMemoryManager>(
                 details::ResizeableMemoryManager(initialSize, maxSize))
         {
             assert(initialSize <= maxSize);
         }
     };
-
-    namespace details
-    {
-        class BufferedReadOnlyMemoryStorage final
-            : public ReadOnlyMemoryStorage
-        {
-        public:
-            explicit BufferedReadOnlyMemoryStorage(size_t size = details::PrefferedBufferSize)
-                : buffer_(size)
-            {
-                setBuffer(buffer_.ptr, size);
-            }
-
-            char* mutableData() const noexcept
-            {
-                return buffer_.ptr;
-            }
-
-            void decreaseSize(size_t newSize) noexcept
-            {
-                assert(newSize < maxSize_);
-                maxSize_ = newSize;
-            }
-
-            void gotoBegin() noexcept
-            {
-                pos_ = 0;
-            }
-
-            void gotoEnd() noexcept
-            {
-                pos_ = maxSize_;
-            }
-
-            size_t available() const noexcept
-            {
-                return maxSize_ - pos_;
-            }
-
-        private:
-            Buffer buffer_;
-        };
-    }
 }

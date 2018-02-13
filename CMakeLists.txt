@@ -23,12 +23,12 @@ include_directories(${PODS_INCLUDE})
 set(PODS_HEADERS "${PODS_INCLUDE}/pods")
 
 set(HEADERS
+    ${PODS_HEADERS}/buffers.h
     ${PODS_HEADERS}/errors.h
     ${PODS_HEADERS}/binary_serializer.h
     ${PODS_HEADERS}/json_serializer.h
-    ${PODS_HEADERS}/memory_storage.h
     ${PODS_HEADERS}/pods.h
-    ${PODS_HEADERS}/stream_storage.h
+    ${PODS_HEADERS}/streams.h
     ${PODS_HEADERS}/types.h
 
     ${PODS_HEADERS}/details/base64.h
@@ -38,6 +38,10 @@ set(HEADERS
     ${PODS_HEADERS}/details/settings.h
     ${PODS_HEADERS}/details/utils.h
     )
+
+if(MSVC)
+    add_custom_target(libpods SOURCES ${HEADERS})
+endif()
 
 add_library(${PROJECT_NAME} INTERFACE)
 target_sources(${PROJECT_NAME} INTERFACE ${HEADERS})
