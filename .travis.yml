@@ -37,9 +37,9 @@ install:
 script:
     - mkdir build
     - cd build
-    - cmake .. -DCMAKE_BUILD_TYPE=$BUILD_CONFIGURATION -DTARGET_CPU=$TARGET_CPU -DPODS_BUILD_GTEST=ON -DPODS_COVERAGE=ON
+    - cmake .. -DCMAKE_BUILD_TYPE=$BUILD_CONFIGURATION -DTARGET_CPU=$TARGET_CPU -DPODS_BUILD_GTEST=ON
     - cmake --build .
     - ctest --output-on-failure
 
 after_success:
-    - source ci/travis/after_success-$TRAVIS_OS_NAME.sh
+    - source ../ci/travis/after_success-$TRAVIS_OS_NAME.sh
