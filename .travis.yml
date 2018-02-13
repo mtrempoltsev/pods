@@ -12,9 +12,9 @@ compiler:
     - clang
 
 env:
-    - TARGET_CPU=amd64 BUILD_CONFIGURATION=Debug
+    - TARGET_CPU=amd64 BUILD_CONFIGURATION=Debug GCOV_FLAGS='--coverage'
     - TARGET_CPU=amd64 BUILD_CONFIGURATION=Release
-    - TARGET_CPU=x86 BUILD_CONFIGURATION=Debug
+    - TARGET_CPU=x86 BUILD_CONFIGURATION=Debug GCOV_FLAGS='--coverage'
     - TARGET_CPU=x86 BUILD_CONFIGURATION=Release
 
 matrix:
@@ -29,7 +29,7 @@ matrix:
           env: TARGET_CPU=x86 BUILD_CONFIGURATION=Release
 
 before_install:
-    - pip install --user cpp-coveralls
+    - source ci/travis/before_install-$TRAVIS_OS_NAME.sh
 
 install:
     - source ci/travis/install-$TRAVIS_OS_NAME.sh
@@ -37,9 +37,9 @@ install:
 script:
     - mkdir build
     - cd build
-    - cmake .. -DCMAKE_BUILD_TYPE=$BUILD_CONFIGURATION -DTARGET_CPU=$TARGET_CPU -DPODS_BUILD_GTEST=ON
+    - cmake .. -DCMAKE_BUILD_TYPE=$BUILD_CONFIGURATION -DTARGET_CPU=$TARGET_CPU -DPODS_BUILD_GTEST=ON -DPODS_COVERAGE=ON
     - cmake --build .
     - ctest --output-on-failure
 
 after_success:
-    - coveralls --root .. -E ".*external.*" -E ".*CMakeFiles.*" -E ".*test/.*.cpp.*" -E ../externals/*
+    - source ci/travis/after_success-$TRAVIS_OS_NAME.sh

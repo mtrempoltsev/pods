@@ -23,3 +23,5 @@ if [ "$TARGET_CPU" == "x86" ]; then
 
     sudo apt-get install -y g++-5-multilib
 fi
+
+pip install --user cpp-coveralls
