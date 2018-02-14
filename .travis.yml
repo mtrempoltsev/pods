@@ -28,8 +28,10 @@ matrix:
         - os: osx
           env: TARGET_CPU=x86 BUILD_CONFIGURATION=Release
 
-before_install:
-    - source ci/travis/before_install-$TRAVIS_OS_NAME.sh
+    include:
+        - os: linux
+          compiler: gcc
+        - env: TARGET_CPU=x86 BUILD_CONFIGURATION=Debug PODS_COVERAGE=YES
 
 install:
     - source ci/travis/install-$TRAVIS_OS_NAME.sh
