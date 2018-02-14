@@ -22,10 +22,10 @@ environment:
         - TOOLCHAIN: msvc14
 
 install:
-    - git submodule update --init --recursive
     - call ci\appveyor\set-env.bat %TOOLCHAIN% %PLATFORM%
 
 build_script:
+    - git submodule update --init
     - mkdir build
     - cd build
     - cmake .. %CMAKE_CONFIGURE_FLAGS% -DPODS_BUILD_GTEST=ON
