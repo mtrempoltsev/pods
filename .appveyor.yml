@@ -22,6 +22,7 @@ environment:
         - TOOLCHAIN: msvc14
 
 install:
+    - git submodule update --init --recursive
     - call ci\appveyor\set-env.bat %TOOLCHAIN% %PLATFORM%
 
 build_script:
