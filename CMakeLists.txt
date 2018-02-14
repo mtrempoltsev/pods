@@ -14,7 +14,7 @@ elseif(APPLE)
 elseif(UNIX)
     set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -Wall -Wpedantic")
     set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -Wall -Wpedantic --coverage")
-enif()
+endif()
 
 get_filename_component(PODS_ROOT "${CMAKE_CURRENT_LIST_DIR}" ABSOLUTE)
 
