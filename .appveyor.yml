@@ -1,11 +1,5 @@
 ﻿image: Visual Studio 2015
 
-init:
-    - git config --global core.autocrlf input
-
-clone_folder: c:\projects\pods
-shallow_clone: true
-
 matrix:
     fast_finish: false
 
@@ -24,11 +18,10 @@ environment:
 install:
     - call ci\appveyor\set-env.bat %TOOLCHAIN% %PLATFORM%
 
+before_build:
+    - git submodule update --init --recursive
+
 build_script:
-    - git clone -q --branch=%APPVEYOR_REPO_BRANCH% https://github.com/%APPVEYOR_REPO_NAME%.git %APPVEYOR_BUILD_FOLDER%
-    - cd %APPVEYOR_BUILD_FOLDER%
-    - git checkout -qf %APPVEYOR_REPO_COMMIT%
-    - git submodule update --init
     - mkdir build
     - cd build
     - cmake .. %CMAKE_CONFIGURE_FLAGS% -DPODS_BUILD_GTEST=ON
