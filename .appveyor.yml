@@ -1,0 +1,34 @@
+﻿image: Visual Studio 2015
+
+init:
+    - git config --global core.autocrlf input
+
+clone_folder: c:\projects\pods
+shallow_clone: true
+
+matrix:
+    fast_finish: false
+
+platform:
+    - x64
+    - x86
+
+configuration:
+    - Debug
+    - Release
+
+environment:
+    matrix:
+        - TOOLCHAIN: msvc14
+
+install:
+    - call ci\appveyor\set-env.bat %TOOLCHAIN% %PLATFORM%
+
+build_script:
+    - mkdir build
+    - cd build
+    - cmake .. %CMAKE_CONFIGURE_FLAGS%
+    - cmake --build . %CMAKE_BUILD_FLAGS%
+
+test_script:
+    - ctest -C %CONFIGURATION% --output-on-failure
