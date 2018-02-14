@@ -27,7 +27,7 @@ install:
 build_script:
     - mkdir build
     - cd build
-    - cmake .. %CMAKE_CONFIGURE_FLAGS%
+    - cmake .. %CMAKE_CONFIGURE_FLAGS% -DPODS_BUILD_GTEST=ON
     - cmake --build . %CMAKE_BUILD_FLAGS%
 
 test_script:
