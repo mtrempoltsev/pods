@@ -19,14 +19,14 @@ TEST(binarySerializer, common)
     actual.x = 0;
     actual.y = 0;
     actual.z = std::string();
-    actual.a.floatData = { 0, 0, 0, 0, 0 };
+    actual.a.floatData = { { 0, 0, 0, 0, 0 } };
     actual.b.c.b = true;
     actual.b.c.e1 = AA;
     actual.b.c.e2 = Enum2::Y;
     actual.points.clear();
     actual.dict.clear();
     actual.strings.clear();
-    actual.arr = { { 0, 0 } };
+    actual.arr = { { { 0, 0 } } };
     actual.map.clear();
 
     pods::InputBuffer in(out.data(), out.size());

@@ -19,7 +19,7 @@ TEST(jsonSerializer, common)
     actual.x = 0;
     actual.y = 0;
     actual.z = std::string();
-    actual.a.floatData = { 0, 0, 0, 0, 0 };
+    actual.a.floatData = { { 0, 0, 0, 0, 0 } };
     actual.b.c.b = true;
     actual.b.c.e1 = AA;
     actual.b.c.e2 = Enum2::Y;

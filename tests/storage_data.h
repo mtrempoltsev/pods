@@ -30,7 +30,7 @@ const char c2expected = std::numeric_limits<char>::max();
 
 const std::string data1expected = "hello";
 const std::string data2expected = "@#0123456789-=AaBbCcDdEeFf!";
-const std::array<uint32_t, 5> data3expected = { 1, 3, 5, 7, 9 };
+const std::array<uint32_t, 5> data3expected = { { 1, 3, 5, 7, 9 } };
 
 enum First
 {
