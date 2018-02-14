@@ -25,6 +25,9 @@ install:
     - call ci\appveyor\set-env.bat %TOOLCHAIN% %PLATFORM%
 
 build_script:
+    - git clone -q --branch=%APPVEYOR_REPO_BRANCH% https://github.com/%APPVEYOR_REPO_NAME%.git %APPVEYOR_BUILD_FOLDER%
+    - cd %APPVEYOR_BUILD_FOLDER%
+    - git checkout -qf %APPVEYOR_REPO_COMMIT%
     - git submodule update --init
     - mkdir build
     - cd build
