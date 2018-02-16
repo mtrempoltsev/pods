@@ -87,13 +87,13 @@ namespace pods
                 : error;
         }
 
-        template <class T, typename std::enable_if<std::is_scalar<T>::value, int>::type = 0>
+        template <class T, typename std::enable_if<std::is_arithmetic<T>::value || std::is_enum<T>::value, int>::type = 0>
         Error process(const char*, T value)
         {
             return doProcess(value);
         }
 
-        template <class T, class... ArgsT, typename std::enable_if<std::is_scalar<T>::value, int>::type = 0>
+        template <class T, class... ArgsT, typename std::enable_if<std::is_arithmetic<T>::value || std::is_enum<T>::value, int>::type = 0>
         Error process(const char*, T value, ArgsT&... args)
         {
             const auto error = doProcess(value);
