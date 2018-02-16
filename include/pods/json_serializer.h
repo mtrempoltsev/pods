@@ -228,6 +228,12 @@ namespace pods
             }
 
             template <class T, size_t ArraySize>
+            Error writeValue(const T(&value)[ArraySize])
+            {
+                return writeRange(value, ArraySize);
+            }
+
+            template <class T, size_t ArraySize>
             Error writeValue(const std::array<T, ArraySize>& value)
             {
                 return writeRange(value.data(), ArraySize);
@@ -527,18 +533,30 @@ namespace pods
         }
 
         template <class T, size_t ArraySize>
-        Error read(Value& data, std::array<T, ArraySize>& value)
+        Error readArray(Value& data, T* value)
         {
             return readRange<T, T*>(data,
                 [&](Size size, T*& it)
                 {
                     if (size == ArraySize)
                     {
-                        it = value.data();
+                        it = value;
                         return Error::NoError;
                     }
                     return Error::CorruptedArchive;
                 });
+        }
+
+        template <class T, size_t ArraySize>
+        Error read(Value& data, T (&value)[ArraySize])
+        {
+            return readArray<T, ArraySize>(data, value);
+        }
+
+        template <class T, size_t ArraySize>
+        Error read(Value& data, std::array<T, ArraySize>& value)
+        {
+            return readArray<T, ArraySize>(data, value.data());
         }
 
         template <class K, class V>

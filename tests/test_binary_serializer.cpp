@@ -166,3 +166,47 @@ TEST(binarySerializer, stream)
 
     EXPECT_EQ(expected.x, actual.x);
 }
+
+TEST(binarySerializer, cArray)
+{
+    const CArray expected;
+
+    pods::ResizableOutputBuffer out;
+    pods::BinarySerializer<pods::ResizableOutputBuffer> serializer(out);
+    EXPECT_EQ(serializer.save(expected), pods::Error::NoError);
+
+    out.flush();
+
+    CArray actual = {};
+
+    pods::InputBuffer in(out.data(), out.size());
+    pods::BinaryDeserializer<pods::InputBuffer> deserializer(in);
+    EXPECT_EQ(deserializer.load(actual), pods::Error::NoError);
+
+    EXPECT_EQ(expected.x[0], actual.x[0]);
+    EXPECT_EQ(expected.x[1], actual.x[1]);
+    EXPECT_EQ(expected.x[2], actual.x[2]);
+    EXPECT_EQ(expected.x[3], actual.x[3]);
+}
+
+TEST(binarySerializer, cArrayBin)
+{
+    const CArrayBin expected;
+
+    pods::ResizableOutputBuffer out;
+    pods::BinarySerializer<pods::ResizableOutputBuffer> serializer(out);
+    EXPECT_EQ(serializer.save(expected), pods::Error::NoError);
+
+    out.flush();
+
+    CArrayBin actual = {};
+
+    pods::InputBuffer in(out.data(), out.size());
+    pods::BinaryDeserializer<pods::InputBuffer> deserializer(in);
+    EXPECT_EQ(deserializer.load(actual), pods::Error::NoError);
+
+    EXPECT_EQ(expected.x[0], actual.x[0]);
+    EXPECT_EQ(expected.x[1], actual.x[1]);
+    EXPECT_EQ(expected.x[2], actual.x[2]);
+    EXPECT_EQ(expected.x[3], actual.x[3]);
+}

@@ -191,3 +191,17 @@ struct Array2
     std::array<uint32_t, 1> x = { { 100 } };
     PODS_SERIALIZABLE(1, PODS_MDR_BIN(x))
 };
+
+struct CArray
+{
+    bool ok = true;
+    uint32_t x[4] = { 1, 2, 3, 4 };
+    PODS_SERIALIZABLE(1, PODS_MDR(x), PODS_MDR(ok))
+};
+
+struct CArrayBin
+{
+    bool ok = true;
+    uint32_t x[4] = { 1, 2, 3, 4 };
+    PODS_SERIALIZABLE(1, PODS_MDR_BIN(x), PODS_MDR(ok))
+};

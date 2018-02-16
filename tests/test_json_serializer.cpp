@@ -261,3 +261,51 @@ TEST(jsonSerializer, stream)
     EXPECT_EQ(actual.a, 100);
     EXPECT_EQ(actual.z, 300);
 }
+
+TEST(jsonSerializer, cArray)
+{
+    const CArray expected;
+
+    pods::ResizableOutputBuffer out;
+    pods::JsonSerializer<pods::ResizableOutputBuffer> serializer(out);
+    EXPECT_EQ(serializer.save(expected), pods::Error::NoError);
+
+    out.flush();
+
+    CArray actual = {};
+
+    pods::InputBuffer in(out.data(), out.size());
+    pods::JsonDeserializer<pods::InputBuffer> deserializer(in);
+    EXPECT_EQ(deserializer.load(actual), pods::Error::NoError);
+
+    EXPECT_EQ(expected.x[0], actual.x[0]);
+    EXPECT_EQ(expected.x[1], actual.x[1]);
+    EXPECT_EQ(expected.x[2], actual.x[2]);
+    EXPECT_EQ(expected.x[3], actual.x[3]);
+}
+
+TEST(jsonSerializer, cArrayBin)
+{
+    const CArrayBin expected;
+
+    pods::ResizableOutputBuffer out;
+    pods::JsonSerializer<pods::ResizableOutputBuffer> serializer(out);
+    EXPECT_EQ(serializer.save(expected), pods::Error::NoError);
+
+    out.flush();
+
+    const std::string expectedJson = "{\"version\":1,\"x\":\"AQAAAAIAAAADAAAABAAAAA==\",\"ok\":true}";
+    const std::string actualJson(out.data(), out.size());
+    EXPECT_EQ(expectedJson, actualJson);
+
+    CArrayBin actual = {};
+
+    pods::InputBuffer in(out.data(), out.size());
+    pods::JsonDeserializer<pods::InputBuffer> deserializer(in);
+    EXPECT_EQ(deserializer.load(actual), pods::Error::NoError);
+
+    EXPECT_EQ(expected.x[0], actual.x[0]);
+    EXPECT_EQ(expected.x[1], actual.x[1]);
+    EXPECT_EQ(expected.x[2], actual.x[2]);
+    EXPECT_EQ(expected.x[3], actual.x[3]);
+}

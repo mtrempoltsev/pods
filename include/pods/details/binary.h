@@ -72,6 +72,12 @@ namespace pods
         };
 
         template <class T, size_t ArraySize>
+        BinaryArray makeBinary(T (&value)[ArraySize])
+        {
+            return BinaryArray(reinterpret_cast<char*>(value), ArraySize * sizeof(T));
+        }
+
+        template <class T, size_t ArraySize>
         BinaryArray makeBinary(std::array<T, ArraySize>& value)
         {
             return BinaryArray(reinterpret_cast<char*>(value.data()), value.size() * sizeof(T));

@@ -72,6 +72,21 @@ namespace pods
                 : error;
         }
 
+        template <class T, size_t ArraySize>
+        Error process(const char*, const T (&value)[ArraySize])
+        {
+            return doProcess(value);
+        }
+
+        template <class T, size_t ArraySize, class... ArgsT>
+        Error process(const char*, const T(&value)[ArraySize], ArgsT&... args)
+        {
+            const auto error = doProcess(value);
+            return error == Error::NoError
+                ? process(args...)
+                : error;
+        }
+
         template <class T, typename std::enable_if<std::is_scalar<T>::value, int>::type = 0>
         Error process(const char*, T value)
         {
@@ -102,6 +117,12 @@ namespace pods
         Error doProcess(const details::BinaryVector<T>& value)
         {
             return saveRange(value.data(), toSize(value.size()));
+        }
+
+        template <class T, size_t ArraySize>
+        Error doProcess(const T (&value)[ArraySize])
+        {
+            return saveRange(value, ArraySize);
         }
 
         template <class T, size_t ArraySize>
@@ -270,6 +291,16 @@ namespace pods
             PODS_SAFE_CALL(storage_.get(n));
             value = (n == True);
             return Error::NoError;
+        }
+
+        template <class T, size_t ArraySize>
+        Error doProcess(T (&value)[ArraySize])
+        {
+            Size size = 0;
+            PODS_SAFE_CALL(loadSize(size));
+            return size == ArraySize
+                ? loadRange(value, ArraySize)
+                : Error::CorruptedArchive;
         }
 
         template <class T, size_t ArraySize>
