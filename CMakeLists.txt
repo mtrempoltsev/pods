@@ -56,3 +56,5 @@ set(PODS_TEST_PROJECT test_${PROJECT_NAME})
 add_test(NAME ${PODS_TEST_PROJECT} COMMAND ${PODS_TEST_PROJECT})
 add_subdirectory(tests)
 enable_testing()
+
+add_executable(benchmark ${PODS_ROOT}/benchmarks/memcpy.cpp)

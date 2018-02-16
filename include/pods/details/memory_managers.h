@@ -8,12 +8,22 @@ namespace pods
         {
             explicit Buffer(size_t size) noexcept
                 : ptr(static_cast<char*>(malloc(size)))
+                , needToFreeMemory_(true)
+            {
+            }
+
+            Buffer(char* data) noexcept
+                : ptr(data)
+                , needToFreeMemory_(false)
             {
             }
 
             ~Buffer() noexcept
             {
-                free(ptr);
+                if (needToFreeMemory_)
+                {
+                    free(ptr);
+                }
             }
 
             Buffer(const Buffer&) = delete;
@@ -21,8 +31,10 @@ namespace pods
 
             Buffer(Buffer&& movied) noexcept
                 : ptr(movied.ptr)
+                , needToFreeMemory_(movied.needToFreeMemory_)
             {
                 movied.ptr = nullptr;
+                movied.needToFreeMemory_ = false;
             }
 
             Buffer& operator=(Buffer&& movied) noexcept
@@ -35,7 +47,11 @@ namespace pods
                         ptr = nullptr;
                     }
 
-                    std::swap(ptr, movied.ptr);
+                    ptr = movied.ptr;
+                    movied.ptr = nullptr;
+
+                    needToFreeMemory_ = movied.needToFreeMemory_;
+                    movied.needToFreeMemory_ = false;
                 }
 
                 return *this;
@@ -43,6 +59,11 @@ namespace pods
 
             bool resize(size_t newSize) noexcept
             {
+                if (!needToFreeMemory_)
+                {
+                    return false;
+                }
+
                 auto newPtr = realloc(ptr, newSize);
                 if (newPtr == nullptr)
                 {
@@ -54,15 +75,25 @@ namespace pods
             }
 
             char* ptr;
+
+        private:
+            bool needToFreeMemory_;
         };
 
         class FixedSizeMemoryManager final
         {
         public:
-            explicit FixedSizeMemoryManager(size_t size) noexcept
+            explicit FixedSizeMemoryManager(size_t size)
                 : maxSize_(size)
                 , pos_(0)
                 , data_(size)
+            {
+            }
+
+            FixedSizeMemoryManager(char* data, size_t size) noexcept
+                : maxSize_(size)
+                , pos_(0)
+                , data_(data)
             {
             }
 

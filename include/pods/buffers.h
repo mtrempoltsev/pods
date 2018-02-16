@@ -218,6 +218,11 @@ namespace pods
             : details::OutputBufferBase<details::FixedSizeMemoryManager>(details::FixedSizeMemoryManager(size))
         {
         }
+
+        OutputBuffer(char* data, size_t size) noexcept
+            : details::OutputBufferBase<details::FixedSizeMemoryManager>(details::FixedSizeMemoryManager(data, size))
+        {
+        }
     };
 
     class ResizableOutputBuffer final
