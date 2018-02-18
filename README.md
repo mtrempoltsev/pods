@@ -22,6 +22,34 @@
 
 ## Benchmarks
 
+#### Comparison with memcpy
+
+> MacBook Pro, 2017
+> 3.5 GHz Intel Core i7
+> 16 Gb 2133 MHz LPDDR3
+
+```
+data size: 11520
+serialized data size: 11632
+
+memcpy
+    total: 27465 Mb
+    total time: 2396.19 ms
+    speed: 11461.9 Mb/s
+
+serialization
+    total: 27732 Mb
+    total time: 3502.93 ms
+    speed: 7916.8 Mb/s
+
+deserialization
+    total: 27732 Mb
+    total time: 3200.15 ms
+    speed: 8665.83 Mb/s
+```
+
+#### Comparison with other libraries
+
 ```
 performing 100000 iterations
 
