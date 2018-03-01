@@ -248,7 +248,7 @@ namespace pods
         Error load(T& data)
         {
             Version version = 0;
-            PODS_SAFE_CALL(storage_.get(version));
+            PODS_SAFE_CALL(getVersion<T>(version));
             return deserialize(data, version);
         }
 
@@ -402,7 +402,7 @@ namespace pods
         Error loadRange(T* begin, Size size)
         {
             Version version = 0;
-            PODS_SAFE_CALL(storage_.get(version));
+            PODS_SAFE_CALL(getVersion<T>(version));
 
             for (auto end = begin + size; begin != end; ++begin)
             {
@@ -427,6 +427,15 @@ namespace pods
         Error loadRange(T* begin, Size size)
         {
             return storage_.get(begin, size);
+        }
+
+        template <class T>
+        Error getVersion(Version& version)
+        {
+            PODS_SAFE_CALL(storage_.get(version));
+            return version > T::version()
+                ? Error::ArchiveVersionMismatch
+                : Error::NoError;
         }
 
     private:

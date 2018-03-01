@@ -38,15 +38,15 @@ int main()
 
     Data data = {};
 
-    pods::ResizableOutputBuffer out;
-    pods::BinarySerializer<decltype(out)> serializer(out);
-    if (serializer.save(data) != pods::Error::NoError)
+    pods::ResizableOutputBuffer out1;
+    pods::BinarySerializer<decltype(out1)> serializer1(out1);
+    if (serializer1.save(data) != pods::Error::NoError)
     {
         std::cerr << "broken serializer\n";
         return EXIT_FAILURE;
     }
 
-    const auto serializedSize = out.size();
+    const auto serializedSize = out1.size();
     std::cout << "serialized data size: " << serializedSize << '\n';
 
     const auto N = 500000;
@@ -76,9 +76,9 @@ int main()
         {
             for (auto i = 0; i < N; ++i)
             {
-                pods::OutputBuffer out(buffer.get() + i * serializedSize, serializedSize);
-                pods::BinarySerializer<decltype(out)> serializer(out);
-                if (serializer.save(data) != pods::Error::NoError)
+                pods::OutputBuffer out2(buffer.get() + i * serializedSize, serializedSize);
+                pods::BinarySerializer<decltype(out2)> serializer2(out2);
+                if (serializer2.save(data) != pods::Error::NoError)
                 {
                     std::cerr << "broken serializer\n";
                     return EXIT_FAILURE;

@@ -32,6 +32,7 @@ set(SOURCES
     test_memory_managers.cpp
     test_resizeable_memory_storage.cpp
     test_stream_storage.cpp
+    test_versioning.cpp
     main.cpp
     )
 
