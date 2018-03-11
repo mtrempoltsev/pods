@@ -209,6 +209,11 @@ namespace pods
         private:
             bool increaseSize(size_t required) noexcept
             {
+                if (data_.ptr == nullptr)
+                {
+                    return false;
+                }
+
                 assert(capacity_ < required);
 
                 auto newCapacity = capacity_ * 2;
