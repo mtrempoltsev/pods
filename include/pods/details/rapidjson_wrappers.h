@@ -80,22 +80,10 @@ namespace pods
             {
                 if (good_)
                 {
-                    char c = peeked_;
-
-                    if (c != '\0')
-                    {
-                        peeked_ = '\0';
-                        ++n_;
-                        return c;
-                    }
-
-                    if (storage_.get(c) == Error::NoError)
-                    {
-                        ++n_;
-                        return c;
-                    }
-
-                    good_ = false;
+                    const auto c = peeked_;
+                    peeked_ = '\0';
+                    ++n_;
+                    return c;
                 }
 
                 return '\0';
