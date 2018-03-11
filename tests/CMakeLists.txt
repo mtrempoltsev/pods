@@ -33,6 +33,7 @@ set(SOURCES
     test_json_serializer.cpp
     test_json_versioning.cpp
     test_memory_managers.cpp
+    test_rapidjson_wrapper.cpp
     test_resizeable_memory_storage.cpp
     test_stream_storage.cpp
     main.cpp
