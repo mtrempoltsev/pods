@@ -210,3 +210,13 @@ TEST(binarySerializer, cArrayBin)
     EXPECT_EQ(expected.x[2], actual.x[2]);
     EXPECT_EQ(expected.x[3], actual.x[3]);
 }
+
+TEST(binarySerializer, errors)
+{
+    const InvalidSize expected;
+
+    pods::ResizableOutputBuffer out;
+    pods::BinarySerializer<pods::ResizableOutputBuffer> serializer(out);
+
+    EXPECT_EQ(serializer.save(expected), pods::Error::SizeToLarge);
+}

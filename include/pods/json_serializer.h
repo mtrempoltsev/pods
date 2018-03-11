@@ -216,6 +216,11 @@ namespace pods
 
             Error writeValue(const details::BinaryArray& value)
             {
+                if (value.size() > std::numeric_limits<Size>::max())
+                {
+                    return Error::SizeToLarge;
+                }
+
                 const auto base64 = details::base64Encode(value.data(), value.size());
                 return writeValue(base64);
             }
@@ -223,6 +228,11 @@ namespace pods
             template <class T>
             Error writeValue(const details::BinaryVector<T>& value)
             {
+                if (value.size() > std::numeric_limits<Size>::max())
+                {
+                    return Error::SizeToLarge;
+                }
+
                 const auto base64 = details::base64Encode(value.data(), value.size());
                 return writeValue(base64);
             }
@@ -271,7 +281,7 @@ namespace pods
                     return Error::SizeToLarge;
                 }
 
-                return writeRange(value.data(), toSize(value.size()));
+                return writeRange(value.data(), static_cast<Size>(value.size()));
             }
 
             template <class T, typename std::enable_if<IsPodsSerializable<T>::value, int>::type = 0>

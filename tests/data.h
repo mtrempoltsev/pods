@@ -205,3 +205,9 @@ struct CArrayBin
     uint32_t x[4] = { 1, 2, 3, 4 };
     PODS_SERIALIZABLE(1, PODS_MDR_BIN(x), PODS_MDR(ok))
 };
+
+struct InvalidSize
+{
+    char data[1] = { '\0' };
+    PODS_SERIALIZABLE(1, PODS_MDR_BIN_2(data, std::numeric_limits<uint64_t>::max()));
+};

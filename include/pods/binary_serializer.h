@@ -110,13 +110,13 @@ namespace pods
 
         Error doProcess(const details::BinaryArray& value)
         {
-            return saveRange(value.data(), toSize(value.size()));
+            return saveRange(value.data(), value.size());
         }
 
         template <class T>
         Error doProcess(const details::BinaryVector<T>& value)
         {
-            return saveRange(value.data(), toSize(value.size()));
+            return saveRange(value.data(), value.size());
         }
 
         template <class T, size_t ArraySize>
@@ -148,7 +148,7 @@ namespace pods
         template <class T>
         Error doProcess(const std::vector<T>& value)
         {
-            return saveRange(value.data(), toSize(value.size()));
+            return saveRange(value.data(), value.size());
         }
 
         Error doProcess(const std::string& value)
@@ -186,7 +186,7 @@ namespace pods
         }
 
         template <class T, typename std::enable_if<details::IsPodsSerializable<T>::value, int>::type = 0>
-        Error saveRange(T* begin, Size size)
+        Error saveRange(T* begin, size_t size)
         {
             PODS_SAFE_CALL(saveSize(size));
             PODS_SAFE_CALL(saveVersion<T>());
@@ -200,7 +200,7 @@ namespace pods
         }
 
         template <class T, typename std::enable_if<std::is_class<T>::value && !details::IsPodsSerializable<T>::value, int>::type = 0>
-        Error saveRange(T* begin, Size size)
+        Error saveRange(T* begin, size_t size)
         {
             PODS_SAFE_CALL(saveSize(size));
 
@@ -213,7 +213,7 @@ namespace pods
         }
 
         template <class T, typename std::enable_if<std::is_arithmetic<T>::value, int>::type = 0>
-        Error saveRange(T* begin, Size size)
+        Error saveRange(T* begin, size_t size)
         {
             PODS_SAFE_CALL(saveSize(size));
 
@@ -359,8 +359,12 @@ namespace pods
         {
             Size size = 0;
             PODS_SAFE_CALL(loadSize(size));
+            if (size != value.size())
+            {
+                return Error::CorruptedArchive;
+            }
             PODS_SAFE_CALL(value.allocate(size));
-            return loadRange(value.data(), toSize(value.size()));
+            return loadRange(value.data(), size);
         }
 
         template <class T>
@@ -369,7 +373,7 @@ namespace pods
             Size size = 0;
             PODS_SAFE_CALL(loadSize(size));
             PODS_SAFE_CALL(value.allocate(size));
-            return loadRange(value.data(), toSize(value.size()));
+            return loadRange(value.data(), size);
         }
 
         template <class T, typename std::enable_if<std::is_class<T>::value, int>::type = 0>

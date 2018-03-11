@@ -309,3 +309,13 @@ TEST(jsonSerializer, cArrayBin)
     EXPECT_EQ(expected.x[2], actual.x[2]);
     EXPECT_EQ(expected.x[3], actual.x[3]);
 }
+
+TEST(jsonSerializer, errors)
+{
+    const InvalidSize expected;
+
+    pods::ResizableOutputBuffer out;
+    pods::JsonSerializer<pods::ResizableOutputBuffer> serializer(out);
+
+    EXPECT_EQ(serializer.save(expected), pods::Error::SizeToLarge);
+}
