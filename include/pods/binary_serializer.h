@@ -29,7 +29,9 @@ namespace pods
         template <class T>
         Error save(T&& data)
         {
-            return serialize(std::forward<T&&>(data));
+            const auto result = serialize(std::forward<T&&>(data));
+            storage_.flush();
+            return result;
         }
 
         Error operator()() noexcept

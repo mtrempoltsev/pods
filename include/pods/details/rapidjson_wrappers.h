@@ -27,6 +27,7 @@ namespace pods
 
             void Flush() noexcept
             {
+                storage_.flush();
             }
 
             bool good() const noexcept

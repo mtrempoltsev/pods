@@ -267,8 +267,6 @@ int main(int /*argc*/, char** /*argv*/)
         return EXIT_FAILURE;
     }
 
-    out.flush();
-
     Server loaded;
     loaded.address = "";
     loaded.port = 0;

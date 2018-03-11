@@ -155,8 +155,6 @@ TEST(binarySerializer, stream)
     pods::BinarySerializer<decltype(out)> serializer(out);
     EXPECT_EQ(serializer.save(expected), pods::Error::NoError);
 
-    out.flush();
-
     BinData1 actual;
     actual.x.clear();
 
@@ -174,8 +172,6 @@ TEST(binarySerializer, cArray)
     pods::ResizableOutputBuffer out;
     pods::BinarySerializer<pods::ResizableOutputBuffer> serializer(out);
     EXPECT_EQ(serializer.save(expected), pods::Error::NoError);
-
-    out.flush();
 
     CArray actual = {};
 
@@ -196,8 +192,6 @@ TEST(binarySerializer, cArrayBin)
     pods::ResizableOutputBuffer out;
     pods::BinarySerializer<pods::ResizableOutputBuffer> serializer(out);
     EXPECT_EQ(serializer.save(expected), pods::Error::NoError);
-
-    out.flush();
 
     CArrayBin actual = {};
 

@@ -270,8 +270,6 @@ TEST(jsonSerializer, cArray)
     pods::JsonSerializer<pods::ResizableOutputBuffer> serializer(out);
     EXPECT_EQ(serializer.save(expected), pods::Error::NoError);
 
-    out.flush();
-
     CArray actual = {};
 
     pods::InputBuffer in(out.data(), out.size());
@@ -291,8 +289,6 @@ TEST(jsonSerializer, cArrayBin)
     pods::ResizableOutputBuffer out;
     pods::JsonSerializer<pods::ResizableOutputBuffer> serializer(out);
     EXPECT_EQ(serializer.save(expected), pods::Error::NoError);
-
-    out.flush();
 
     const std::string expectedJson = "{\"version\":1,\"x\":\"AQAAAAIAAAADAAAABAAAAA==\",\"ok\":true}";
     const std::string actualJson(out.data(), out.size());
