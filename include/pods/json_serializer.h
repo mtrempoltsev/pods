@@ -375,7 +375,7 @@ namespace pods
         Error deserialize(T& value)
         {
             Version version = 0;
-            PODS_SAFE_CALL(readValue(details::PODS_VERSION_STR, version));
+            PODS_SAFE_CALL(getVersion<T>(version));
             return value.serialize(*this, version);
         }
 
@@ -644,7 +644,7 @@ namespace pods
             auto sentry = goDeeperAndBackOnExit(data);
 
             Version version = 0;
-            PODS_SAFE_CALL(readValue(details::PODS_VERSION_STR, version));
+            PODS_SAFE_CALL(getVersion<T>(version));
 
             Member member;
             PODS_SAFE_CALL(getMember(details::PODS_DATA_STR, member));
@@ -710,6 +710,15 @@ namespace pods
             }
 
             return Error::NoError;
+        }
+
+        template <class T>
+        Error getVersion(Version& version)
+        {
+            PODS_SAFE_CALL(readValue(details::PODS_VERSION_STR, version));
+            return version > T::version()
+                ? Error::ArchiveVersionMismatch
+                : Error::NoError;
         }
 
     private:

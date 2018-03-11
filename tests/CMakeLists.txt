@@ -22,17 +22,19 @@ include_directories(${PODS_INCLUDE})
 set(HEADERS
    data.h
    storage_data.h
+   versioning_data.h
    )
 
 set(SOURCES
     test_base64.cpp
     test_binary_serializer.cpp
+    test_binary_versioning.cpp
     test_fixed_memory_storage.cpp
     test_json_serializer.cpp
+    test_json_versioning.cpp
     test_memory_managers.cpp
     test_resizeable_memory_storage.cpp
     test_stream_storage.cpp
-    test_versioning.cpp
     main.cpp
     )
 
