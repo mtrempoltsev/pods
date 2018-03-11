@@ -1,5 +1,7 @@
 ﻿#pragma once
 
+#include "../errors.h"
+
 namespace pods
 {
     namespace details
