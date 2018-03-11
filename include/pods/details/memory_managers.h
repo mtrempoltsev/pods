@@ -29,17 +29,17 @@ namespace pods
             Buffer(const Buffer&) = delete;
             Buffer& operator=(const Buffer&) = delete;
 
-            Buffer(Buffer&& movied) noexcept
-                : ptr(movied.ptr)
-                , needToFreeMemory_(movied.needToFreeMemory_)
+            Buffer(Buffer&& moved) noexcept
+                : ptr(moved.ptr)
+                , needToFreeMemory_(moved.needToFreeMemory_)
             {
-                movied.ptr = nullptr;
-                movied.needToFreeMemory_ = false;
+                moved.ptr = nullptr;
+                moved.needToFreeMemory_ = false;
             }
 
-            Buffer& operator=(Buffer&& movied) noexcept
+            Buffer& operator=(Buffer&& moved) noexcept
             {
-                if (this != &movied)
+                if (this != &moved)
                 {
                     if (ptr != nullptr)
                     {
@@ -47,11 +47,11 @@ namespace pods
                         ptr = nullptr;
                     }
 
-                    ptr = movied.ptr;
-                    movied.ptr = nullptr;
+                    ptr = moved.ptr;
+                    moved.ptr = nullptr;
 
-                    needToFreeMemory_ = movied.needToFreeMemory_;
-                    movied.needToFreeMemory_ = false;
+                    needToFreeMemory_ = moved.needToFreeMemory_;
+                    moved.needToFreeMemory_ = false;
                 }
 
                 return *this;
@@ -212,9 +212,17 @@ namespace pods
                 assert(capacity_ < required);
 
                 auto newCapacity = capacity_ * 2;
+
                 while (newCapacity < required)
                 {
+                    const auto oldCapacity = newCapacity;
                     newCapacity *= 2;
+                    if (newCapacity < oldCapacity)
+                    {
+                        // overflow
+                        newCapacity = required;
+                        break;
+                    }
                 }
 
                 if (data_.resize(newCapacity))

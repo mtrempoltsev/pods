@@ -87,3 +87,41 @@ TEST(resizeableMemoryManager, common)
 
     EXPECT_EQ(expected, actual);
 }
+
+TEST(resizeableMemoryManager, canNotAllocate)
+{
+    const auto InvalidSize = std::numeric_limits<uint64_t>::max();
+
+    EXPECT_THROW(pods::details::ResizeableMemoryManager m1(InvalidSize, InvalidSize), std::bad_alloc);
+
+    const auto InitialSize = 4;
+
+    pods::details::ResizeableMemoryManager m2(InitialSize, InvalidSize);
+
+    EXPECT_FALSE(m2.getPtr(InvalidSize - InitialSize));
+}
+
+TEST(resizeableMemoryManager, move)
+{
+    pods::details::ResizeableMemoryManager m1(4, 8);
+
+    const auto begin = m1.data();
+
+    ASSERT_EQ(m1.getPtr(2), begin);
+
+    pods::details::ResizeableMemoryManager m2 = std::move(m1);
+
+    ASSERT_EQ(m1.data(), nullptr);
+
+    ASSERT_EQ(m2.data(), begin);
+    ASSERT_EQ(m2.size(), 2);
+    ASSERT_EQ(m2.available(), 6);
+
+    ASSERT_EQ(m1.getPtr(4), nullptr);
+
+    ASSERT_EQ(m2.getPtr(4), begin + 2);
+
+    ASSERT_EQ(m2.data(), begin);
+    ASSERT_EQ(m2.size(), 6);
+    ASSERT_EQ(m2.available(), 2);
+}
