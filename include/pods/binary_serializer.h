@@ -177,11 +177,7 @@ namespace pods
 
         Error saveSize(size_t size)
         {
-            if (std::numeric_limits<Size>::max() < size)
-            {
-                return Error::SizeToLarge;
-            }
-
+            PODS_SAFE_CALL(checkSize(size));
             return storage_.put(static_cast<Size>(size));
         }
 

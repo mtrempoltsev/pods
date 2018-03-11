@@ -209,5 +209,5 @@ struct CArrayBin
 struct InvalidSize
 {
     char data[1] = { '\0' };
-    PODS_SERIALIZABLE(1, PODS_MDR_BIN_2(data, std::numeric_limits<uint64_t>::max()));
+    PODS_SERIALIZABLE(1, PODS_MDR_BIN_2(data, static_cast<size_t>(std::numeric_limits<uint64_t>::max())))
 };

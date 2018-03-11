@@ -14,7 +14,7 @@ public:
         start_ = std::chrono::high_resolution_clock::now();
     }
 
-    size_t stop()
+    std::chrono::microseconds::rep stop()
     {
         const auto finish = std::chrono::high_resolution_clock::now();
         return std::chrono::duration_cast<std::chrono::microseconds>(finish - start_).count();
@@ -24,7 +24,7 @@ private:
     std::chrono::high_resolution_clock::time_point start_;
 };
 
-void printSpeed(size_t n, size_t size, size_t us)
+void printSpeed(size_t n, size_t size, std::chrono::microseconds::rep us)
 {
     std::cout << "    total: " << n * size / (1024 * 1024) << " Mb" << '\n';
     std::cout << "    total time: " << us / 1e3 << " ms" << '\n';

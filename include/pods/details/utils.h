@@ -2,6 +2,7 @@
 
 #include <type_traits>
 
+#include "../errors.h"
 #include "../types.h"
 
 namespace pods
@@ -27,6 +28,13 @@ namespace pods
             : std::integral_constant<bool, IsPodsSerializableImpl<T>::value>
         {
         };
+    }
+
+    inline Error checkSize(size_t size)
+    {
+        return size < std::numeric_limits<Size>::max()
+            ? pods::Error::NoError
+            : Error::SizeToLarge;
     }
 }
 

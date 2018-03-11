@@ -216,11 +216,7 @@ namespace pods
 
             Error writeValue(const details::BinaryArray& value)
             {
-                if (value.size() > std::numeric_limits<Size>::max())
-                {
-                    return Error::SizeToLarge;
-                }
-
+                PODS_SAFE_CALL(checkSize(value.size()));
                 const auto base64 = details::base64Encode(value.data(), value.size());
                 return writeValue(base64);
             }
@@ -228,11 +224,7 @@ namespace pods
             template <class T>
             Error writeValue(const details::BinaryVector<T>& value)
             {
-                if (value.size() > std::numeric_limits<Size>::max())
-                {
-                    return Error::SizeToLarge;
-                }
-
+                PODS_SAFE_CALL(checkSize(value.size()));
                 const auto base64 = details::base64Encode(value.data(), value.size());
                 return writeValue(base64);
             }
@@ -252,11 +244,7 @@ namespace pods
             template <class K, class V>
             Error writeValue(const std::map<K, V>& value)
             {
-                if (value.size() > std::numeric_limits<Size>::max())
-                {
-                    return Error::SizeToLarge;
-                }
-
+                PODS_SAFE_CALL(checkSize(value.size()));
                 PODS_SAFE_CALL(startArray());
 
                 for (const auto& pair : value)
@@ -276,11 +264,7 @@ namespace pods
             template <class T>
             Error writeValue(const std::vector<T>& value)
             {
-                if (value.size() > std::numeric_limits<Size>::max())
-                {
-                    return Error::SizeToLarge;
-                }
-
+                PODS_SAFE_CALL(checkSize(value.size()));
                 return writeRange(value.data(), static_cast<Size>(value.size()));
             }
 
@@ -632,13 +616,8 @@ namespace pods
         Error readSize(const Array& array, Size& size)
         {
             const auto n = array.Size();
-            if (n > std::numeric_limits<Size>::max())
-            {
-                return Error::CorruptedArchive;
-            }
-
+            PODS_SAFE_CALL(checkSize(n));
             size = static_cast<Size>(n);
-
             return Error::NoError;
         }
 
