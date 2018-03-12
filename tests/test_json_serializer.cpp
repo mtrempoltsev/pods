@@ -26,7 +26,7 @@ TEST(jsonSerializer, common)
     actual.points.clear();
     actual.dict.clear();
     actual.strings.clear();
-    actual.arr = { { 0, 0 } };
+    actual.arr = { { { 0, 0 } } };
     actual.map.clear();
 
     const std::string json = std::string(out.data(), out.size());
