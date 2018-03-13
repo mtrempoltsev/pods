@@ -135,6 +135,18 @@ namespace pods
             OutputBufferBase(OutputBufferBase<MemoryManager>&&) = delete;
             OutputBufferBase<MemoryManager>& operator=(OutputBufferBase<MemoryManager>&&) = delete;
 
+            Error put(bool value)
+            {
+                auto to = memoryManager_.getPtr(sizeof(Bool));
+                if (to != nullptr)
+                {
+                    *to = value ? True : False;
+                    return Error::NoError;
+                }
+
+                return Error::NotEnoughMemory;
+            }
+
             template <class T, typename std::enable_if<sizeof(T) == 1, int>::type = 0>
             Error put(T value)
             {

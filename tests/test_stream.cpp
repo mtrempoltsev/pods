@@ -6,7 +6,7 @@
 
 #include <pods/streams.h>
 
-TEST(streamStorage, common)
+TEST(stream, common)
 {
     std::stringstream buffer;
 
@@ -50,7 +50,7 @@ TEST(streamStorage, common)
     EXPECT_EQ(e3, a3);
 }
 
-TEST(streamStorage, flush)
+TEST(stream, flush)
 {
     std::stringstream buffer;
 

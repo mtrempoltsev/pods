@@ -29,13 +29,13 @@ set(SOURCES
     test_base64.cpp
     test_binary_serializer.cpp
     test_binary_versioning.cpp
-    test_fixed_memory_storage.cpp
+    test_buffer.cpp
     test_json_serializer.cpp
     test_json_versioning.cpp
     test_memory_managers.cpp
     test_rapidjson_wrapper.cpp
-    test_resizeable_memory_storage.cpp
-    test_stream_storage.cpp
+    test_resizeable_buffer.cpp
+    test_stream.cpp
     main.cpp
     )
 

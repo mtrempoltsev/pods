@@ -28,6 +28,9 @@ const double d2expected = std::numeric_limits<double>::max();
 const char c1expected = std::numeric_limits<char>::min();
 const char c2expected = std::numeric_limits<char>::max();
 
+const bool b1expected = false;
+const bool b2expected = true;
+
 const std::string data1expected = "hello";
 const std::string data2expected = "@#0123456789-=AaBbCcDdEeFf!";
 const std::array<uint32_t, 5> data3expected = { { 1, 3, 5, 7, 9 } };
@@ -47,8 +50,8 @@ enum class Second : uint64_t
 const First enum1expected = A;
 const Second enum2expected = Second::Y;
 
-template <class WriteOnlyStorage>
-void testSignedWrite(WriteOnlyStorage& out)
+template <class OutputStorage>
+void testSignedWrite(OutputStorage& out)
 {
     EXPECT_EQ(out.put(i8expected1), pods::Error::NoError);
     EXPECT_EQ(out.put(i8expected2), pods::Error::NoError);
@@ -60,8 +63,8 @@ void testSignedWrite(WriteOnlyStorage& out)
     EXPECT_EQ(out.put(i64expected2), pods::Error::NoError);
 }
 
-template <class ReadOnlyStorage>
-void testSignedRead(ReadOnlyStorage& in)
+template <class InputStorage>
+void testSignedRead(InputStorage& in)
 {
     int8_t i8actual1 = 0;
     EXPECT_EQ(in.get(i8actual1), pods::Error::NoError);
@@ -96,8 +99,8 @@ void testSignedRead(ReadOnlyStorage& in)
     EXPECT_EQ(i64actual2, i64expected2);
 }
 
-template <class WriteOnlyStorage>
-void testUnsignedWrite(WriteOnlyStorage& out)
+template <class OutputStorage>
+void testUnsignedWrite(OutputStorage& out)
 {
     EXPECT_EQ(out.put(ui8expected1), pods::Error::NoError);
     EXPECT_EQ(out.put(ui8expected2), pods::Error::NoError);
@@ -109,8 +112,8 @@ void testUnsignedWrite(WriteOnlyStorage& out)
     EXPECT_EQ(out.put(ui64expected2), pods::Error::NoError);
 }
 
-template <class ReadOnlyStorage>
-void testUnsignedRead(ReadOnlyStorage& in)
+template <class InputStorage>
+void testUnsignedRead(InputStorage& in)
 {
     uint8_t ui8actual1 = 0;
     EXPECT_EQ(in.get(ui8actual1), pods::Error::NoError);
@@ -145,8 +148,8 @@ void testUnsignedRead(ReadOnlyStorage& in)
     EXPECT_EQ(ui64actual2, ui64expected2);
 }
 
-template <class WriteOnlyStorage>
-void testFloatWrite(WriteOnlyStorage& out)
+template <class OutputStorage>
+void testFloatWrite(OutputStorage& out)
 {
     EXPECT_EQ(out.put(f1expected), pods::Error::NoError);
     EXPECT_EQ(out.put(f2expected), pods::Error::NoError);
@@ -154,8 +157,8 @@ void testFloatWrite(WriteOnlyStorage& out)
     EXPECT_EQ(out.put(d2expected), pods::Error::NoError);
 }
 
-template <class ReadOnlyStorage>
-void testFloatRead(ReadOnlyStorage& in)
+template <class InputStorage>
+void testFloatRead(InputStorage& in)
 {
     float f1actual = 0;
     EXPECT_EQ(in.get(f1actual), pods::Error::NoError);
@@ -174,15 +177,34 @@ void testFloatRead(ReadOnlyStorage& in)
     EXPECT_EQ(d2actual, d2expected);
 }
 
-template <class WriteOnlyStorage>
-void testCharWrite(WriteOnlyStorage& out)
+template <class OutputStorage>
+void testBoolWrite(OutputStorage& out)
+{
+    EXPECT_EQ(out.put(b1expected), pods::Error::NoError);
+    EXPECT_EQ(out.put(b2expected), pods::Error::NoError);
+}
+
+template <class OutputStorage>
+void testCharWrite(OutputStorage& out)
 {
     EXPECT_EQ(out.put(c1expected), pods::Error::NoError);
     EXPECT_EQ(out.put(c2expected), pods::Error::NoError);
 }
 
-template <class ReadOnlyStorage>
-void testCharRead(ReadOnlyStorage& in)
+template <class InputStorage>
+void testBoolRead(InputStorage& in)
+{
+    bool b1actual = true;
+    EXPECT_EQ(in.get(b1actual), pods::Error::NoError);
+    EXPECT_EQ(b1actual, b1expected);
+
+    bool b2actual = false;
+    EXPECT_EQ(in.get(b2actual), pods::Error::NoError);
+    EXPECT_EQ(b2actual, b2expected);
+}
+
+template <class InputStorage>
+void testCharRead(InputStorage& in)
 {
     char c1actual = 0;
     EXPECT_EQ(in.get(c1actual), pods::Error::NoError);
@@ -193,16 +215,16 @@ void testCharRead(ReadOnlyStorage& in)
     EXPECT_EQ(c2actual, c2expected);
 }
 
-template <class WriteOnlyStorage>
-void testRawDataWrite(WriteOnlyStorage& out)
+template <class OutputStorage>
+void testRawDataWrite(OutputStorage& out)
 {
     EXPECT_EQ(out.put(data1expected.c_str(), data1expected.size()), pods::Error::NoError);
     EXPECT_EQ(out.put(data2expected.c_str(), data2expected.size()), pods::Error::NoError);
     EXPECT_EQ(out.put(data3expected.data(), data3expected.size()), pods::Error::NoError);
 }
 
-template <class ReadOnlyStorage>
-void testRawDataRead(ReadOnlyStorage& in)
+template <class InputStorage>
+void testRawDataRead(InputStorage& in)
 {
     std::string data1actual(data1expected.size(), '\0');
     EXPECT_EQ(in.get(&*data1actual.begin(), data1actual.size()), pods::Error::NoError);
@@ -217,8 +239,8 @@ void testRawDataRead(ReadOnlyStorage& in)
     EXPECT_EQ(data3actual, data3expected);
 }
 
-template <class WriteOnlyStorage>
-void testEnumWrite(WriteOnlyStorage& out)
+template <class OutputStorage>
+void testEnumWrite(OutputStorage& out)
 {
     EXPECT_EQ(out.put(enum1expected), pods::Error::NoError);
     EXPECT_EQ(out.put(enum2expected), pods::Error::NoError);

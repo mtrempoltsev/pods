@@ -59,10 +59,7 @@ namespace pods
 
             bool resize(size_t newSize) noexcept
             {
-                if (!needToFreeMemory_)
-                {
-                    return false;
-                }
+                assert(needToFreeMemory_ && "you should not use a moved object");
 
                 auto newPtr = realloc(ptr, newSize);
                 if (newPtr == nullptr)
