@@ -27,8 +27,8 @@ private:
 void printSpeed(size_t n, size_t size, std::chrono::microseconds::rep us)
 {
     std::cout << "    total: " << n * size / (1024 * 1024) << " Mb" << '\n';
-    std::cout << "    total time: " << us / 1e3 << " ms" << '\n';
-    std::cout << "    speed: " << (n * size / (1024 * 1024)) / (us / 1e6) << " Mb/s" << '\n';
+    std::cout << "    total time: " << us / 1000 << " ms" << '\n';
+    std::cout << "    speed: " << (n * size / (1024 * 1024)) / (us / 1000000) << " Mb/s" << '\n';
 }
 
 int main()
