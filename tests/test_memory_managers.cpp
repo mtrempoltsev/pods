@@ -90,7 +90,7 @@ TEST(resizeableMemoryManager, common)
 
 TEST(resizeableMemoryManager, canNotAllocate1)
 {
-    const auto InvalidSize = std::numeric_limits<uint64_t>::max();
+    const size_t InvalidSize = std::numeric_limits<uint64_t>::max() / 4;
 
     try
     {
@@ -105,8 +105,8 @@ TEST(resizeableMemoryManager, canNotAllocate1)
 
 TEST(resizeableMemoryManager, canNotAllocate2)
 {
-    const auto InvalidSize = std::numeric_limits<uint64_t>::max();
-    const auto InitialSize = 4;
+    const size_t InvalidSize = std::numeric_limits<uint64_t>::max() / 4;
+    const size_t InitialSize = 4;
 
     pods::details::ResizeableMemoryManager m(InitialSize, InvalidSize);
 
