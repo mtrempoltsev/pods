@@ -14,6 +14,8 @@ namespace pods
         struct BinaryArray final
         {
         public:
+            using ValueType = char;
+
             BinaryArray(char* data, size_t size) noexcept
                 : data_(data)
                 , size_(size)
@@ -46,6 +48,8 @@ namespace pods
         struct BinaryVector final
         {
         public:
+            using ValueType = char;
+
             explicit BinaryVector(std::vector<T>& storage)
                 : storage_(storage)
             {

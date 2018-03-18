@@ -1,6 +1,10 @@
 ﻿#pragma once
 
 #include <array>
+#include <deque>
+#include <iterator>
+#include <list>
+#include <forward_list>
 #include <map>
 #include <string>
 #include <type_traits>
@@ -112,25 +116,25 @@ namespace pods
 
         Error doProcess(const details::BinaryArray& value)
         {
-            return saveRange(value.data(), value.size());
+            return saveRange<const details::BinaryArray::ValueType>(value.data(), value.size());
         }
 
         template <class T>
         Error doProcess(const details::BinaryVector<T>& value)
         {
-            return saveRange(value.data(), value.size());
+            return saveRange<const details::BinaryVector<T>::ValueType>(value.data(), value.size());
         }
 
         template <class T, size_t ArraySize>
         Error doProcess(const T (&value)[ArraySize])
         {
-            return saveRange(value, ArraySize);
+            return saveRange<const T>(value, ArraySize);
         }
 
         template <class T, size_t ArraySize>
         Error doProcess(const std::array<T, ArraySize>& value)
         {
-            return saveRange(value.data(), ArraySize);
+            return saveRange<const T>(value.data(), ArraySize);
         }
 
         template <class K, class V>
@@ -150,7 +154,27 @@ namespace pods
         template <class T>
         Error doProcess(const std::vector<T>& value)
         {
-            return saveRange(value.data(), value.size());
+            return saveRange<const T>(value.data(), value.size());
+        }
+
+        template <class T>
+        Error doProcess(const std::deque<T>& value)
+        {
+            return saveRange<const T>(value.cbegin(), value.size());
+        }
+
+        template <class T>
+        Error doProcess(const std::list<T>& value)
+        {
+            return saveRange<const T>(value.cbegin(), value.size());
+        }
+
+        template <class T>
+        Error doProcess(const std::forward_list<T>& value)
+        {
+            size_t size = 0;
+            std::for_each(value.begin(), value.end(), [&](const T&) { ++size; });
+            return saveRange<const T>(value.cbegin(), size);
         }
 
         Error doProcess(const std::string& value)
@@ -183,38 +207,37 @@ namespace pods
             return storage_.put(static_cast<Size>(size));
         }
 
-        template <class T, typename std::enable_if<details::IsPodsSerializable<T>::value, int>::type = 0>
-        Error saveRange(T* begin, size_t size)
+        template <class T, class Iterator, typename std::enable_if<details::IsPodsSerializable<T>::value, int>::type = 0>
+        Error saveRange(Iterator begin, size_t size)
         {
             PODS_SAFE_CALL(saveSize(size));
             PODS_SAFE_CALL(saveVersion<T>());
 
-            for (auto end = begin + size; begin != end; ++begin)
+            for (size_t i = 0; i < size; ++i)
             {
-                PODS_SAFE_CALL(serializeWithoutVersion(*begin));
+                PODS_SAFE_CALL(serializeWithoutVersion(*begin++));
             }
 
             return Error::NoError;
         }
 
-        template <class T, typename std::enable_if<std::is_class<T>::value && !details::IsPodsSerializable<T>::value, int>::type = 0>
-        Error saveRange(T* begin, size_t size)
+        template <class T, class Iterator, typename std::enable_if<!details::IsPodsSerializable<T>::value, int>::type = 0>
+        Error saveRange(Iterator begin, size_t size)
         {
             PODS_SAFE_CALL(saveSize(size));
 
-            for (auto end = begin + size; begin != end; ++begin)
+            for (size_t i = 0; i < size; ++i)
             {
-                PODS_SAFE_CALL(doProcess(*begin));
+                PODS_SAFE_CALL(doProcess(*begin++));
             }
 
             return Error::NoError;
         }
 
         template <class T, typename std::enable_if<std::is_arithmetic<T>::value, int>::type = 0>
-        Error saveRange(T* begin, size_t size)
+        Error saveRange(const T* begin, size_t size)
         {
             PODS_SAFE_CALL(saveSize(size));
-
             return storage_.put(begin, size);
         }
 
@@ -297,7 +320,7 @@ namespace pods
             Size size = 0;
             PODS_SAFE_CALL(loadSize(size));
             return size == ArraySize
-                ? loadRange(value, ArraySize)
+                ? loadRange<T>(value, ArraySize)
                 : Error::CorruptedArchive;
         }
 
@@ -307,7 +330,7 @@ namespace pods
             Size size = 0;
             PODS_SAFE_CALL(loadSize(size));
             return size == ArraySize
-                ? loadRange(value.data(), ArraySize)
+                ? loadRange<T>(value.data(), ArraySize)
                 : Error::CorruptedArchive;
         }
 
@@ -340,7 +363,25 @@ namespace pods
             Size size = 0;
             PODS_SAFE_CALL(loadSize(size));
             value.resize(size);
-            return loadRange(value.data(), size);
+            return loadRange<T>(value.data(), size);
+        }
+
+        template <class T>
+        Error doProcess(std::deque<T>& value)
+        {
+            return loadContainer(value);
+        }
+
+        template <class T>
+        Error doProcess(std::list<T>& value)
+        {
+            return loadContainer(value);
+        }
+
+        template <class T>
+        Error doProcess(std::forward_list<T>& value)
+        {
+            return loadContainer(value);
         }
 
         Error doProcess(std::string& value)
@@ -362,7 +403,7 @@ namespace pods
                 return Error::CorruptedArchive;
             }
             PODS_SAFE_CALL(value.allocate(size));
-            return loadRange(value.data(), size);
+            return loadRange<details::BinaryArray::ValueType>(value.data(), size);
         }
 
         template <class T>
@@ -371,7 +412,7 @@ namespace pods
             Size size = 0;
             PODS_SAFE_CALL(loadSize(size));
             PODS_SAFE_CALL(value.allocate(size));
-            return loadRange(value.data(), size);
+            return loadRange<details::BinaryVector<T>::ValueType>(value.data(), size);
         }
 
         template <class T, typename std::enable_if<std::is_class<T>::value, int>::type = 0>
@@ -400,26 +441,35 @@ namespace pods
             return storage_.get(size);
         }
 
-        template <class T, typename std::enable_if<details::IsPodsSerializable<T>::value, int>::type = 0>
-        Error loadRange(T* begin, Size size)
+        template <class Container>
+        Error loadContainer(Container& value)
+        {
+            Size size = 0;
+            PODS_SAFE_CALL(loadSize(size));
+            value.resize(size);
+            return loadRange<Container::value_type>(value.begin(), size);
+        }
+
+        template <class T, class Iterator, typename std::enable_if<details::IsPodsSerializable<T>::value, int>::type = 0>
+        Error loadRange(Iterator begin, Size size)
         {
             Version version = 0;
             PODS_SAFE_CALL(getVersion<T>(version));
 
-            for (auto end = begin + size; begin != end; ++begin)
+            for (size_t i = 0; i < size; ++i)
             {
-                PODS_SAFE_CALL(deserialize(*begin, version));
+                PODS_SAFE_CALL(deserialize(*begin++, version));
             }
 
             return Error::NoError;
         }
 
-        template <class T, typename std::enable_if<std::is_class<T>::value && !details::IsPodsSerializable<T>::value, int>::type = 0>
-        Error loadRange(T* begin, Size size)
+        template <class T, class Iterator, typename std::enable_if<!details::IsPodsSerializable<T>::value, int>::type = 0>
+        Error loadRange(Iterator begin, Size size)
         {
-            for (auto end = begin + size; begin != end; ++begin)
+            for (size_t i = 0; i < size; ++i)
             {
-                PODS_SAFE_CALL(doProcess(*begin));
+                PODS_SAFE_CALL(doProcess(*begin++));
             }
 
             return Error::NoError;
