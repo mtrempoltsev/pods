@@ -1,5 +1,6 @@
 ﻿#pragma once
 
+#include <algorithm>
 #include <array>
 #include <deque>
 #include <iterator>
@@ -122,7 +123,8 @@ namespace pods
         template <class T>
         Error doProcess(const details::BinaryVector<T>& value)
         {
-            return saveRange<const details::BinaryVector<T>::ValueType>(value.data(), value.size());
+            using Y = const typename details::BinaryVector<T>::ValueType;
+            return saveRange<Y>(value.data(), value.size());
         }
 
         template <class T, size_t ArraySize>
@@ -412,7 +414,7 @@ namespace pods
             Size size = 0;
             PODS_SAFE_CALL(loadSize(size));
             PODS_SAFE_CALL(value.allocate(size));
-            return loadRange<details::BinaryVector<T>::ValueType>(value.data(), size);
+            return loadRange<typename details::BinaryVector<T>::ValueType>(value.data(), size);
         }
 
         template <class T, typename std::enable_if<std::is_class<T>::value, int>::type = 0>
@@ -447,7 +449,7 @@ namespace pods
             Size size = 0;
             PODS_SAFE_CALL(loadSize(size));
             value.resize(size);
-            return loadRange<Container::value_type>(value.begin(), size);
+            return loadRange<typename Container::value_type>(value.begin(), size);
         }
 
         template <class T, class Iterator, typename std::enable_if<details::IsPodsSerializable<T>::value, int>::type = 0>

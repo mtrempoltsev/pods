@@ -24,7 +24,12 @@ struct In
         return k == other.k;
     }
 
-    PODS_SERIALIZABLE(1, PODS_MDR(k));
+    bool operator!=(const In& other) const
+    {
+        return !(*this == other);
+    }
+
+    PODS_SERIALIZABLE(1, PODS_MDR(k))
 };
 
 struct Array
@@ -32,7 +37,7 @@ struct Array
     std::array<int, 3> x = { 1, 2, 3 };
     std::array<In, 3> y = { { { 4 }, { 5 }, { 6 } } };
     std::array<std::array<int, 1>, 1> z = { { 7 } };
-    PODS_SERIALIZABLE(1, PODS_MDR(x), PODS_MDR(y), PODS_MDR(z));
+    PODS_SERIALIZABLE(1, PODS_MDR(x), PODS_MDR(y), PODS_MDR(z))
 };
 
 struct Vector
@@ -40,7 +45,7 @@ struct Vector
     std::vector<int> x = { 1, 2, 3 };
     std::vector<In> y = { { { 4 }, { 5 }, { 6 } } };
     std::vector<std::vector<int>> z = { { 7 } };
-    PODS_SERIALIZABLE(1, PODS_MDR(x), PODS_MDR(y), PODS_MDR(z));
+    PODS_SERIALIZABLE(1, PODS_MDR(x), PODS_MDR(y), PODS_MDR(z))
 };
 
 struct Deque
@@ -48,7 +53,7 @@ struct Deque
     std::deque<int> x = { 1, 2, 3 };
     std::deque<In> y = { { { 4 }, { 5 }, { 6 } } };
     std::deque<std::deque<int>> z = { { 7 } };
-    PODS_SERIALIZABLE(1, PODS_MDR(x), PODS_MDR(y), PODS_MDR(z));
+    PODS_SERIALIZABLE(1, PODS_MDR(x), PODS_MDR(y), PODS_MDR(z))
 };
 
 struct List
@@ -56,7 +61,7 @@ struct List
     std::list<int> x = { 1, 2, 3 };
     std::list<In> y = { { { 4 }, { 5 }, { 6 } } };
     std::list<std::list<int>> z = { { 7 } };
-    PODS_SERIALIZABLE(1, PODS_MDR(x), PODS_MDR(y), PODS_MDR(z));
+    PODS_SERIALIZABLE(1, PODS_MDR(x), PODS_MDR(y), PODS_MDR(z))
 };
 
 struct ForwardList
@@ -64,7 +69,7 @@ struct ForwardList
     std::forward_list<int> x = { 1, 2, 3 };
     std::forward_list<In> y = { { { 4 },{ 5 },{ 6 } } };
     std::forward_list<std::list<int>> z = { { 7 } };
-    PODS_SERIALIZABLE(1, PODS_MDR(x), PODS_MDR(y), PODS_MDR(z));
+    PODS_SERIALIZABLE(1, PODS_MDR(x), PODS_MDR(y), PODS_MDR(z))
 };
 
 void clear(Array& data)
