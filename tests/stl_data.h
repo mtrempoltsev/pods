@@ -36,7 +36,7 @@ struct Array
 {
     std::array<int, 3> x = { 1, 2, 3 };
     std::array<In, 3> y = { { { 4 }, { 5 }, { 6 } } };
-    std::array<std::array<int, 1>, 1> z = { { 7 } };
+    std::array<std::array<int, 1>, 1> z = { { { 7 } } };
     PODS_SERIALIZABLE(1, PODS_MDR(x), PODS_MDR(y), PODS_MDR(z))
 };
 
