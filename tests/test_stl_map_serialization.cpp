@@ -4,7 +4,7 @@
 #include <pods/buffers.h>
 #include <pods/json.h>
 
-#include "stl_data.h"
+#include "stl_map_data.h"
 
 template <class Object, class Serializer, class Deserializer>
 void test()
@@ -24,31 +24,25 @@ void test()
 
     EXPECT_EQ(deserializer.load(actual), pods::Error::NoError);
 
-    EXPECT_EQ(expected.x, actual.x);
-    EXPECT_EQ(expected.y, actual.y);
-    EXPECT_EQ(expected.z, actual.z);
+    EXPECT_EQ(expected.a, actual.a);
+    EXPECT_EQ(expected.b, actual.b);
+    EXPECT_EQ(expected.c, actual.c);
+    EXPECT_EQ(expected.d, actual.d);
+    EXPECT_EQ(expected.e, actual.e);
 }
 
-TEST(stlSerialization, binary)
+TEST(stlMapSerialization, binary)
 {
     using BinarySerializer = pods::BinarySerializer<pods::ResizableOutputBuffer>;
     using BinaryDeserializer = pods::BinaryDeserializer<pods::InputBuffer>;
 
-    test<Array, BinarySerializer, BinaryDeserializer>();
-    test<Vector, BinarySerializer, BinaryDeserializer>();
-    test<Deque, BinarySerializer, BinaryDeserializer>();
-    test<List, BinarySerializer, BinaryDeserializer>();
-    test<ForwardList, BinarySerializer, BinaryDeserializer>();
+    test<Map, BinarySerializer, BinaryDeserializer>();
 }
 
-TEST(stlSerialization, json)
+TEST(stlMapSerialization, json)
 {
     using JsonSerializer = pods::JsonSerializer<pods::ResizableOutputBuffer>;
     using JsonDeserializer = pods::JsonDeserializer<pods::InputBuffer>;
 
-    test<Array, JsonSerializer, JsonDeserializer>();
-    test<Vector, JsonSerializer, JsonDeserializer>();
-    test<Deque, JsonSerializer, JsonDeserializer>();
-    test<List, JsonSerializer, JsonDeserializer>();
-    test<ForwardList, JsonSerializer, JsonDeserializer>();
+    test<Map, JsonSerializer, JsonDeserializer>();
 }

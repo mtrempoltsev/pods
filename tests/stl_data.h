@@ -72,6 +72,15 @@ struct ForwardList
     PODS_SERIALIZABLE(1, PODS_MDR(x), PODS_MDR(y), PODS_MDR(z))
 };
 
+struct Map
+{
+    std::map<int, int> a = { { 1, 2}, { 3, 4 } };
+    std::map<In, int> b = { { { 1 }, 2 } };
+    std::map<int, In> c = { { 1, { 2 } } };
+    std::map<In, In> d = { { { 1 }, { 2 } } };
+    std::map<std::map<int, int>, std::map<int, int>> e = { { { 1, 2 }, { 3, 4 } } };
+};
+
 void clear(Array& data)
 {
     std::fill(data.x.begin(), data.x.end(), 0);
