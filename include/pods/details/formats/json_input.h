@@ -3,6 +3,7 @@
 #include <rapidjson/reader.h>
 
 #include "../base64.h"
+#include "../names.h"
 #include "../rapidjson_wrappers.h"
 #include "../utils.h"
 
