@@ -349,9 +349,9 @@ namespace pods
                 PODS_SAFE_CALL(format_.startObject());
 
                 Version valVersion = NoVersion;
-                PODS_SAFE_CALL(loadVersion<Key>(PODS_KEY_VERSION, keyVersion));
+                PODS_SAFE_CALL(loadVersion<Key>(PODS_KEY_VERSION, valVersion));
 
-                const auto error = doLoadMap<Key, Val>(std::forward<Init>(init), value, keyVersion, NoVersion);
+                const auto error = doLoadMap<Key, Val>(std::forward<Init>(init), value, valVersion, NoVersion);
                 if (error != Error::NoError)
                 {
                     return error;

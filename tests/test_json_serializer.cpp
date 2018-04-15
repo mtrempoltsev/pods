@@ -319,7 +319,7 @@ TEST(jsonSerializer, errors)
 struct Dict
 {
     std::map<short, std::vector<char>> dict = { { 1,{ 'a', 'b' } },{ -5,{} } };
-    PODS_SERIALIZABLE(1, PODS_MDR(dict));
+    PODS_SERIALIZABLE(1, PODS_MDR(dict))
 };
 
 TEST(jsonSerializer, dictAndArray)
