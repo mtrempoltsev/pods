@@ -3,7 +3,7 @@
 #include "errors.h"
 #include "types.h"
 
-#include "details/binary.h"
+#include "details/binary_wrappers.h"
 
 #ifdef PODS_MDR
 #error Rename the macro

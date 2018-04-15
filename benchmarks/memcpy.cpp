@@ -1,7 +1,7 @@
 ﻿#include <iostream>
 #include <chrono>
 
-#include <pods/binary_serializer.h>
+#include <pods/binary.h>
 #include <pods/buffers.h>
 
 #include "data.h"

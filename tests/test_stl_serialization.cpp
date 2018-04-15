@@ -1,8 +1,8 @@
 ﻿#include <gtest/gtest.h>
 
-#include <pods/binary_serializer.h>
+#include <pods/binary.h>
 #include <pods/buffers.h>
-#include <pods/json_serializer.h>
+#include <pods/json.h>
 
 #include "stl_data.h"
 

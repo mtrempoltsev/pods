@@ -1,7 +1,7 @@
 ﻿#include <gtest/gtest.h>
 
-#include <pods/json_serializer.h>
 #include <pods/buffers.h>
+#include <pods/json.h>
 
 #include "versioning_data.h"
 

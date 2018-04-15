@@ -10,6 +10,7 @@ namespace pods
 
         ArchiveVersionMismatch,
         MandatoryFieldMissed,
+        OptionalFieldMissed,
         CorruptedArchive,
         NotEnoughMemory,
         UnexpectedEnd,

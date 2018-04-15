@@ -1,7 +1,7 @@
 #include <iostream>
 
 #include <pods/pods.h>
-#include <pods/json_serializer.h>
+#include <pods/json.h>
 #include <pods/buffers.h>
 
 struct Server
@@ -21,7 +21,7 @@ struct ServerList
     {
         // this is default values
         Server { "localhost", 8080 },
-        Server { "my.com", 2018 }
+        Server { "volt.trempoltsev.ru", 2018 }
     };
 
     PODS_SERIALIZABLE(

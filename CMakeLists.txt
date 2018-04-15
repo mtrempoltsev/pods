@@ -25,24 +25,45 @@ include_directories(${PODS_INCLUDE})
 
 set(PODS_HEADERS "${PODS_INCLUDE}/pods")
 
-set(HEADERS
+set(PODS_PUBLIC_HEADERS
     ${PODS_HEADERS}/buffers.h
     ${PODS_HEADERS}/errors.h
-    ${PODS_HEADERS}/binary_serializer.h
-    ${PODS_HEADERS}/json_serializer.h
+    ${PODS_HEADERS}/binary.h
+    ${PODS_HEADERS}/json.h
     ${PODS_HEADERS}/pods.h
     ${PODS_HEADERS}/streams.h
     ${PODS_HEADERS}/types.h
+    )
 
+set(PODS_DETAILS_HEADERS
     ${PODS_HEADERS}/details/base64.h
-    ${PODS_HEADERS}/details/binary.h
+    ${PODS_HEADERS}/details/binary_wrappers.h
+    ${PODS_HEADERS}/details/deserializer.h
+    ${PODS_HEADERS}/details/names.h
     ${PODS_HEADERS}/details/memory_managers.h
     ${PODS_HEADERS}/details/rapidjson_wrappers.h
+    ${PODS_HEADERS}/details/serializer.h
     ${PODS_HEADERS}/details/settings.h
     ${PODS_HEADERS}/details/utils.h
     )
 
+set(PODS_FORMATS_HEADERS
+    ${PODS_HEADERS}/details/formats/binary_input.h
+    ${PODS_HEADERS}/details/formats/binary_output.h
+    ${PODS_HEADERS}/details/formats/json_input.h
+    ${PODS_HEADERS}/details/formats/json_output.h
+    )
+
+set(HEADERS
+    ${PODS_PUBLIC_HEADERS}
+    ${PODS_DETAILS_HEADERS}
+    ${PODS_FORMATS_HEADERS}
+    )
+
 if(MSVC)
+    source_group("Header Files" FILES "${PODS_PUBLIC_HEADERS}")
+    source_group("Header Files\\details" FILES "${PODS_DETAILS_HEADERS}")
+    source_group("Header Files\\formats" FILES "${PODS_FORMATS_HEADERS}")
     add_custom_target(libpods SOURCES ${HEADERS})
 endif()
 

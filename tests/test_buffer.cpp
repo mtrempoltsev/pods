@@ -6,14 +6,14 @@
 
 #include "storage_data.h"
 
-class buffer
+class buffer_f
     : public ::testing::Test
 {
 protected:
     pods::OutputBuffer out { 1024 };
 };
 
-TEST_F(buffer, testSigned)
+TEST_F(buffer_f, testSigned)
 {
     testSignedWrite(out);
 
@@ -21,7 +21,7 @@ TEST_F(buffer, testSigned)
     testSignedRead(in);
 }
 
-TEST_F(buffer, testUnsigned)
+TEST_F(buffer_f, testUnsigned)
 {
     testUnsignedWrite(out);
 
@@ -29,7 +29,7 @@ TEST_F(buffer, testUnsigned)
     testUnsignedRead(in);
 }
 
-TEST_F(buffer, testFloat)
+TEST_F(buffer_f, testFloat)
 {
     testFloatWrite(out);
 
@@ -37,7 +37,7 @@ TEST_F(buffer, testFloat)
     testFloatRead(in);
 }
 
-TEST_F(buffer, testCharBool)
+TEST_F(buffer_f, testCharBool)
 {
     testBoolWrite(out);
     testCharWrite(out);
@@ -47,7 +47,7 @@ TEST_F(buffer, testCharBool)
     testCharRead(in);
 }
 
-TEST_F(buffer, testRawData)
+TEST_F(buffer_f, testRawData)
 {
     testRawDataWrite(out);
 
@@ -55,7 +55,7 @@ TEST_F(buffer, testRawData)
     testRawDataRead(in);
 }
 
-TEST_F(buffer, testError1)
+TEST(buffer, testError1)
 {
     uint16_t small = 0;
     uint64_t big = 0;
@@ -74,7 +74,7 @@ TEST_F(buffer, testError1)
     }
 }
 
-TEST_F(buffer, testError2)
+TEST(buffer, testError2)
 {
     uint8_t v1 = 10;
     pods::OutputBuffer out(1);
@@ -85,7 +85,7 @@ TEST_F(buffer, testError2)
     EXPECT_EQ(in.get(v2), pods::Error::CorruptedArchive);
 }
 
-TEST_F(buffer, testError3)
+TEST(buffer, testError3)
 {
     const char v1[2] = { 0, 1 };
     pods::OutputBuffer out(2);
@@ -96,21 +96,21 @@ TEST_F(buffer, testError3)
     EXPECT_EQ(in.get(v2, 3), pods::Error::UnexpectedEnd);
 }
 
-TEST_F(buffer, testError4)
+TEST(buffer, testError4)
 {
     const char v1[2] = { 0, 1 };
     pods::OutputBuffer out(1);
     EXPECT_EQ(out.put(v1, 2), pods::Error::NotEnoughMemory);
 }
 
-TEST_F(buffer, testError5)
+TEST(buffer, testError5)
 {
     pods::OutputBuffer out(1);
     EXPECT_EQ(out.put(true), pods::Error::NoError);
     EXPECT_EQ(out.put(true), pods::Error::NotEnoughMemory);
 }
 
-TEST_F(buffer, testCtor)
+TEST(buffer, testCtor)
 {
     const uint16_t expected = 5;
     char buf[sizeof(expected)] = {};

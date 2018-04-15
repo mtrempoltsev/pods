@@ -11,4 +11,9 @@ namespace pods
 
     static constexpr Bool False = 0;
     static constexpr Bool True = 1;
+
+    static constexpr Version NoVersion = 0;
+
+    static constexpr Size NoSize = std::numeric_limits<Size>::max();
+    static constexpr Size MaxSize = NoSize - 1;
 }

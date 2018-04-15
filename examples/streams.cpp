@@ -2,7 +2,7 @@
 #include <sstream>
 
 #include <pods/pods.h>
-#include <pods/binary_serializer.h>
+#include <pods/binary.h>
 #include <pods/streams.h>
 
 struct Server

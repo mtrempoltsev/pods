@@ -1,6 +1,6 @@
 ﻿#include <gtest/gtest.h>
 
-#include <pods/binary_serializer.h>
+#include <pods/binary.h>
 #include <pods/buffers.h>
 
 #include "versioning_data.h"

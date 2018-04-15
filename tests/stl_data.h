@@ -52,8 +52,8 @@ struct Deque
 {
     std::deque<int> x = { 1, 2, 3 };
     std::deque<In> y = { { { 4 }, { 5 }, { 6 } } };
-    std::deque<std::deque<int>> z = { { 7 } };
-    PODS_SERIALIZABLE(1, PODS_MDR(x), PODS_MDR(y), PODS_MDR(z))
+    std::deque<std::deque<int>> z = { { { 7 } } };
+    PODS_SERIALIZABLE(1, PODS_MDR(x), PODS_MDR(y), PODS_MDR(z));
 };
 
 struct List

@@ -28,13 +28,25 @@ namespace pods
             : std::integral_constant<bool, IsPodsSerializableImpl<T>::value>
         {
         };
-    }
 
-    inline Error checkSize(size_t size)
-    {
-        return size < std::numeric_limits<Size>::max()
-            ? pods::Error::NoError
-            : Error::SizeToLarge;
+        constexpr bool isOptional(const char* name) noexcept
+        {
+            return *name == 0;
+        }
+
+        constexpr const char* getName(const char* name) noexcept
+        {
+            return isOptional(name)
+                ? name + 1
+                : name;
+        }
+
+        inline Error checkSize(size_t size)
+        {
+            return size < MaxSize
+                ? pods::Error::NoError
+                : Error::SizeToLarge;
+        }
     }
 }
 

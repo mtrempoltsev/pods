@@ -48,6 +48,8 @@ namespace pods
         struct BinaryVector final
         {
         public:
+            static_assert(std::is_arithmetic<T>::value, "T must be an arithmetic type");
+
             using ValueType = char;
 
             explicit BinaryVector(std::vector<T>& storage)

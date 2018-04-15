@@ -1,6 +1,6 @@
 ﻿#include <gtest/gtest.h>
 
-#include <pods/binary_serializer.h>
+#include <pods/binary.h>
 #include <pods/buffers.h>
 #include <pods/streams.h>
 
@@ -173,7 +173,9 @@ TEST(binarySerializer, cArray)
     pods::BinarySerializer<pods::ResizableOutputBuffer> serializer(out);
     EXPECT_EQ(serializer.save(expected), pods::Error::NoError);
 
-    CArray actual = {};
+    CArray actual;
+    actual.ok = false;
+    std::fill_n(actual.x, 4, 0);
 
     pods::InputBuffer in(out.data(), out.size());
     pods::BinaryDeserializer<pods::InputBuffer> deserializer(in);
