@@ -24,6 +24,28 @@ TEST(saxHandlers, startObject)
     EXPECT_FALSE(handler.EndArray(2));
 }
 
+TEST(saxHandlers, endObject)
+{
+    pods::details::EndObjectHandler handler;
+
+    EXPECT_FALSE(handler.Null());
+    EXPECT_FALSE(handler.Bool(true));
+    EXPECT_FALSE(handler.Int(std::numeric_limits<int32_t>::min()));
+    EXPECT_FALSE(handler.Int(std::numeric_limits<int32_t>::max()));
+    EXPECT_FALSE(handler.Uint(std::numeric_limits<uint32_t>::max()));
+    EXPECT_FALSE(handler.Int64(std::numeric_limits<int64_t>::min()));
+    EXPECT_FALSE(handler.Int64(std::numeric_limits<int64_t>::max()));
+    EXPECT_FALSE(handler.Uint64(std::numeric_limits<uint64_t>::max()));
+    EXPECT_FALSE(handler.Double(0.5));
+    EXPECT_FALSE(handler.RawNumber("15", 2, true));
+    EXPECT_FALSE(handler.String("test", 4, true));
+    EXPECT_FALSE(handler.StartObject());
+    EXPECT_FALSE(handler.Key("key", 3, true));
+    EXPECT_TRUE(handler.EndObject(1));
+    EXPECT_FALSE(handler.StartArray());
+    EXPECT_FALSE(handler.EndArray(2));
+}
+
 TEST(saxHandlers, startArray)
 {
     pods::details::StartArrayHandler handler;
