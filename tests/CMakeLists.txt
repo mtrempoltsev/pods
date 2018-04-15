@@ -37,6 +37,7 @@ set(SOURCES
     test_memory_managers.cpp
     test_rapidjson_wrapper.cpp
     test_resizeable_buffer.cpp
+    test_sax_handlers.cpp
     test_stl_map_serialization.cpp
     test_stl_serialization.cpp
     test_stream.cpp

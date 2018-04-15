@@ -218,7 +218,7 @@ namespace pods
 
             bool Uint64(uint64_t value) noexcept
             {
-                if (value > std::numeric_limits<T>::max())
+                if (value > static_cast<uint64_t>(std::numeric_limits<T>::max()))
                 {
                     return false;
                 }
@@ -257,6 +257,10 @@ namespace pods
 
             bool Double(double value) noexcept
             {
+                if (value < std::numeric_limits<T>::min() || value > std::numeric_limits<T>::max())
+                {
+                    return false;
+                }
                 value_ = static_cast<T>(value);
                 return true;
             }
