@@ -53,8 +53,8 @@ namespace pods
                 return Error::NoError;
             }
 
-            template <class... T>
-            Error operator()(T&&... args)
+            template <class... ArgsT>
+            Error operator()(ArgsT&&... args)
             {
                 return process(args...);
             }

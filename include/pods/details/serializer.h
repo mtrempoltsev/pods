@@ -45,7 +45,7 @@ namespace pods
             template <class T>
             Error save(T&& data)
             {
-                return serialize(std::forward<T&&>(data));
+                return serialize(std::forward<T>(data));
             }
 
             Error operator()() noexcept
@@ -53,10 +53,10 @@ namespace pods
                 return Error::NoError;
             }
 
-            template <class... T>
-            Error operator()(T&&... args)
+            template <class... ArgsT>
+            Error operator()(ArgsT&&... args)
             {
-                return process(std::forward<T>(args)...);
+                return process(std::forward<ArgsT>(args)...);
             }
 
         private:
@@ -108,7 +108,7 @@ namespace pods
                 PODS_SAFE_CALL(format_.saveName(name));
                 const auto error = doProcess(value);
                 return error == Error::NoError
-                    ? process(args...)
+                    ? process(std::forward<ArgsT>(args)...)
                     : error;
             }
 
@@ -120,12 +120,12 @@ namespace pods
             }
 
             template <class T, size_t ArraySize, class... ArgsT>
-            Error process(const char* name, const T(&value)[ArraySize], ArgsT&... args)
+            Error process(const char* name, const T(&value)[ArraySize], ArgsT&&... args)
             {
                 PODS_SAFE_CALL(format_.saveName(name));
                 const auto error = doProcess(value);
                 return error == Error::NoError
-                    ? process(args...)
+                    ? process(std::forward<ArgsT>(args)...)
                     : error;
             }
 
@@ -137,12 +137,12 @@ namespace pods
             }
 
             template <class T, class... ArgsT, typename std::enable_if<std::is_arithmetic<T>::value || std::is_enum<T>::value, int>::type = 0>
-            Error process(const char* name, T value, ArgsT&... args)
+            Error process(const char* name, T value, ArgsT&&... args)
             {
                 PODS_SAFE_CALL(format_.saveName(name));
                 const auto error = doProcess(value);
                 return error == Error::NoError
-                    ? process(args...)
+                    ? process(std::forward<ArgsT>(args)...)
                     : error;
             }
 
