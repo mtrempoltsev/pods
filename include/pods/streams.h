@@ -40,7 +40,7 @@ namespace pods
             if (bytesLeft > 0)
             {
                 auto pos = in_.tellg();
-                pos -= bytesLeft;
+                pos -= static_cast<std::streamsize>(bytesLeft);
                 in_.seekg(pos, std::ios_base::beg);
             }
 
@@ -89,7 +89,7 @@ namespace pods
     private:
         Error read(char* data, size_t size) noexcept
         {
-            const bool success = !!in_.read(data, size);
+            const bool success = !!in_.read(data, static_cast<std::streamsize>(size));
             if (!success)
             {
                 eof_ = in_.eof();
@@ -213,7 +213,7 @@ namespace pods
 
             PODS_SAFE_CALL(writeBuffer());
 
-            const bool success = !!out_.write(data, size);
+            const bool success = !!out_.write(data, static_cast<std::streamsize>(size));
             return success
                 ? Error::NoError
                 : Error::WriteError;
@@ -238,7 +238,8 @@ namespace pods
     private:
         Error writeBuffer() noexcept
         {
-            const bool success = !!out_.write(buffer_.data(), buffer_.size());
+            const bool success =
+                !!out_.write(buffer_.data(), static_cast<std::streamsize>(buffer_.size()));
             if (success)
             {
                 buffer_.clear();

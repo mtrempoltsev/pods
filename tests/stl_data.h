@@ -52,7 +52,7 @@ struct Deque
 {
     std::deque<int> x = { 1, 2, 3 };
     std::deque<In> y = { { { 4 }, { 5 }, { 6 } } };
-    std::deque<std::deque<int>> z = { { { 7 } } };
+    std::deque<std::deque<int>> z = { { 7 } };
     PODS_SERIALIZABLE(1, PODS_MDR(x), PODS_MDR(y), PODS_MDR(z))
 };
 
@@ -76,7 +76,7 @@ void clear(Array& data)
 {
     std::fill(data.x.begin(), data.x.end(), 0);
     std::fill(data.y.begin(), data.y.end(), In { 0 } );
-    std::fill(data.z.begin(), data.z.end(), std::array<int, 1> { 0 });
+    std::fill(data.z.begin(), data.z.end(), std::array<int, 1> { { 0 } });
 }
 
 template <class T>

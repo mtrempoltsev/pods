@@ -28,7 +28,13 @@ void printSpeed(size_t n, size_t size, std::chrono::microseconds::rep us)
 {
     std::cout << "    total: " << n * size / (1024 * 1024) << " Mb" << '\n';
     std::cout << "    total time: " << us / 1000 << " ms" << '\n';
-    std::cout << "    speed: " << (n * size / (1024 * 1024)) / (us / 1000000) << " Mb/s" << '\n';
+    if (us == 0)
+    {
+        us = 1;
+    }
+    const size_t mb = 1024 * 1024;
+    const size_t sec = 1000000;
+    std::cout << "    speed: " << (n * size) / static_cast<size_t>(us) * mb / sec << " Mb/s" << '\n';
 }
 
 int main()
@@ -49,8 +55,8 @@ int main()
     const auto serializedSize = out1.size();
     std::cout << "serialized data size: " << serializedSize << '\n';
 
-    const auto N = 500000;
-    const auto R = 5;
+    const auto N = 10000;
+    const auto R = 50;
 
     auto buffer = std::make_unique<char[]>(serializedSize * N);
 
@@ -59,9 +65,9 @@ int main()
     {
         std::cout << "\nmemcpy" << std::endl;
         timer.start();
-        for (auto r = 0; r < R; ++r)
+        for (size_t r = 0; r < R; ++r)
         {
-            for (auto i = 0; i < N; ++i)
+            for (size_t i = 0; i < N; ++i)
             {
                 memcpy(buffer.get() + i * serializedSize, &data, serializedSize);
             }
@@ -72,9 +78,9 @@ int main()
     {
         std::cout << "\nserialization" << std::endl;
         timer.start();
-        for (auto r = 0; r < R; ++r)
+        for (size_t r = 0; r < R; ++r)
         {
-            for (auto i = 0; i < N; ++i)
+            for (size_t i = 0; i < N; ++i)
             {
                 pods::OutputBuffer out2(buffer.get() + i * serializedSize, serializedSize);
                 pods::BinarySerializer<decltype(out2)> serializer2(out2);
@@ -91,9 +97,9 @@ int main()
     {
         std::cout << "\ndeserialization" << std::endl;
         timer.start();
-        for (auto r = 0; r < R; ++r)
+        for (size_t r = 0; r < R; ++r)
         {
-            for (auto i = 0; i < N; ++i)
+            for (size_t i = 0; i < N; ++i)
             {
                 pods::InputBuffer in(buffer.get() + i * serializedSize, serializedSize);
                 pods::BinaryDeserializer<decltype(in)> deserializer(in);

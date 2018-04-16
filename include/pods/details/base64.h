@@ -11,7 +11,7 @@ namespace pods
 {
     namespace details
     {
-        static size_t getBase64EncodedSize(size_t size)
+        static inline size_t getBase64EncodedSize(size_t size)
         {
             const auto result = 4 * ((size + 2) / 3);
             return result < size
@@ -19,7 +19,7 @@ namespace pods
                 : result;
         }
 
-        static std::string base64Encode(const char* source, size_t size)
+        static inline std::string base64Encode(const char* source, size_t size)
         {
             static const char* Base64Chars =
                 "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
@@ -66,9 +66,9 @@ namespace pods
             return result;
         }
 
-        static size_t getBase64DecodedSize(const char* encoded, size_t encodedSize)
+        static inline size_t getBase64DecodedSize(const char* encoded, size_t encodedSize)
         {
-            const auto padding = encodedSize < 4
+            const size_t padding = encodedSize < 4
                 ? 0
                 : encoded[encodedSize - 2] == '='
                     ? 2
@@ -78,7 +78,7 @@ namespace pods
             return (encodedSize * 3) / 4 - padding;
         }
 
-        static void base64Decode(const char* encoded, size_t encodedSize, char* destination)
+        static inline void base64Decode(const char* encoded, size_t encodedSize, char* destination)
         {
             assert(encodedSize % 4 == 0);
 

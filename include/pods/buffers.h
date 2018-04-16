@@ -55,7 +55,7 @@ namespace pods
         {
             if (pos_ + sizeof(T) <= maxSize_)
             {
-                value = data_[pos_];
+                value = static_cast<T>(data_[pos_]);
                 pos_ += sizeof(T);
                 return Error::NoError;
             }
@@ -153,7 +153,7 @@ namespace pods
                 auto to = memoryManager_.getPtr(sizeof(T));
                 if (to != nullptr)
                 {
-                    *to = value;
+                    *to = static_cast<char>(value);
                     return Error::NoError;
                 }
 
