@@ -137,7 +137,7 @@ namespace pods
             }
 
             template <class T>
-            Error saveBlob(const T* data, size_t size)
+            Error saveBlob(const T* data, Size size)
             {
                 const auto base64 = details::base64Encode(data, size);
                 return save(base64);

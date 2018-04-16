@@ -111,7 +111,6 @@ namespace pods
             {
                 Size size = 0;
                 PODS_SAFE_CALL(storage_.get(size));
-                PODS_SAFE_CALL(checkSize(size));
                 PODS_SAFE_CALL(allocator(size));
                 return doLoadBlob(data, size);
             }

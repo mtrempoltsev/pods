@@ -81,14 +81,13 @@ namespace pods
 
             Error save(const std::string& value)
             {
-                return saveBlob(value.c_str(), value.size());
+                return saveBlob(value.c_str(), static_cast<Size>(value.size()));
             }
 
             template <class T>
-            Error saveBlob(const T* data, size_t size)
+            Error saveBlob(const T* data, Size size)
             {
-                PODS_SAFE_CALL(checkSize(size));
-                PODS_SAFE_CALL(storage_.put(static_cast<Size>(size)));
+                PODS_SAFE_CALL(storage_.put(size));
                 return storage_.put(data, size);
             }
 

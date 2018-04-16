@@ -41,7 +41,7 @@ namespace pods
                 : name;
         }
 
-        inline Error checkSize(size_t size)
+        inline Error checkSize(size_t size) noexcept
         {
             return size < MaxSize
                 ? pods::Error::NoError

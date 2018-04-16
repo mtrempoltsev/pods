@@ -198,20 +198,23 @@ namespace pods
 
             Error doProcess(const std::string& value)
             {
+                PODS_SAFE_CALL(checkSize(value.size()));
                 return format_.save(value);
             }
 
             Error doProcess(const BinaryArray& value)
             {
-                PODS_SAFE_CALL(checkSize(value.size()));
-                return format_.saveBlob(value.data(), value.size());
+                const auto size = value.size();
+                PODS_SAFE_CALL(checkSize(size));
+                return format_.saveBlob(value.data(), static_cast<Size>(size));
             }
 
             template <class T>
             Error doProcess(const BinaryVector<T>& value)
             {
-                PODS_SAFE_CALL(checkSize(value.size()));
-                return format_.saveBlob(value.data(), value.size());
+                const auto size = value.size();
+                PODS_SAFE_CALL(checkSize(size));
+                return format_.saveBlob(value.data(), static_cast<Size>(size));
             }
 
             template <class T, size_t ArraySize>

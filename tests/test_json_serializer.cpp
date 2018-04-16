@@ -97,10 +97,10 @@ TEST(jsonSerializer, optionalFields1)
     pods::JsonDeserializer<decltype(in)> serializer(in);
     EXPECT_EQ(serializer.load(data), pods::Error::NoError);
 
-    EXPECT_EQ(data.x, 7);
-    EXPECT_EQ(data.y, 8);
-    EXPECT_EQ(data.z.z, 9);
-    EXPECT_EQ(data.z.a, 5);
+    EXPECT_EQ(data.x, 7u);
+    EXPECT_EQ(data.y, 8u);
+    EXPECT_EQ(data.z.z, 9u);
+    EXPECT_EQ(data.z.a, 5u);
 }
 
 TEST(jsonSerializer, optionalFields2)
@@ -114,9 +114,9 @@ TEST(jsonSerializer, optionalFields2)
     pods::JsonDeserializer<decltype(in)> serializer(in);
     EXPECT_EQ(serializer.load(data), pods::Error::NoError);
 
-    EXPECT_EQ(data.x, 0);
-    EXPECT_EQ(data.y, 8);
-    EXPECT_EQ(data.z.z, 0);
+    EXPECT_EQ(data.x, 0u);
+    EXPECT_EQ(data.y, 8u);
+    EXPECT_EQ(data.z.z, 0u);
 }
 
 TEST(jsonSerializer, optionalFields3)
@@ -190,7 +190,7 @@ TEST(jsonSerializer, binary2)
     pods::JsonDeserializer<pods::InputBuffer> deserializer(in);
     EXPECT_EQ(deserializer.load(actual), pods::Error::NoError);
 
-    for (size_t i = 0; i < expected.size; ++i)
+    for (int i = 0; i < expected.size; ++i)
     {
         EXPECT_EQ(actual.x.get()[i], i + 1);
         EXPECT_EQ(actual.y[i], i + 10);
@@ -258,8 +258,8 @@ TEST(jsonSerializer, stream)
     pods::InputStream in(stream);
     pods::JsonDeserializer<pods::InputStream> deserializer(in);
     EXPECT_EQ(deserializer.load(actual), pods::Error::NoError);
-    EXPECT_EQ(actual.a, 100);
-    EXPECT_EQ(actual.z, 300);
+    EXPECT_EQ(actual.a, 100u);
+    EXPECT_EQ(actual.z, 300u);
 }
 
 TEST(jsonSerializer, cArray)

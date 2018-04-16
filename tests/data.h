@@ -172,7 +172,7 @@ struct BinData1
 
 struct BinData2
 {
-    static constexpr size_t size = 3;
+    static constexpr int size = 3;
     std::unique_ptr<int16_t[]> x;
     int16_t* y;
     PODS_SERIALIZABLE(1,
