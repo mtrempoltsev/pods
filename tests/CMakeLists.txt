@@ -32,6 +32,7 @@ set(SOURCES
     test_binary_serializer.cpp
     test_binary_versioning.cpp
     test_buffer.cpp
+    test_endianness.cpp
     test_json_serializer.cpp
     test_json_versioning.cpp
     test_memory_managers.cpp

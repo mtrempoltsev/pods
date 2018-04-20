@@ -4,6 +4,14 @@ project(pods)
 
 set(CMAKE_CXX_STANDARD 14)
 
+include (TestBigEndian)
+TEST_BIG_ENDIAN(IS_BIG_ENDIAN)
+if (IS_BIG_ENDIAN)
+    add_definitions(-DPODS_BIG_ENDIAN)
+else()
+    add_definitions(-DPODS_LITTLE_ENDIAN)
+endif()
+
 if(MSVC)
     set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /W4")
     set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /W4")
@@ -39,6 +47,7 @@ set(PODS_DETAILS_HEADERS
     ${PODS_HEADERS}/details/base64.h
     ${PODS_HEADERS}/details/binary_wrappers.h
     ${PODS_HEADERS}/details/deserializer.h
+    ${PODS_HEADERS}/details/endianness.h
     ${PODS_HEADERS}/details/names.h
     ${PODS_HEADERS}/details/memory_managers.h
     ${PODS_HEADERS}/details/rapidjson_wrappers.h
