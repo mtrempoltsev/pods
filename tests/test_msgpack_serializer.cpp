@@ -10,56 +10,56 @@ struct Int8
 {
     using Type = int8_t;
     Type x;
-    PODS_SERIALIZABLE(1, PODS_MDR(x));
+    PODS_SERIALIZABLE(1, PODS_MDR(x))
 };
 
 struct UInt8
 {
     using Type = uint8_t;
     Type x;
-    PODS_SERIALIZABLE(1, PODS_MDR(x));
+    PODS_SERIALIZABLE(1, PODS_MDR(x))
 };
 
 struct Int16
 {
     using Type = int16_t;
     Type x;
-    PODS_SERIALIZABLE(1, PODS_MDR(x));
+    PODS_SERIALIZABLE(1, PODS_MDR(x))
 };
 
 struct UInt16
 {
     using Type = uint16_t;
     Type x;
-    PODS_SERIALIZABLE(1, PODS_MDR(x));
+    PODS_SERIALIZABLE(1, PODS_MDR(x))
 };
 
 struct Int32
 {
     using Type = int32_t;
     Type x;
-    PODS_SERIALIZABLE(1, PODS_MDR(x));
+    PODS_SERIALIZABLE(1, PODS_MDR(x))
 };
 
 struct UInt32
 {
     using Type = uint32_t;
     Type x;
-    PODS_SERIALIZABLE(1, PODS_MDR(x));
+    PODS_SERIALIZABLE(1, PODS_MDR(x))
 };
 
 struct Int64
 {
     using Type = int64_t;
     Type x;
-    PODS_SERIALIZABLE(1, PODS_MDR(x));
+    PODS_SERIALIZABLE(1, PODS_MDR(x))
 };
 
 struct UInt64
 {
     using Type = uint64_t;
     Type x;
-    PODS_SERIALIZABLE(1, PODS_MDR(x));
+    PODS_SERIALIZABLE(1, PODS_MDR(x))
 };
 
 template <class FromT, class ToT, class T>

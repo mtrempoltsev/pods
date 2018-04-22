@@ -60,7 +60,7 @@ struct Int
     PODS_SERIALIZABLE(1,
         PODS_MDR(a), PODS_MDR(b), PODS_MDR(c), PODS_MDR(d), PODS_MDR(e), PODS_MDR(f), PODS_MDR(g),
         PODS_MDR(h), PODS_MDR(i), PODS_MDR(k), PODS_MDR(l), PODS_MDR(m), PODS_MDR(n), PODS_MDR(o),
-        PODS_MDR(p), PODS_MDR(q));
+        PODS_MDR(p), PODS_MDR(q))
 };
 
 template <class Serializer, class Deserializer>
@@ -112,7 +112,7 @@ struct Unsigned
 
     PODS_SERIALIZABLE(1,
         PODS_MDR(a), PODS_MDR(b), PODS_MDR(c), PODS_MDR(d), PODS_MDR(e), PODS_MDR(f), PODS_MDR(g),
-        PODS_MDR(h), PODS_MDR(i));
+        PODS_MDR(h), PODS_MDR(i))
 };
 
 template <class Serializer, class Deserializer>
@@ -147,7 +147,7 @@ struct Float
     float a = std::numeric_limits<float>::max();
     double b = std::numeric_limits<double>::max();
 
-    PODS_SERIALIZABLE(1, PODS_MDR(a), PODS_MDR(b));
+    PODS_SERIALIZABLE(1, PODS_MDR(a), PODS_MDR(b))
 };
 
 template <class Serializer, class Deserializer>
@@ -178,7 +178,7 @@ struct String
     std::string d = std::string(std::numeric_limits<uint8_t>::max() + 1, 'd');
     std::string e = std::string(std::numeric_limits<uint16_t>::max() + 1, 'e');
 
-    PODS_SERIALIZABLE(1, PODS_MDR(a), PODS_MDR(b), PODS_MDR(c), PODS_MDR(d), PODS_MDR(e));
+    PODS_SERIALIZABLE(1, PODS_MDR(a), PODS_MDR(b), PODS_MDR(c), PODS_MDR(d), PODS_MDR(e))
 };
 
 template <class Serializer, class Deserializer>
@@ -221,7 +221,7 @@ struct Binary
     uint64_t g[4] = { 1, 2, 3, 4 };
 
     PODS_SERIALIZABLE(1, PODS_MDR_BIN(a), PODS_MDR_BIN(b), PODS_MDR_BIN_2(c, size),
-        PODS_MDR_BIN_2(d, size), PODS_MDR_BIN(e), PODS_MDR_BIN(f), PODS_MDR_BIN(g));
+        PODS_MDR_BIN_2(d, size), PODS_MDR_BIN(e), PODS_MDR_BIN(f), PODS_MDR_BIN(g))
 };
 
 template <class Serializer, class Deserializer>
