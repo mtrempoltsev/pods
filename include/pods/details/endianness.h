@@ -46,19 +46,19 @@ namespace pods
         template <class T, typename std::enable_if<sizeof(T) == 2, int>::type = 0>
         T changeEndianess(T value) noexcept
         {
-            return __builtin_bswap16(value);
+            return static_cast<T>(__builtin_bswap16(static_cast<uint16_t>(value)));
         }
 
         template <class T, typename std::enable_if<sizeof(T) == 4, int>::type = 0>
         T changeEndianess(T value) noexcept
         {
-            return __builtin_bswap32(value);
+            return static_cast<T>(__builtin_bswap32(static_cast<uint32_t>(value)));
         }
 
         template <class T, typename std::enable_if<sizeof(T) == 8, int>::type = 0>
         T changeEndianess(T value) noexcept
         {
-            return __builtin_bswap64(value);
+            return static_cast<T>(__builtin_bswap64(static_cast<uint64_t>(value)));
         }
 #endif
 
