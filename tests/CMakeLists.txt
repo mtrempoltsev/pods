@@ -21,6 +21,7 @@ include_directories(${PODS_INCLUDE})
 
 set(HEADERS
     data.h
+    serialization_tests.h
     stl_data.h
     stl_map_data.h
     storage_data.h
@@ -36,6 +37,7 @@ set(SOURCES
     test_json_serializer.cpp
     test_json_versioning.cpp
     test_memory_managers.cpp
+    test_msgpack_serializer.cpp
     test_rapidjson_wrapper.cpp
     test_resizeable_buffer.cpp
     test_sax_handlers.cpp

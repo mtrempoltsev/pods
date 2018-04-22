@@ -23,15 +23,15 @@ TEST(rapidJsonWrapper, common)
 
     EXPECT_TRUE(inWrapper.good());
     EXPECT_EQ(inWrapper.Peek(), 'a');
-    EXPECT_EQ(inWrapper.Tell(), 0);
+    EXPECT_EQ(inWrapper.Tell(), 0u);
     EXPECT_EQ(inWrapper.Take(), 'a');
     EXPECT_TRUE(inWrapper.good());
     EXPECT_EQ(inWrapper.Peek(), 'b');
-    EXPECT_EQ(inWrapper.Tell(), 1);
+    EXPECT_EQ(inWrapper.Tell(), 1u);
     EXPECT_EQ(inWrapper.Take(), 'b');
     EXPECT_TRUE(inWrapper.good());
     EXPECT_EQ(inWrapper.Peek(), '\0');
-    EXPECT_EQ(inWrapper.Tell(), 2);
+    EXPECT_EQ(inWrapper.Tell(), 2u);
     EXPECT_EQ(inWrapper.Take(), '\0');
     EXPECT_FALSE(inWrapper.good());
 }

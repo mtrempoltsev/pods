@@ -2,9 +2,13 @@
 #include <chrono>
 
 #include <pods/binary.h>
+#include <pods/msgpack.h>
 #include <pods/buffers.h>
 
 #include "data.h"
+
+const auto N = 10000;
+const auto R = 50;
 
 class Timer
 {
@@ -37,43 +41,24 @@ void printSpeed(size_t n, size_t size, std::chrono::microseconds::rep us)
     std::cout << "    speed: " << (n * size) / static_cast<size_t>(us) * mb / sec << " Mb/s" << '\n';
 }
 
-int main()
+template <class Serializer, class T>
+size_t getSerializedSize(const T& data)
 {
-    const auto size = sizeof(Data);
-    std::cout << "data size: " << size << '\n';
-
-    Data data = {};
-
-    pods::ResizableOutputBuffer out1;
-    pods::BinarySerializer<decltype(out1)> serializer1(out1);
-    if (serializer1.save(data) != pods::Error::NoError)
+    pods::ResizableOutputBuffer out;
+    Serializer serializer(out);
+    if (serializer.save(data) != pods::Error::NoError)
     {
         std::cerr << "broken serializer\n";
         return EXIT_FAILURE;
     }
 
-    const auto serializedSize = out1.size();
-    std::cout << "serialized data size: " << serializedSize << '\n';
+    return out.size();
+}
 
-    const auto N = 10000;
-    const auto R = 50;
-
-    auto buffer = std::make_unique<char[]>(serializedSize * N);
-
+template <class Serializer, class Deserializer, class T>
+void benchmark(T& data, char* buffer, size_t size)
+{
     Timer timer;
-
-    {
-        std::cout << "\nmemcpy" << std::endl;
-        timer.start();
-        for (size_t r = 0; r < R; ++r)
-        {
-            for (size_t i = 0; i < N; ++i)
-            {
-                memcpy(buffer.get() + i * serializedSize, &data, serializedSize);
-            }
-        }
-        printSpeed(N * R, size, timer.stop());
-    }
 
     {
         std::cout << "\nserialization" << std::endl;
@@ -82,16 +67,16 @@ int main()
         {
             for (size_t i = 0; i < N; ++i)
             {
-                pods::OutputBuffer out2(buffer.get() + i * serializedSize, serializedSize);
-                pods::BinarySerializer<decltype(out2)> serializer2(out2);
-                if (serializer2.save(data) != pods::Error::NoError)
+                pods::OutputBuffer out(buffer + i * size, size);
+                Serializer serializer(out);
+                if (serializer.save(data) != pods::Error::NoError)
                 {
                     std::cerr << "broken serializer\n";
-                    return EXIT_FAILURE;
+                    exit(EXIT_FAILURE);
                 }
             }
         }
-        printSpeed(N * R, serializedSize, timer.stop());
+        printSpeed(N * R, size, timer.stop());
     }
 
     {
@@ -101,17 +86,56 @@ int main()
         {
             for (size_t i = 0; i < N; ++i)
             {
-                pods::InputBuffer in(buffer.get() + i * serializedSize, serializedSize);
-                pods::BinaryDeserializer<decltype(in)> deserializer(in);
+                pods::InputBuffer in(buffer + i * size, size);
+                Deserializer deserializer(in);
                 if (deserializer.load(data) != pods::Error::NoError)
                 {
                     std::cerr << "broken deserializer\n";
-                    return EXIT_FAILURE;
+                    exit(EXIT_FAILURE);
                 }
             }
         }
-        printSpeed(N * R, serializedSize, timer.stop());
+        printSpeed(N * R, size, timer.stop());
     }
+}
+
+int main()
+{
+    const auto size = sizeof(Data);
+    std::cout << "data size: " << size << '\n';
+
+    Data data = {};
+
+    const auto serializedSize = getSerializedSize<pods::BinarySerializer<pods::ResizableOutputBuffer>>(data);
+    std::cout << "serialized data size: " << serializedSize << '\n';
+
+    const auto msgpackSerializedSize = getSerializedSize<pods::MsgPackSerializer<pods::ResizableOutputBuffer>>(data);
+    std::cout << "msgpack serialized data size: " << msgpackSerializedSize << '\n';
+
+    const auto maxSize = std::max(size, std::max(serializedSize, msgpackSerializedSize));
+    auto buffer = std::make_unique<char[]>(maxSize * N);
+
+    {
+        std::cout << "\nmemcpy" << std::endl;
+
+        Timer timer;
+        timer.start();
+
+        for (size_t r = 0; r < R; ++r)
+        {
+            for (size_t i = 0; i < N; ++i)
+            {
+                memcpy(buffer.get() + i * size, &data, size);
+            }
+        }
+        printSpeed(N * R, size, timer.stop());
+    }
+
+    std::cout << "\nPODS format";
+    benchmark<pods::MsgPackSerializer<pods::OutputBuffer>, pods::MsgPackDeserializer<pods::InputBuffer>>(data, buffer.get(), serializedSize);
+
+    std::cout << "\nMsgPack format";
+    benchmark<pods::MsgPackSerializer<pods::OutputBuffer>, pods::MsgPackDeserializer<pods::InputBuffer>>(data, buffer.get(), msgpackSerializedSize);
 
     return 0;
 }

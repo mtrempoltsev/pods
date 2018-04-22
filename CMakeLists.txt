@@ -38,6 +38,7 @@ set(PODS_PUBLIC_HEADERS
     ${PODS_HEADERS}/errors.h
     ${PODS_HEADERS}/binary.h
     ${PODS_HEADERS}/json.h
+    ${PODS_HEADERS}/msgpack.h
     ${PODS_HEADERS}/pods.h
     ${PODS_HEADERS}/streams.h
     ${PODS_HEADERS}/types.h
@@ -61,6 +62,9 @@ set(PODS_FORMATS_HEADERS
     ${PODS_HEADERS}/details/formats/binary_output.h
     ${PODS_HEADERS}/details/formats/json_input.h
     ${PODS_HEADERS}/details/formats/json_output.h
+    ${PODS_HEADERS}/details/formats/msgpack_aux.h
+    ${PODS_HEADERS}/details/formats/msgpack_input.h
+    ${PODS_HEADERS}/details/formats/msgpack_output.h
     )
 
 set(HEADERS

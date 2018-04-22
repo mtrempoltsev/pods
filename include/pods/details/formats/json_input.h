@@ -208,7 +208,12 @@ namespace pods
                     ? std::numeric_limits<T>::min()
                     : 0;
 
-                if (value < min || value > std::numeric_limits<T>::max())
+                if (value < min)
+                {
+                    return false;
+                }
+
+                if (value > 0 && static_cast<uint64_t>(value) > static_cast<uint64_t>(std::numeric_limits<T>::max()))
                 {
                     return false;
                 }

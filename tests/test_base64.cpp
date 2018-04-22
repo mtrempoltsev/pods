@@ -17,7 +17,7 @@ TEST(base64, common)
     const std::vector<char> data4 = { '1', '2', '3', '4' };
     const std::vector<char> data5 = { 41, 35, -66 };
 
-    EXPECT_EQ(0, pods::details::getBase64EncodedSize(0));
+    EXPECT_EQ(0u, pods::details::getBase64EncodedSize(0));
 
     EXPECT_NO_FATAL_FAILURE(pods::details::base64Encode(nullptr, 0));
 

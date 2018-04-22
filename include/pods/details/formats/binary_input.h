@@ -93,7 +93,7 @@ namespace pods
                 Size size = 0;
                 PODS_SAFE_CALL(storage_.get(size));
                 value.resize(size);
-                return doLoadBlob(const_cast<char*>(value.data()), size);
+                return storage_.get(const_cast<char*>(value.data()), size);
             }
 
             template <class T>
@@ -102,7 +102,7 @@ namespace pods
                 Size actualSize = 0;
                 PODS_SAFE_CALL(storage_.get(actualSize));
                 return size == actualSize
-                    ? doLoadBlob(data, actualSize)
+                    ? storage_.get(data, actualSize)
                     : Error::CorruptedArchive;
             }
 
@@ -112,13 +112,6 @@ namespace pods
                 Size size = 0;
                 PODS_SAFE_CALL(storage_.get(size));
                 PODS_SAFE_CALL(allocator(size));
-                return doLoadBlob(data, size);
-            }
-
-        private:
-            template <class T>
-            Error doLoadBlob(T* data, Size size)
-            {
                 return storage_.get(data, size);
             }
 

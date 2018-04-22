@@ -8,33 +8,33 @@
 TEST(fixedSizeMemoryManager, common)
 {
     pods::details::FixedSizeMemoryManager m1(4);
-    ASSERT_EQ(m1.available(), 4);
+    ASSERT_EQ(m1.available(), 4u);
     ASSERT_TRUE(m1.getPtr(2) != nullptr);
-    ASSERT_EQ(m1.available(), 2);
+    ASSERT_EQ(m1.available(), 2u);
     ASSERT_TRUE(m1.getPtr(2) != nullptr);
-    ASSERT_EQ(m1.available(), 0);
+    ASSERT_EQ(m1.available(), 0u);
     ASSERT_TRUE(m1.getPtr(2) == nullptr);
 
     pods::details::FixedSizeMemoryManager m2(4);
-    ASSERT_EQ(m2.available(), 4);
+    ASSERT_EQ(m2.available(), 4u);
     ASSERT_TRUE(m2.getPtr(8) == nullptr);
-    ASSERT_EQ(m2.available(), 4);
+    ASSERT_EQ(m2.available(), 4u);
     ASSERT_TRUE(m2.getPtr(2) != nullptr);
-    ASSERT_EQ(m2.available(), 2);
+    ASSERT_EQ(m2.available(), 2u);
     ASSERT_TRUE(m2.getPtr(2) != nullptr);
-    ASSERT_EQ(m2.available(), 0);
+    ASSERT_EQ(m2.available(), 0u);
     ASSERT_TRUE(m2.getPtr(2) == nullptr);
-    ASSERT_EQ(m2.available(), 0);
+    ASSERT_EQ(m2.available(), 0u);
 }
 
 TEST(resizeableMemoryManager, common)
 {
     pods::details::ResizeableMemoryManager m1(4, 4);
-    ASSERT_EQ(m1.available(), 4);
+    ASSERT_EQ(m1.available(), 4u);
     ASSERT_TRUE(m1.getPtr(2) != nullptr);
-    ASSERT_EQ(m1.available(), 2);
+    ASSERT_EQ(m1.available(), 2u);
     ASSERT_TRUE(m1.getPtr(2) != nullptr);
-    ASSERT_EQ(m1.available(), 0);
+    ASSERT_EQ(m1.available(), 0u);
     ASSERT_TRUE(m1.getPtr(2) == nullptr);
 
     pods::details::ResizeableMemoryManager m2(4, 4);
@@ -44,21 +44,21 @@ TEST(resizeableMemoryManager, common)
     ASSERT_TRUE(m2.getPtr(2) == nullptr);
 
     pods::details::ResizeableMemoryManager m3(4, 8);
-    ASSERT_EQ(m3.available(), 8);
+    ASSERT_EQ(m3.available(), 8u);
     ASSERT_TRUE(m3.getPtr(8) != nullptr);
-    ASSERT_EQ(m3.available(), 0);
+    ASSERT_EQ(m3.available(), 0u);
     ASSERT_TRUE(m3.getPtr(2) == nullptr);
 
     pods::details::ResizeableMemoryManager m4(4, 16);
-    ASSERT_EQ(m4.available(), 16);
+    ASSERT_EQ(m4.available(), 16u);
     ASSERT_TRUE(m4.getPtr(8) != nullptr);
-    ASSERT_EQ(m4.available(), 8);
+    ASSERT_EQ(m4.available(), 8u);
     ASSERT_TRUE(m4.getPtr(4) != nullptr);
-    ASSERT_EQ(m4.available(), 4);
+    ASSERT_EQ(m4.available(), 4u);
     ASSERT_TRUE(m4.getPtr(8) == nullptr);
-    ASSERT_EQ(m4.available(), 4);
+    ASSERT_EQ(m4.available(), 4u);
     ASSERT_TRUE(m4.getPtr(4) != nullptr);
-    ASSERT_EQ(m4.available(), 0);
+    ASSERT_EQ(m4.available(), 0u);
     ASSERT_TRUE(m4.getPtr(1) == nullptr);
 
     const size_t n = 1000;
@@ -127,12 +127,12 @@ TEST(resizeableMemoryManager, move)
 
     ASSERT_EQ(m2.data(), begin);
     ASSERT_EQ(m2.size(), 2);
-    ASSERT_EQ(m2.available(), 6);
+    ASSERT_EQ(m2.available(), 6u);
 
     ASSERT_EQ(m1.getPtr(4), nullptr);
 
     ASSERT_TRUE(m2.getPtr(4) != nullptr);
     ASSERT_TRUE(m2.data() != nullptr);
     ASSERT_EQ(m2.size(), 6);
-    ASSERT_EQ(m2.available(), 2);
+    ASSERT_EQ(m2.available(), 2u);
 }

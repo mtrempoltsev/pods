@@ -3,24 +3,31 @@
 #include <pods/details/endianness.h>
 
 #ifdef PODS_BIG_ENDIAN
-    #define PODS_PASS pods::details::toBigEndian
-    #define PODS_CONV pods::details::toLittleEndian
+    #define PODS_PASS_TO pods::details::toBigEndian
+    #define PODS_PASS_FROM pods::details::fromBigEndian
+    #define PODS_CONV_TO pods::details::toLittleEndian
+    #define PODS_CONV_FROM pods::details::fromLittleEndian
 #else
-    #define PODS_PASS pods::details::toLittleEndian
-    #define PODS_CONV pods::details::toBigEndian
+    #define PODS_PASS_TO pods::details::toLittleEndian
+    #define PODS_PASS_FROM pods::details::fromLittleEndian
+    #define PODS_CONV_TO pods::details::toBigEndian
+    #define PODS_CONV_FROM pods::details::fromBigEndian
 #endif
 
 template <class T>
-void check(T from, T expected)
+void check(T value, T mirror)
 {
-    const auto a1 = PODS_PASS(from);
-    EXPECT_EQ(from, a1);
+    const auto a1 = PODS_PASS_TO(value);
+    EXPECT_EQ(value, a1);
 
-    const auto a2 = PODS_CONV(from);
-    EXPECT_EQ(expected, a2);
+    const auto a2 = PODS_PASS_FROM(a1);
+    EXPECT_EQ(value, a2);
 
-    const auto a3 = PODS_CONV(a2);
-    EXPECT_EQ(from, a3);
+    const auto a3 = PODS_CONV_TO(value);
+    EXPECT_EQ(mirror, a3);
+
+    const auto a4 = PODS_CONV_FROM(a3);
+    EXPECT_EQ(value, a4);
 }
 
 TEST(testEndianess, common)
@@ -33,6 +40,8 @@ TEST(testEndianess, common)
     EXPECT_FALSE(pods::details::BigEndian);
 #endif
 
+    check<int8_t>(0x01, 0x01);
+    check<uint8_t>(0x01, 0x01);
     check<int16_t>(0x0102, 0x0201);
     check<uint16_t>(0x0102, 0x0201);
     check<int32_t>(0x01020304, 0x04030201);
@@ -41,5 +50,7 @@ TEST(testEndianess, common)
     check<uint64_t>(0x0102030405060708, 0x0807060504030201);
 }
 
-#undef PODS_PASS
-#undef PODS_CONV
+#undef PODS_PASS_TO
+#undef PODS_PASS_FROM
+#undef PODS_CONV_TO
+#undef PODS_CONV_FROM
