@@ -17,7 +17,7 @@ TEST(stream, common)
     const bool e4 = false;
     const uint64_t e5 = 100;
     const int32_t e6 = 5000;
-    const std::array<int32_t, 3> e7 = { 1, 2, 3 };
+    const std::array<int32_t, 3> e7 = { { 1, 2, 3 } };
 
     pods::OutputStream out(buffer);
 
@@ -37,7 +37,7 @@ TEST(stream, common)
     bool a4 = true;
     uint64_t a5 = 0;
     int32_t a6 = 0;
-    std::array<int32_t, 3> a7 = { 0, 0, 0 };
+    std::array<int32_t, 3> a7 = { { 0, 0, 0 } };
 
     pods::InputStream in(buffer);
 
@@ -69,7 +69,7 @@ TEST(stream, paging)
     const bool e4 = false;
     const uint64_t e5 = 100;
     const int32_t e6 = 5000;
-    const std::array<int64_t, 9> e7 = { 1, 2, 3, 4, 5, 6, 7, 8, 9 };
+    const std::array<int64_t, 9> e7 = { { 1, 2, 3, 4, 5, 6, 7, 8, 9 } };
     const uint16_t e8 = 1;
     const int8_t e9 = -2;
     const uint64_t e10 = 100;
@@ -97,7 +97,7 @@ TEST(stream, paging)
     bool a4 = true;
     uint64_t a5 = 0;
     int32_t a6 = 0;
-    std::array<int64_t, 9> a7 = { 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+    std::array<int64_t, 9> a7 = { { 0, 0, 0, 0, 0, 0, 0, 0, 0 } };
     uint16_t a8 = 0;
     int8_t a9 = 0;
     uint64_t a10 = 0;

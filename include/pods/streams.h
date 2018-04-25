@@ -71,7 +71,7 @@ namespace pods
                 in_.seekg(pos, std::ios_base::beg);
             }
 
-            if (size > buffer_.size())
+            if (size > buffer_.totalSize())
             {
                 PODS_SAFE_CALL(read(data, size));
                 buffer_.gotoEnd();
@@ -92,8 +92,8 @@ namespace pods
     private:
         Error readBuffer()
         {
-            PODS_SAFE_CALL(read(buffer_.data(), buffer_.size()));
-            buffer_.reset(in_.gcount());
+            PODS_SAFE_CALL(read(buffer_.data(), buffer_.totalSize()));
+            buffer_.reset(static_cast<size_t>(in_.gcount()));
             return Error::NoError;
         }
 

@@ -131,14 +131,16 @@ namespace pods
             return data_;
         }
 
-        size_t size() const noexcept
+        size_t totalSize() const noexcept
         {
-            return end_ - begin_;
+            assert(begin_ <= end_);
+            return static_cast<size_t>(end_ - begin_);
         }
 
         size_t available() const noexcept
         {
-            return end_ - current_;
+            assert(end_ <= current_);
+            return static_cast<size_t>(end_ - current_);
         }
 
     private:
@@ -238,12 +240,14 @@ namespace pods
 
         size_t size() const noexcept
         {
-            return current_ - begin_;
+            assert(begin_ <= current_);
+            return static_cast<size_t>(current_ - begin_);
         }
 
         size_t available() const noexcept
         {
-            return end_ - current_;
+            assert(end_ <= current_);
+            return static_cast<size_t>(end_ - current_);
         }
 
         void clear() noexcept
@@ -341,18 +345,19 @@ namespace pods
 
         size_t size() const noexcept
         {
-            return current_ - data_;
+            assert(data_ <= current_);
+            return static_cast<size_t>(current_ - data_);
+        }
+
+        size_t available() const noexcept
+        {
+            return available_;
         }
 
         void clear() noexcept
         {
             available_ += size();
             current_ = data_;
-        }
-
-        size_t available() const noexcept
-        {
-            return available_;
         }
 
         void flush() noexcept
