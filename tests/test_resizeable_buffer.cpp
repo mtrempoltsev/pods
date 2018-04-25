@@ -69,3 +69,56 @@ TEST(resizeableBuffer, testError)
         EXPECT_EQ(in.get(big), pods::Error::UnexpectedEnd);
     }
 }
+
+TEST(resizeableBuffer, resize)
+{
+    const uint64_t e1 = 1;
+    const uint64_t e2 = 2;
+    const uint64_t e3 = 3;
+    const uint64_t e4 = 4;
+    const uint64_t e5 = 5;
+
+    pods::ResizableOutputBuffer out(10);
+
+    EXPECT_EQ(out.size(), 0);
+
+    EXPECT_EQ(out.put(e1), pods::Error::NoError);
+    EXPECT_EQ(out.size(), 8);
+    EXPECT_EQ(out.available(), 2);
+
+    EXPECT_EQ(out.put(e2), pods::Error::NoError);
+    EXPECT_EQ(out.size(), 16);
+    EXPECT_EQ(out.available(), 16);
+
+    EXPECT_EQ(out.put(e3), pods::Error::NoError);
+    EXPECT_EQ(out.size(), 24);
+    EXPECT_EQ(out.available(), 8);
+
+    EXPECT_EQ(out.put(e4), pods::Error::NoError);
+    EXPECT_EQ(out.size(), 32);
+    EXPECT_EQ(out.available(), 0);
+
+    EXPECT_EQ(out.put(e5), pods::Error::NoError);
+    EXPECT_EQ(out.size(), 40);
+    EXPECT_EQ(out.available(), 40);
+
+    uint64_t a1 = 0;
+    uint64_t a2 = 0;
+    uint64_t a3 = 0;
+    uint64_t a4 = 0;
+    uint64_t a5 = 0;
+
+    pods::InputBuffer in(out.data(), out.size());
+
+    EXPECT_EQ(in.get(a1), pods::Error::NoError);
+    EXPECT_EQ(e1, a1);
+    EXPECT_EQ(in.get(a2), pods::Error::NoError);
+    EXPECT_EQ(e2, a2);
+    EXPECT_EQ(in.get(a3), pods::Error::NoError);
+    EXPECT_EQ(e3, a3);
+    EXPECT_EQ(in.get(a4), pods::Error::NoError);
+    EXPECT_EQ(e4, a4);
+    EXPECT_EQ(in.get(a5), pods::Error::NoError);
+    EXPECT_EQ(e5, a5);
+    EXPECT_EQ(in.get(a1), pods::Error::UnexpectedEnd);
+}

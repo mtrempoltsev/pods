@@ -13,6 +13,92 @@ protected:
     pods::OutputBuffer out { 1024 };
 };
 
+TEST_F(buffer_f, testInfo)
+{
+    const size_t totalSize = 1024;
+    size_t size = 0;
+    size_t available = 1024;
+
+    EXPECT_EQ(out.available(), available);
+    EXPECT_EQ(out.size(), size);
+
+    const uint64_t n = 0;
+
+    EXPECT_EQ(out.put(n), pods::Error::NoError);
+
+    available -= sizeof(n);
+    size += sizeof(n);
+
+    EXPECT_EQ(out.available(), available);
+    EXPECT_EQ(out.size(), size);
+
+    out.clear();
+    available = totalSize;
+    size = 0;
+
+    EXPECT_EQ(out.available(), available);
+    EXPECT_EQ(out.size(), size);
+
+    EXPECT_EQ(out.put(n), pods::Error::NoError);
+
+    available -= sizeof(n);
+    size += sizeof(n);
+
+    EXPECT_EQ(out.available(), available);
+    EXPECT_EQ(out.size(), size);
+
+    out.clear();
+
+    EXPECT_EQ(size % sizeof(n), 0);
+
+    for (size_t i = 0; i < totalSize / sizeof(n); ++i)
+    {
+        EXPECT_EQ(out.put(n), pods::Error::NoError);
+    }
+
+    EXPECT_EQ(out.available(), 0);
+    EXPECT_EQ(out.size(), totalSize);
+
+    EXPECT_EQ(out.put(n), pods::Error::NotEnoughMemory);
+
+    EXPECT_EQ(out.put(static_cast<uint8_t>(1)), pods::Error::NotEnoughMemory);
+    EXPECT_EQ(out.available(), 0);
+    EXPECT_EQ(out.size(), totalSize);
+
+    EXPECT_EQ(out.put(static_cast<uint32_t>(1)), pods::Error::NotEnoughMemory);
+    EXPECT_EQ(out.available(), 0);
+    EXPECT_EQ(out.size(), totalSize);
+
+    EXPECT_EQ(out.put(static_cast<bool>(1)), pods::Error::NotEnoughMemory);
+    EXPECT_EQ(out.available(), 0);
+    EXPECT_EQ(out.size(), totalSize);
+
+    EXPECT_EQ(out.put(nullptr, 16), pods::Error::NotEnoughMemory);
+    EXPECT_EQ(out.available(), 0);
+    EXPECT_EQ(out.size(), totalSize);
+
+    out.clear();
+    available = totalSize;
+    size = 0;
+
+    EXPECT_EQ(out.available(), available);
+    EXPECT_EQ(out.size(), size);
+
+    char buf[totalSize - 1];
+
+    EXPECT_EQ(out.put(buf, totalSize - 1), pods::Error::NoError);
+    EXPECT_EQ(out.available(), 1);
+    EXPECT_EQ(out.size(), totalSize - 1);
+
+    EXPECT_EQ(out.put(static_cast<uint32_t>(1)), pods::Error::NotEnoughMemory);
+    EXPECT_EQ(out.available(), 1);
+    EXPECT_EQ(out.size(), totalSize - 1);
+
+    EXPECT_EQ(out.put(static_cast<uint8_t>(1)), pods::Error::NoError);
+    EXPECT_EQ(out.available(), 0);
+    EXPECT_EQ(out.size(), totalSize);
+}
+
 TEST_F(buffer_f, testSigned)
 {
     testSignedWrite(out);

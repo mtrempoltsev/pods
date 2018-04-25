@@ -51,7 +51,6 @@ size_t getSerializedSize(const T& data)
         std::cerr << "broken serializer\n";
         return EXIT_FAILURE;
     }
-
     return out.size();
 }
 

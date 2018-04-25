@@ -36,7 +36,6 @@ set(SOURCES
     test_endianness.cpp
     test_json_serializer.cpp
     test_json_versioning.cpp
-    test_memory_managers.cpp
     test_msgpack_serializer.cpp
     test_rapidjson_wrapper.cpp
     test_resizeable_buffer.cpp

@@ -50,7 +50,6 @@ set(PODS_DETAILS_HEADERS
     ${PODS_HEADERS}/details/deserializer.h
     ${PODS_HEADERS}/details/endianness.h
     ${PODS_HEADERS}/details/names.h
-    ${PODS_HEADERS}/details/memory_managers.h
     ${PODS_HEADERS}/details/rapidjson_wrappers.h
     ${PODS_HEADERS}/details/serializer.h
     ${PODS_HEADERS}/details/settings.h

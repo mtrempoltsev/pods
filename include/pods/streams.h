@@ -12,12 +12,10 @@ namespace pods
 {
     class InputStream final
     {
-        static constexpr auto BufferSize = details::PrefferedBufferSize;
     public:
-        explicit InputStream(std::istream& stream)
+        explicit InputStream(std::istream& stream, size_t bufferSize = details::PrefferedBufferSize)
             : in_(stream)
-            , buffer_(BufferSize)
-            , eof_(false)
+            , buffer_(bufferSize)
         {
             buffer_.gotoEnd();
         }
@@ -31,148 +29,93 @@ namespace pods
         template <class T>
         Error get(T& value) noexcept
         {
-            if (buffer_.available() >= sizeof(T))
+            const size_t available = buffer_.available();
+            if (available >= sizeof(T))
             {
                 return buffer_.get(value);
             }
 
-            const auto bytesLeft = buffer_.available();
-            if (bytesLeft > 0)
-            {
-                auto pos = in_.tellg();
-                pos -= static_cast<std::streamsize>(bytesLeft);
-                in_.seekg(pos, std::ios_base::beg);
-            }
-
-            if (eof_)
+            if (in_.eof())
             {
                 return Error::UnexpectedEnd;
             }
 
-            PODS_SAFE_CALL(readBuffer());
+            if (available > 0)
+            {
+                auto pos = in_.tellg();
+                pos -= static_cast<std::streamsize>(available);
+                in_.seekg(pos, std::ios_base::beg);
+            }
 
+            PODS_SAFE_CALL(readBuffer());
             return buffer_.get(value);
         }
 
-        Error get(char* data, size_t size) noexcept
+        Error get(char* data, size_t size)
         {
-            if (buffer_.available() >= size)
+            const size_t available = buffer_.available();
+            if (available >= size)
             {
                 return buffer_.get(data, size);
             }
 
-            if (eof_)
+            if (in_.eof())
             {
                 return Error::UnexpectedEnd;
             }
 
-            const auto bytesReaded = buffer_.available();
-            const auto needToReed = size - bytesReaded;
-
-            PODS_SAFE_CALL(buffer_.get(data, bytesReaded));
-
-            const auto error = read(data + bytesReaded, needToReed);
-            if (error == Error::NoError || error == Error::Eof)
+            if (available > 0)
             {
+                auto pos = in_.tellg();
+                pos -= static_cast<std::streamsize>(available);
+                in_.seekg(pos, std::ios_base::beg);
+            }
+
+            if (size > buffer_.size())
+            {
+                PODS_SAFE_CALL(read(data, size));
+                buffer_.gotoEnd();
                 return Error::NoError;
             }
-            return error;
+
+            PODS_SAFE_CALL(readBuffer());
+            return buffer_.get(data, size);
         }
 
         template <class T>
-        Error get(T* data, size_t size) noexcept
+        Error get(T* data, size_t size)
         {
             const auto totalSize = size * sizeof(T);
             return get(reinterpret_cast<char*>(data), totalSize);
         }
 
     private:
-        Error read(char* data, size_t size) noexcept
+        Error readBuffer()
         {
-            const bool success = !!in_.read(data, static_cast<std::streamsize>(size));
-            if (!success)
-            {
-                eof_ = in_.eof();
-                return eof_
-                    ? Error::Eof
-                    : Error::ReadError;
-            }
-
+            PODS_SAFE_CALL(read(buffer_.data(), buffer_.size()));
+            buffer_.reset(in_.gcount());
             return Error::NoError;
         }
 
-        Error readBuffer() noexcept
+        Error read(char* data, size_t size)
         {
-            buffer_.gotoBegin();
-
-            const auto error = read(buffer_.mutableData(), BufferSize);
-
-            if (error == Error::Eof)
-            {
-                const auto bytesReaded = static_cast<size_t>(in_.gcount());
-                if (bytesReaded < BufferSize)
-                {
-                    buffer_.decreaseSize(bytesReaded);
-                }
-                return Error::NoError;
-            }
-
-            return error;
+            const bool success = !!in_.read(data, static_cast<std::streamsize>(size));
+            return success || in_.eof()
+                ? Error::NoError
+                : Error::ReadError;
         }
 
     private:
-        class InternalInputBuffer final
-            : public InputBuffer
-        {
-        public:
-            explicit InternalInputBuffer(size_t size)
-                : buffer_(size)
-            {
-                setBuffer(buffer_.ptr, size);
-            }
-
-            char* mutableData() const noexcept
-            {
-                return buffer_.ptr;
-            }
-
-            void decreaseSize(size_t newSize) noexcept
-            {
-                assert(newSize < maxSize_);
-                maxSize_ = newSize;
-            }
-
-            void gotoBegin() noexcept
-            {
-                pos_ = 0;
-            }
-
-            void gotoEnd() noexcept
-            {
-                pos_ = maxSize_;
-            }
-
-            size_t available() const noexcept
-            {
-                return maxSize_ - pos_;
-            }
-
-        private:
-            details::Buffer buffer_;
-        };
-
         std::istream& in_;
-        InternalInputBuffer buffer_;
-        bool eof_;
+        InputBuffer buffer_;
     };
 
     class OutputStream final
     {
-        static constexpr auto BufferSize = details::PrefferedBufferSize;
     public:
-        explicit OutputStream(std::ostream& stream)
+        explicit OutputStream(std::ostream& stream, size_t bufferSize = details::PrefferedBufferSize)
             : out_(stream)
-            , buffer_(BufferSize)
+            , buffer_(bufferSize)
         {
         }
 
@@ -213,10 +156,9 @@ namespace pods
 
             PODS_SAFE_CALL(writeBuffer());
 
-            const bool success = !!out_.write(data, static_cast<std::streamsize>(size));
-            return success
-                ? Error::NoError
-                : Error::WriteError;
+            return buffer_.size() > size
+                ? buffer_.put(data, size)
+                : write(data, size);
         }
 
         template <class T>
@@ -226,7 +168,7 @@ namespace pods
             return put(reinterpret_cast<const char*>(data), totalSize);
         }
 
-        Error flush() noexcept
+        Error flush()
         {
             if (buffer_.size() > 0)
             {
@@ -236,16 +178,19 @@ namespace pods
         }
 
     private:
-        Error writeBuffer() noexcept
+        Error writeBuffer()
         {
-            const bool success =
-                !!out_.write(buffer_.data(), static_cast<std::streamsize>(buffer_.size()));
-            if (success)
-            {
-                buffer_.clear();
-                return Error::NoError;
-            }
-            return Error::WriteError;
+            PODS_SAFE_CALL(write(buffer_.data(), buffer_.size()));
+            buffer_.clear();
+            return Error::NoError;
+        }
+
+        Error write(const char* data, size_t size)
+        {
+            const bool success = !!out_.write(data, static_cast<std::streamsize>(size));
+            return success
+                ? Error::NoError
+                : Error::WriteError;
         }
 
     private:
