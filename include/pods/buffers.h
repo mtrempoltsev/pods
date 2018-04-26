@@ -20,33 +20,33 @@ namespace pods
         friend class InputStream;
     public:
         explicit InputBuffer(size_t size)
-            : data_(static_cast<char*>(malloc(size)))
-            , begin_(data_)
-            , current_(data_)
-            , end_(data_ + size)
+            : allocated_(static_cast<char*>(malloc(size)))
+            , maxSize_(size)
+            , data_(allocated_)
+            , pos_(0)
         {
             assert(size > 0);
 
-            if (begin_ == nullptr)
+            if (allocated_ == nullptr)
             {
                 throw std::bad_alloc();
             }
         }
 
         InputBuffer(const char* data, size_t size) noexcept
-            : data_(nullptr)
-            , begin_(data)
-            , current_(data)
-            , end_(data + size)
+            : allocated_(nullptr)
+            , maxSize_(size)
+            , data_(data)
+            , pos_(0)
         {
             assert(size > 0);
         }
 
         ~InputBuffer()
         {
-            if (data_ != nullptr)
+            if (allocated_ != nullptr)
             {
-                free(data_);
+                free(allocated_);
             }
         }
 
@@ -78,13 +78,13 @@ namespace pods
         template <class T>
         Error get(T& value, typename std::enable_if<std::is_arithmetic<T>::value && sizeof(T) == 1, int>::type = 0) noexcept
         {
-            auto next = current_ + sizeof(T);
-            if (next <= end_)
+            if (pos_ + sizeof(T) <= maxSize_)
             {
-                value = static_cast<T>(*current_);
-                current_ = next;
+                value = static_cast<T>(data_[pos_]);
+                pos_ += sizeof(T);
                 return Error::NoError;
             }
+
             return Error::UnexpectedEnd;
         }
 
@@ -96,13 +96,14 @@ namespace pods
 
         Error get(char* data, size_t size) noexcept
         {
-            auto next = current_ + size;
-            if (next <= end_)
+            if (pos_ + size <= maxSize_)
             {
-                memcpy(data, current_, size);
-                current_ = next;
+                auto begin = data_ + pos_;
+                memcpy(data, begin, size);
+                pos_ += size;
                 return Error::NoError;
             }
+
             return Error::UnexpectedEnd;
         }
 
@@ -116,39 +117,36 @@ namespace pods
     private:
         void gotoEnd() noexcept
         {
-            current_ = end_;
+            pos_ = maxSize_;
         }
 
         void reset(size_t newSize) noexcept
         {
-            assert(newSize <= totalSize());
-            current_ = begin_;
-            end_ = begin_ + newSize;
+            assert(newSize <= maxSize_);
+            maxSize_ = newSize;
+            pos_ = 0;
         }
 
         char* data() const noexcept
         {
-            return data_;
+            return allocated_;
         }
 
-        size_t totalSize() const noexcept
+        size_t maxSize() const noexcept
         {
-            assert(begin_ <= end_);
-            return static_cast<size_t>(end_ - begin_);
+            return maxSize_;
         }
 
         size_t available() const noexcept
         {
-            assert(current_ <= end_);
-            return static_cast<size_t>(end_ - current_);
+            return maxSize_ - pos_;
         }
 
     private:
-        char* data_;
-
-        const char* begin_;
-        const char* current_;
-        const char* end_;
+        char* allocated_;
+        size_t maxSize_;
+        const char* data_;
+        size_t pos_;
     };
 
     class OutputBuffer final
