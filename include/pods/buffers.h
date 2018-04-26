@@ -121,7 +121,7 @@ namespace pods
 
         void reset(size_t newSize) noexcept
         {
-            assert(newSize <= size());
+            assert(newSize <= totalSize());
             current_ = begin_;
             end_ = begin_ + newSize;
         }
@@ -139,7 +139,7 @@ namespace pods
 
         size_t available() const noexcept
         {
-            assert(end_ <= current_);
+            assert(current_ <= end_);
             return static_cast<size_t>(end_ - current_);
         }
 
@@ -246,7 +246,7 @@ namespace pods
 
         size_t available() const noexcept
         {
-            assert(end_ <= current_);
+            assert(current_ <= end_);
             return static_cast<size_t>(end_ - current_);
         }
 
