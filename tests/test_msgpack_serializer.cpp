@@ -161,3 +161,8 @@ TEST(msgpackSerializer, testUIntSizes)
     check<UInt64, UInt16>(max2byte);
     check<UInt64, UInt32>(max4byte);
 }
+
+TEST(msgpackSerializer, testArray)
+{
+    testArray<pods::MsgPackSerializer<pods::ResizableOutputBuffer>, pods::MsgPackDeserializer<pods::InputBuffer>>();
+}

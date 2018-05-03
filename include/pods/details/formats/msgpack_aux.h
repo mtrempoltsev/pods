@@ -40,6 +40,13 @@ namespace pods
             static constexpr Tag Bin16 = 0xc5;
             static constexpr Tag Bin32 = 0xc6;
 
+            static constexpr Tag ArrayMax = 15;
+            static constexpr Tag ArrayMask = 0b10010000;
+            static constexpr Tag ArrayValue = 0b00001111;
+
+            static constexpr Tag Array16 = 0xdc;
+            static constexpr Tag Array32 = 0xdd;
+
             static constexpr int8_t Min5 = -32;
             static constexpr int8_t Min8 = std::numeric_limits<int8_t>::min();
             static constexpr int8_t Max8 = std::numeric_limits<int8_t>::max();

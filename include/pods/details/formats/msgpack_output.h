@@ -54,7 +54,21 @@ namespace pods
 
             Error startArray(Size size)
             {
-                return Error::NoError;
+                if (size <= msgpack::ArrayMax)
+                {
+                    const msgpack::Tag tag = static_cast<msgpack::Tag>(size) | msgpack::ArrayMask;
+                    return storage_.put(tag);
+                }
+                else if (size <= msgpack::Max16U)
+                {
+                    PODS_SAFE_CALL(storage_.put(msgpack::Array16));
+                    return storage_.put(static_cast<uint16_t>(size));
+                }
+                else
+                {
+                    PODS_SAFE_CALL(storage_.put(msgpack::Array32));
+                    return storage_.put(static_cast<uint32_t>(size));
+                }
             }
 
             Error endArray() noexcept

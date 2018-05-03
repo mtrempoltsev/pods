@@ -84,23 +84,23 @@ TEST(resizeableBuffer, resize)
 
     EXPECT_EQ(out.put(e1), pods::Error::NoError);
     EXPECT_EQ(out.size(), 8);
-    EXPECT_EQ(out.available(), 2);
+    EXPECT_EQ(out.capacity(), 10);
 
     EXPECT_EQ(out.put(e2), pods::Error::NoError);
     EXPECT_EQ(out.size(), 16);
-    EXPECT_EQ(out.available(), 16);
+    EXPECT_EQ(out.capacity(), 32);
 
     EXPECT_EQ(out.put(e3), pods::Error::NoError);
     EXPECT_EQ(out.size(), 24);
-    EXPECT_EQ(out.available(), 8);
+    EXPECT_EQ(out.capacity(), 32);
 
     EXPECT_EQ(out.put(e4), pods::Error::NoError);
     EXPECT_EQ(out.size(), 32);
-    EXPECT_EQ(out.available(), 0);
+    EXPECT_EQ(out.capacity(), 32);
 
     EXPECT_EQ(out.put(e5), pods::Error::NoError);
     EXPECT_EQ(out.size(), 40);
-    EXPECT_EQ(out.available(), 40);
+    EXPECT_EQ(out.capacity(), 80);
 
     uint64_t a1 = 0;
     uint64_t a2 = 0;

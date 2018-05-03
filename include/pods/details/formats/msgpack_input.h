@@ -51,7 +51,30 @@ namespace pods
 
             Error startArray(Size& size)
             {
-                return Error::NoError;
+                msgpack::Tag tag;
+                PODS_SAFE_CALL(storage_.get(tag));
+
+                switch (tag)
+                {
+                case msgpack::Array16:
+                {
+                    uint16_t n = 0;
+                    PODS_SAFE_CALL(storage_.get(n));
+                    size = n;
+                    return Error::NoError;
+                }
+                case msgpack::Array32:
+                    PODS_SAFE_CALL(storage_.get(size));
+                    return Error::NoError;
+                }
+
+                if ((tag & ~msgpack::ArrayValue) == msgpack::ArrayMask)
+                {
+                    size = (tag & msgpack::ArrayValue);
+                    return Error::NoError;
+                }
+
+                return Error::CorruptedArchive;
             }
 
             Error endArray() noexcept

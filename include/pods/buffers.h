@@ -347,9 +347,9 @@ namespace pods
             return static_cast<size_t>(current_ - data_);
         }
 
-        size_t available() const noexcept
+        size_t capacity() const noexcept
         {
-            return available_;
+            return size() + available_;
         }
 
         void clear() noexcept

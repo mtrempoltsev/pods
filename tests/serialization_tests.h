@@ -276,3 +276,78 @@ void testBinary()
         EXPECT_EQ(expected.g[i], actual.g[i]);
     }
 }
+
+struct SimpleSerializable
+{
+    int64_t a;
+
+    PODS_SERIALIZABLE(1, PODS_MDR(a))
+
+    bool operator==(const SimpleSerializable& right) const
+    {
+        return a == right.a;
+    }
+};
+
+struct Array
+{
+    static constexpr int aSize = 15;
+    static constexpr int bSize = 16;
+    static constexpr int cSize = 65536;
+
+    std::string a[aSize];
+    SimpleSerializable b[bSize];
+    int32_t c[cSize];
+
+    void fill()
+    {
+        for (int i = 0; i < aSize; ++i)
+        {
+            a[i] = std::to_string(i);
+        }
+
+        for (int i = 0; i < bSize; ++i)
+        {
+            b[i] = SimpleSerializable { i };
+        }
+
+        for (int i = 0; i < cSize; ++i)
+        {
+            c[i] = i;
+        }
+    }
+
+    PODS_SERIALIZABLE(1, PODS_MDR(a), PODS_MDR(b), PODS_MDR(c))
+};
+
+template <class Serializer, class Deserializer>
+void testArray()
+{
+    Array expected{};
+    expected.fill();
+
+    pods::ResizableOutputBuffer out;
+    Serializer serializer(out);
+    EXPECT_EQ(serializer.save(expected), pods::Error::NoError);
+
+    Array actual{};
+
+    pods::InputBuffer in(out.data(), out.size());
+    Deserializer deserializer(in);
+    EXPECT_EQ(deserializer.load(actual), pods::Error::NoError);
+
+    for (int i = 0; i < Array::aSize; ++i)
+    {
+        EXPECT_EQ(expected.a[i], actual.a[i]);
+    }
+
+    for (int i = 0; i < Array::bSize; ++i)
+    {
+        EXPECT_EQ(expected.b[i], actual.b[i]);
+    }
+
+    for (int i = 0; i < Array::cSize; ++i)
+    {
+        EXPECT_EQ(expected.c[i], actual.c[i]);
+    }
+}
