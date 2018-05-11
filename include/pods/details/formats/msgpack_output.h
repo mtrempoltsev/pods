@@ -78,7 +78,21 @@ namespace pods
 
             Error startMap(Size size)
             {
-                return Error::NoError;
+                if (size <= msgpack::MapMax)
+                {
+                    const msgpack::Tag tag = static_cast<msgpack::Tag>(size) | msgpack::MapMask;
+                    return storage_.put(tag);
+                }
+                else if (size <= msgpack::Max16U)
+                {
+                    PODS_SAFE_CALL(storage_.put(msgpack::Map16));
+                    return storage_.put(static_cast<uint16_t>(size));
+                }
+                else
+                {
+                    PODS_SAFE_CALL(storage_.put(msgpack::Map32));
+                    return storage_.put(static_cast<uint32_t>(size));
+                }
             }
 
             Error endMap() noexcept

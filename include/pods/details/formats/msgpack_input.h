@@ -84,7 +84,30 @@ namespace pods
 
             Error startMap(Size& size)
             {
-                return Error::NoError;
+                msgpack::Tag tag;
+                PODS_SAFE_CALL(storage_.get(tag));
+
+                switch (tag)
+                {
+                case msgpack::Map16:
+                {
+                    uint16_t n = 0;
+                    PODS_SAFE_CALL(storage_.get(n));
+                    size = n;
+                    return Error::NoError;
+                }
+                case msgpack::Map32:
+                    PODS_SAFE_CALL(storage_.get(size));
+                    return Error::NoError;
+                }
+
+                if ((tag & ~msgpack::MapValue) == msgpack::MapMask)
+                {
+                    size = (tag & msgpack::MapValue);
+                    return Error::NoError;
+                }
+
+                return Error::CorruptedArchive;
             }
 
             Error endMap() noexcept

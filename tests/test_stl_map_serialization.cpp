@@ -3,6 +3,7 @@
 #include <pods/binary.h>
 #include <pods/buffers.h>
 #include <pods/json.h>
+#include <pods/msgpack.h>
 
 #include "stl_map_data.h"
 
@@ -36,7 +37,7 @@ TEST(stlMapSerialization, binary)
     using BinarySerializer = pods::BinarySerializer<pods::ResizableOutputBuffer>;
     using BinaryDeserializer = pods::BinaryDeserializer<pods::InputBuffer>;
 
-    test<Map, BinarySerializer, BinaryDeserializer>();
+    test<StlMap, BinarySerializer, BinaryDeserializer>();
 }
 
 TEST(stlMapSerialization, json)
@@ -44,5 +45,13 @@ TEST(stlMapSerialization, json)
     using JsonSerializer = pods::JsonSerializer<pods::ResizableOutputBuffer>;
     using JsonDeserializer = pods::JsonDeserializer<pods::InputBuffer>;
 
-    test<Map, JsonSerializer, JsonDeserializer>();
+    test<StlMap, JsonSerializer, JsonDeserializer>();
+}
+
+TEST(stlMapSerialization, msgpack)
+{
+    using MsgPackSerializer = pods::MsgPackSerializer<pods::ResizableOutputBuffer>;
+    using MsgPackDeserializer = pods::MsgPackDeserializer<pods::InputBuffer>;
+
+    test<StlMap, MsgPackSerializer, MsgPackDeserializer>();
 }

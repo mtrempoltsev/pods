@@ -37,7 +37,7 @@ struct In
     PODS_SERIALIZABLE(1, PODS_MDR(k))
 };
 
-struct Map
+struct StlMap
 {
     std::map<int, int> a = { { 1, 2}, { 3, 4 } };
     std::map<In, int> b = { { { 1 }, 2 } };

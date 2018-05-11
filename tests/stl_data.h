@@ -32,7 +32,7 @@ struct In
     PODS_SERIALIZABLE(1, PODS_MDR(k))
 };
 
-struct Array
+struct StlArray
 {
     std::array<int, 3> x = { { 1, 2, 3 } };
     std::array<In, 3> y = { { { 4 }, { 5 }, { 6 } } };
@@ -40,7 +40,7 @@ struct Array
     PODS_SERIALIZABLE(1, PODS_MDR(x), PODS_MDR(y), PODS_MDR(z))
 };
 
-struct Vector
+struct StlVector
 {
     std::vector<int> x = { 1, 2, 3 };
     std::vector<In> y = { { { 4 }, { 5 }, { 6 } } };
@@ -48,7 +48,7 @@ struct Vector
     PODS_SERIALIZABLE(1, PODS_MDR(x), PODS_MDR(y), PODS_MDR(z))
 };
 
-struct Deque
+struct StlDeque
 {
     std::deque<int> x = { 1, 2, 3 };
     std::deque<In> y = { { { 4 }, { 5 }, { 6 } } };
@@ -56,7 +56,7 @@ struct Deque
     PODS_SERIALIZABLE(1, PODS_MDR(x), PODS_MDR(y), PODS_MDR(z))
 };
 
-struct List
+struct StlList
 {
     std::list<int> x = { 1, 2, 3 };
     std::list<In> y = { { { 4 }, { 5 }, { 6 } } };
@@ -64,7 +64,7 @@ struct List
     PODS_SERIALIZABLE(1, PODS_MDR(x), PODS_MDR(y), PODS_MDR(z))
 };
 
-struct ForwardList
+struct StlForwardList
 {
     std::forward_list<int> x = { 1, 2, 3 };
     std::forward_list<In> y = { { { 4 },{ 5 },{ 6 } } };
@@ -72,7 +72,7 @@ struct ForwardList
     PODS_SERIALIZABLE(1, PODS_MDR(x), PODS_MDR(y), PODS_MDR(z))
 };
 
-void clear(Array& data)
+void clear(StlArray& data)
 {
     std::fill(data.x.begin(), data.x.end(), 0);
     std::fill(data.y.begin(), data.y.end(), In { 0 } );

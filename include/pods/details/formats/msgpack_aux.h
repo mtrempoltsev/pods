@@ -47,6 +47,13 @@ namespace pods
             static constexpr Tag Array16 = 0xdc;
             static constexpr Tag Array32 = 0xdd;
 
+            static constexpr Tag MapMax = 15;
+            static constexpr Tag MapMask = 0b10000000;
+            static constexpr Tag MapValue = 0b00001111;
+
+            static constexpr Tag Map16 = 0xde;
+            static constexpr Tag Map32 = 0xdf;
+
             static constexpr int8_t Min5 = -32;
             static constexpr int8_t Min8 = std::numeric_limits<int8_t>::min();
             static constexpr int8_t Max8 = std::numeric_limits<int8_t>::max();

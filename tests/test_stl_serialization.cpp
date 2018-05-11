@@ -3,6 +3,7 @@
 #include <pods/binary.h>
 #include <pods/buffers.h>
 #include <pods/json.h>
+#include <pods/msgpack.h>
 
 #include "stl_data.h"
 
@@ -34,11 +35,11 @@ TEST(stlSerialization, binary)
     using BinarySerializer = pods::BinarySerializer<pods::ResizableOutputBuffer>;
     using BinaryDeserializer = pods::BinaryDeserializer<pods::InputBuffer>;
 
-    test<Array, BinarySerializer, BinaryDeserializer>();
-    test<Vector, BinarySerializer, BinaryDeserializer>();
-    test<Deque, BinarySerializer, BinaryDeserializer>();
-    test<List, BinarySerializer, BinaryDeserializer>();
-    test<ForwardList, BinarySerializer, BinaryDeserializer>();
+    test<StlArray, BinarySerializer, BinaryDeserializer>();
+    test<StlVector, BinarySerializer, BinaryDeserializer>();
+    test<StlDeque, BinarySerializer, BinaryDeserializer>();
+    test<StlList, BinarySerializer, BinaryDeserializer>();
+    test<StlForwardList, BinarySerializer, BinaryDeserializer>();
 }
 
 TEST(stlSerialization, json)
@@ -46,9 +47,21 @@ TEST(stlSerialization, json)
     using JsonSerializer = pods::JsonSerializer<pods::ResizableOutputBuffer>;
     using JsonDeserializer = pods::JsonDeserializer<pods::InputBuffer>;
 
-    test<Array, JsonSerializer, JsonDeserializer>();
-    test<Vector, JsonSerializer, JsonDeserializer>();
-    test<Deque, JsonSerializer, JsonDeserializer>();
-    test<List, JsonSerializer, JsonDeserializer>();
-    test<ForwardList, JsonSerializer, JsonDeserializer>();
+    test<StlArray, JsonSerializer, JsonDeserializer>();
+    test<StlVector, JsonSerializer, JsonDeserializer>();
+    test<StlDeque, JsonSerializer, JsonDeserializer>();
+    test<StlList, JsonSerializer, JsonDeserializer>();
+    test<StlForwardList, JsonSerializer, JsonDeserializer>();
+}
+
+TEST(stlSerialization, msgpack)
+{
+    using MsgPackSerializer = pods::MsgPackSerializer<pods::ResizableOutputBuffer>;
+    using MsgPackDeserializer = pods::MsgPackDeserializer<pods::InputBuffer>;
+
+    test<StlArray, MsgPackSerializer, MsgPackDeserializer>();
+    test<StlVector, MsgPackSerializer, MsgPackDeserializer>();
+    test<StlDeque, MsgPackSerializer, MsgPackDeserializer>();
+    test<StlList, MsgPackSerializer, MsgPackDeserializer>();
+    test<StlForwardList, MsgPackSerializer, MsgPackDeserializer>();
 }
