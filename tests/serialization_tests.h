@@ -432,17 +432,17 @@ void testMap()
     EXPECT_EQ(deserializer.load(actual), pods::Error::NoError);
 
     EXPECT_EQ(expected.a[0], actual.a[0]);
-    EXPECT_EQ(expected.a[Array::aSize - 1], actual.a[Array::aSize - 1]);
+    EXPECT_EQ(expected.a[Map::aSize - 1], actual.a[Map::aSize - 1]);
 
     EXPECT_EQ(expected.b[0], actual.b[0]);
-    EXPECT_EQ(expected.b[Array::aSize - 1], actual.b[Array::aSize - 1]);
-    EXPECT_EQ(expected.b[Array::aSize], actual.b[Array::aSize]);
-    EXPECT_EQ(expected.b[Array::bSize - 1], actual.b[Array::bSize - 1]);
+    EXPECT_EQ(expected.b[Map::aSize - 1], actual.b[Map::aSize - 1]);
+    EXPECT_EQ(expected.b[Map::aSize - 0], actual.b[Map::aSize - 0]);
+    EXPECT_EQ(expected.b[Map::bSize - 1], actual.b[Map::bSize - 1]);
 
     EXPECT_EQ(expected.c[0], actual.c[0]);
-    EXPECT_EQ(expected.c[Array::aSize - 1], actual.c[Array::aSize - 1]);
-    EXPECT_EQ(expected.c[Array::aSize], actual.c[Array::aSize]);
-    EXPECT_EQ(expected.c[Array::bSize - 1], actual.c[Array::bSize - 1]);
-    EXPECT_EQ(expected.c[Array::bSize], actual.c[Array::bSize]);
-    EXPECT_EQ(expected.c[Array::cSize - 1], actual.c[Array::cSize - 1]);
+    EXPECT_EQ(expected.c[Map::aSize - 1], actual.c[Map::aSize - 1]);
+    EXPECT_EQ(expected.c[Map::aSize - 0], actual.c[Map::aSize - 0]);
+    EXPECT_EQ(expected.c[Map::bSize - 1], actual.c[Map::bSize - 1]);
+    EXPECT_EQ(expected.c[Map::bSize - 0], actual.c[Map::bSize - 0]);
+    EXPECT_EQ(expected.c[Map::cSize - 1], actual.c[Map::cSize - 1]);
 }
