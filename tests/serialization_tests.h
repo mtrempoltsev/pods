@@ -213,16 +213,43 @@ struct Binary
 {
     static constexpr int size = 3;
 
-    std::vector<uint32_t> a;
+    std::vector<uint32_t> a; // zero size
     std::vector<uint32_t> b = { 0xfedcba98, 0x76543210, 0x648823fe };
     std::unique_ptr<int16_t[]> c;
     int16_t* d;
     std::array<uint32_t, 3> e = { { 0xfedcba98, 0x76543210, 0x648823fe } };
     std::array<uint8_t, 1> f = { { 100 } };
     uint64_t g[4] = { 1, 2, 3, 4 };
+    std::vector<uint8_t> h;
+    std::vector<uint8_t> i;
+
+    static constexpr int hSize = 65535;
+    static constexpr int iSize = 65536;
+
+    void fill()
+    {
+        for (size_t j = 0; j < size; ++j)
+        {
+            c.get()[j] = static_cast<int16_t>(j + 1);
+            d[j] = static_cast<int16_t>(j + 10);
+        }
+
+        uint8_t n = 0;
+
+        for (int j = 0; j < hSize; ++j)
+        {
+            h.push_back(n++);
+        }
+
+        for (int j = 0; j < iSize; ++j)
+        {
+            i.push_back(n++);
+        }
+    }
 
     PODS_SERIALIZABLE(1, PODS_MDR_BIN(a), PODS_MDR_BIN(b), PODS_MDR_BIN_2(c, size),
-        PODS_MDR_BIN_2(d, size), PODS_MDR_BIN(e), PODS_MDR_BIN(f), PODS_MDR_BIN(g))
+        PODS_MDR_BIN_2(d, size), PODS_MDR_BIN(e), PODS_MDR_BIN(f), PODS_MDR_BIN(g),
+        PODS_MDR_BIN(h), PODS_MDR_BIN(i))
 };
 
 template <class Serializer, class Deserializer>
@@ -235,17 +262,13 @@ void testBinary()
     expected.c = std::make_unique<int16_t[]>(expected.size);
     expected.d = buf1;
 
-    for (size_t i = 0; i < expected.size; ++i)
-    {
-        expected.c.get()[i] = static_cast<int16_t>(i + 1);
-        expected.d[i] = static_cast<int16_t>(i + 10);
-    }
+    expected.fill();
 
     pods::ResizableOutputBuffer out;
     Serializer serializer(out);
     EXPECT_EQ(serializer.save(expected), pods::Error::NoError);
 
-    Binary actual;
+    Binary actual{};
     actual.a.push_back(100);
     actual.b.clear();
     actual.c = std::make_unique<int16_t[]>(expected.size);
@@ -276,6 +299,14 @@ void testBinary()
     {
         EXPECT_EQ(expected.g[i], actual.g[i]);
     }
+
+    EXPECT_EQ(expected.h[0], actual.h[0]);
+    EXPECT_EQ(expected.h[Binary::hSize - 1], actual.h[Binary::hSize - 1]);
+
+    EXPECT_EQ(expected.i[0], actual.i[0]);
+    EXPECT_EQ(expected.i[Binary::hSize - 1], actual.i[Binary::hSize - 1]);
+    EXPECT_EQ(expected.i[Binary::hSize], actual.i[Binary::hSize]);
+    EXPECT_EQ(expected.i[Binary::iSize - 1], actual.i[Binary::iSize - 1]);
 }
 
 struct SimpleSerializable
@@ -337,20 +368,20 @@ void testArray()
     Deserializer deserializer(in);
     EXPECT_EQ(deserializer.load(actual), pods::Error::NoError);
 
-    for (int i = 0; i < Array::aSize; ++i)
-    {
-        EXPECT_EQ(expected.a[i], actual.a[i]);
-    }
+    EXPECT_EQ(expected.a[0], actual.a[0]);
+    EXPECT_EQ(expected.a[Array::aSize - 1], actual.a[Array::aSize - 1]);
 
-    for (int i = 0; i < Array::bSize; ++i)
-    {
-        EXPECT_EQ(expected.b[i], actual.b[i]);
-    }
+    EXPECT_EQ(expected.b[0], actual.b[0]);
+    EXPECT_EQ(expected.b[Array::aSize - 1], actual.b[Array::aSize - 1]);
+    EXPECT_EQ(expected.b[Array::aSize], actual.b[Array::aSize]);
+    EXPECT_EQ(expected.b[Array::bSize - 1], actual.b[Array::bSize - 1]);
 
-    for (int i = 0; i < Array::cSize; ++i)
-    {
-        EXPECT_EQ(expected.c[i], actual.c[i]);
-    }
+    EXPECT_EQ(expected.c[0], actual.c[0]);
+    EXPECT_EQ(expected.c[Array::aSize - 1], actual.c[Array::aSize - 1]);
+    EXPECT_EQ(expected.c[Array::aSize], actual.c[Array::aSize]);
+    EXPECT_EQ(expected.c[Array::bSize - 1], actual.c[Array::bSize - 1]);
+    EXPECT_EQ(expected.c[Array::bSize], actual.c[Array::bSize]);
+    EXPECT_EQ(expected.c[Array::cSize - 1], actual.c[Array::cSize - 1]);
 }
 
 struct Map
@@ -400,21 +431,18 @@ void testMap()
     Deserializer deserializer(in);
     EXPECT_EQ(deserializer.load(actual), pods::Error::NoError);
 
-    ASSERT_EQ(expected.a.size(), actual.a.size());
-    for (int i = 0; i < Map::aSize; ++i)
-    {
-        EXPECT_EQ(expected.a[i], actual.a[i]);
-    }
+    EXPECT_EQ(expected.a[0], actual.a[0]);
+    EXPECT_EQ(expected.a[Array::aSize - 1], actual.a[Array::aSize - 1]);
 
-    ASSERT_EQ(expected.b.size(), actual.b.size());
-    for (int i = 0; i < Map::bSize; ++i)
-    {
-        EXPECT_EQ(expected.b[i], actual.b[i]);
-    }
+    EXPECT_EQ(expected.b[0], actual.b[0]);
+    EXPECT_EQ(expected.b[Array::aSize - 1], actual.b[Array::aSize - 1]);
+    EXPECT_EQ(expected.b[Array::aSize], actual.b[Array::aSize]);
+    EXPECT_EQ(expected.b[Array::bSize - 1], actual.b[Array::bSize - 1]);
 
-    ASSERT_EQ(expected.c.size(), actual.c.size());
-    for (int i = 0; i < Map::cSize; ++i)
-    {
-        EXPECT_EQ(expected.c[i], actual.c[i]);
-    }
+    EXPECT_EQ(expected.c[0], actual.c[0]);
+    EXPECT_EQ(expected.c[Array::aSize - 1], actual.c[Array::aSize - 1]);
+    EXPECT_EQ(expected.c[Array::aSize], actual.c[Array::aSize]);
+    EXPECT_EQ(expected.c[Array::bSize - 1], actual.c[Array::bSize - 1]);
+    EXPECT_EQ(expected.c[Array::bSize], actual.c[Array::bSize]);
+    EXPECT_EQ(expected.c[Array::cSize - 1], actual.c[Array::cSize - 1]);
 }

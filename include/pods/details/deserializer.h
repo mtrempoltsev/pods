@@ -190,7 +190,11 @@ namespace pods
             template <class T>
             Error doProcess(BinaryVector<T>& value)
             {
-                return format_.loadBlob(value.data(), [&](Size size) { return value.allocate(size); });
+                return format_.loadBlob(
+                    [&](char*& data, Size size)
+                    {
+                        return value.allocate(data, size);
+                    });
             }
 
             template <class T, size_t ArraySize>

@@ -451,8 +451,7 @@ namespace pods
                     : Error::CorruptedArchive;
             }
 
-            template <class T>
-            Error loadBlob(T* data, size_t size)
+            Error loadBlob(char* data, size_t size)
             {
                 std::string encoded;
                 PODS_SAFE_CALL(load(encoded));
@@ -467,15 +466,16 @@ namespace pods
                 return Error::NoError;
             }
 
-            template <class T, class Allocator>
-            Error loadBlob(T* data, const Allocator& allocator)
+            template <class Allocator>
+            Error loadBlob(const Allocator& allocator)
             {
                 std::string encoded;
                 PODS_SAFE_CALL(load(encoded));
 
                 const auto decodedSize = details::getBase64DecodedSize(encoded.c_str(), encoded.size());
                 PODS_SAFE_CALL(checkSize(decodedSize));
-                PODS_SAFE_CALL(allocator(static_cast<Size>(decodedSize)));
+                char* data = nullptr;
+                PODS_SAFE_CALL(allocator(data, static_cast<Size>(decodedSize)));
 
                 details::base64Decode(encoded.c_str(), encoded.size(), data);
                 return Error::NoError;

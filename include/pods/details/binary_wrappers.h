@@ -14,8 +14,6 @@ namespace pods
         struct BinaryArray final
         {
         public:
-            using ValueType = char;
-
             BinaryArray(char* data, size_t size) noexcept
                 : data_(data)
                 , size_(size)
@@ -50,16 +48,15 @@ namespace pods
         public:
             static_assert(std::is_arithmetic<T>::value, "T must be an arithmetic type");
 
-            using ValueType = char;
-
             explicit BinaryVector(std::vector<T>& storage)
                 : storage_(storage)
             {
             }
 
-            Error allocate(size_t requestedSize)
+            Error allocate(char*& ptr, size_t requestedSize)
             {
                 storage_.resize(requestedSize / sizeof(T));
+                ptr = data();
                 return Error::NoError;
             }
 

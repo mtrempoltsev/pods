@@ -96,8 +96,7 @@ namespace pods
                 return storage_.get(const_cast<char*>(value.data()), size);
             }
 
-            template <class T>
-            Error loadBlob(T* data, size_t size)
+            Error loadBlob(char* data, size_t size)
             {
                 Size actualSize = 0;
                 PODS_SAFE_CALL(storage_.get(actualSize));
@@ -106,12 +105,13 @@ namespace pods
                     : Error::CorruptedArchive;
             }
 
-            template <class T, class Allocator>
-            Error loadBlob(T* data, const Allocator& allocator)
+            template <class Allocator>
+            Error loadBlob(const Allocator& allocator)
             {
                 Size size = 0;
                 PODS_SAFE_CALL(storage_.get(size));
-                PODS_SAFE_CALL(allocator(size));
+                char* data = nullptr;
+                PODS_SAFE_CALL(allocator(data, size));
                 return storage_.get(data, size);
             }
 
