@@ -166,3 +166,8 @@ TEST(msgpackSerializer, testArray)
 {
     testArray<pods::MsgPackSerializer<pods::ResizableOutputBuffer>, pods::MsgPackDeserializer<pods::InputBuffer>>();
 }
+
+TEST(msgpackSerializer, testMap)
+{
+    testMap<pods::MsgPackSerializer<pods::ResizableOutputBuffer>, pods::MsgPackDeserializer<pods::InputBuffer>>();
+}

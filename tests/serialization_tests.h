@@ -2,6 +2,7 @@
 
 #include <cstdint>
 #include <string>
+#include <map>
 
 #include <pods/pods.h>
 
@@ -347,6 +348,72 @@ void testArray()
     }
 
     for (int i = 0; i < Array::cSize; ++i)
+    {
+        EXPECT_EQ(expected.c[i], actual.c[i]);
+    }
+}
+
+struct Map
+{
+    static constexpr int aSize = 15;
+    static constexpr int bSize = 16;
+    static constexpr int cSize = 65536;
+
+    std::map<int, int> a;
+    std::map<int, int> b;
+    std::map<int, int> c;
+
+    void fill()
+    {
+        for (int i = 0; i < aSize; ++i)
+        {
+            a[i] = i;
+        }
+
+        for (int i = 0; i < bSize; ++i)
+        {
+            b[i] = i * 2;
+        }
+
+        for (int i = 0; i < cSize; ++i)
+        {
+            c[i] = i * 3;
+        }
+    }
+
+    PODS_SERIALIZABLE(1, PODS_MDR(a), PODS_MDR(b), PODS_MDR(c))
+};
+
+template <class Serializer, class Deserializer>
+void testMap()
+{
+    Map expected{};
+    expected.fill();
+
+    pods::ResizableOutputBuffer out;
+    Serializer serializer(out);
+    EXPECT_EQ(serializer.save(expected), pods::Error::NoError);
+
+    Map actual{};
+
+    pods::InputBuffer in(out.data(), out.size());
+    Deserializer deserializer(in);
+    EXPECT_EQ(deserializer.load(actual), pods::Error::NoError);
+
+    ASSERT_EQ(expected.a.size(), actual.a.size());
+    for (int i = 0; i < Map::aSize; ++i)
+    {
+        EXPECT_EQ(expected.a[i], actual.a[i]);
+    }
+
+    ASSERT_EQ(expected.b.size(), actual.b.size());
+    for (int i = 0; i < Map::bSize; ++i)
+    {
+        EXPECT_EQ(expected.b[i], actual.b[i]);
+    }
+
+    ASSERT_EQ(expected.c.size(), actual.c.size());
+    for (int i = 0; i < Map::cSize; ++i)
     {
         EXPECT_EQ(expected.c[i], actual.c[i]);
     }
