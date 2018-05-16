@@ -72,12 +72,10 @@ set(HEADERS
     ${PODS_FORMATS_HEADERS}
     )
 
-if(MSVC)
-    source_group("Header Files" FILES "${PODS_PUBLIC_HEADERS}")
-    source_group("Header Files\\details" FILES "${PODS_DETAILS_HEADERS}")
-    source_group("Header Files\\formats" FILES "${PODS_FORMATS_HEADERS}")
-    add_custom_target(libpods SOURCES ${HEADERS})
-endif()
+source_group("Header Files" FILES "${PODS_PUBLIC_HEADERS}")
+source_group("Header Files\\details" FILES "${PODS_DETAILS_HEADERS}")
+source_group("Header Files\\formats" FILES "${PODS_FORMATS_HEADERS}")
+add_custom_target(libpods SOURCES ${HEADERS})
 
 add_library(${PROJECT_NAME} INTERFACE)
 target_sources(${PROJECT_NAME} INTERFACE ${HEADERS})
@@ -85,9 +83,9 @@ target_sources(${PROJECT_NAME} INTERFACE ${HEADERS})
 set(PODS_EXAMPLES ${PROJECT_NAME}_examples)
 add_subdirectory(examples)
 
+add_subdirectory(benchmarks)
+
 set(PODS_TEST_PROJECT test_${PROJECT_NAME})
 add_test(NAME ${PODS_TEST_PROJECT} COMMAND ${PODS_TEST_PROJECT})
 add_subdirectory(tests)
 enable_testing()
-
-add_executable(benchmark ${PODS_ROOT}/benchmarks/memcpy.cpp)
