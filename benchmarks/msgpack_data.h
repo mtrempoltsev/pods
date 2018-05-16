@@ -60,17 +60,17 @@ void destroyFirst(struct First* data)
 
 struct Second
 {
-    int32_t a;
-    uint64_t b;
-    int64_t c;
+    uint64_t a;
+    int64_t b;
+    uint16_t c;
     int8_t d;
-    uint16_t e;
-    int64_t f;
-    uint64_t g;
-    int32_t h;
-    int8_t i;
-    int32_t k;
-    uint16_t l;
+    int64_t e;
+    uint16_t f;
+    int32_t g;
+    uint64_t h;
+    int32_t i;
+    int8_t k;
+    int32_t l;
 
 #ifdef __cplusplus
     PODS_SERIALIZABLE(1, PODS_MDR(a), PODS_MDR(b), PODS_MDR(c), PODS_MDR(d),
@@ -81,17 +81,17 @@ struct Second
 
 void initSecond(struct Second* data)
 {
-    data->a = -20;
-    data->b = 1024 * 1024;
-    data->c = 100l * 1024 * 1024 * 1024;
-    data->d = 100;
-    data->e = 512;
-    data->f = -(1024 * 1024);
-    data->g = 64;
+    data->a = 40;
+    data->b = 50l * 1024 * 1024 * 1024;
+    data->c = 256;
+    data->d = 10;
+    data->e = -(80 * 1024 * 1024);
+    data->f = 60 * 1024;
+    data->g = 1024 * 1024 + 512;
     data->h = 8000;
-    data->i = -4;
-    data->k = -(60 * 1024);
-    data->l = 0;
+    data->i = -400000;
+    data->k = -60;
+    data->l = 200000000;
 }
 
 void destroySecond(struct Second* data)
