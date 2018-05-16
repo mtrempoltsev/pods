@@ -194,7 +194,7 @@ const char* decodeName(const char* buf, const char* end, const char* name, uint3
     if (len != nameLen)
         return NULL;
 
-    if (strcmp(name, ptr) != 0)
+    if (memcmp(name, ptr, len) != 0)
         return NULL;
 
     return buf;
@@ -305,7 +305,7 @@ const char* deserialize(struct Data* data, const char* buf, size_t size)
         data->third[i].first.f = decodeInt(&buf, end);
         RET_IF_NULL(buf);
 
-        buf = decodeName(buf, end, "f", 1);
+        buf = decodeName(buf, end, "g", 1);
         RET_IF_NULL(buf);
         buf = decodeBin(buf, end, (char*) data->third[i].first.g, Small * sizeof(uint64_t));
         RET_IF_NULL(buf);
