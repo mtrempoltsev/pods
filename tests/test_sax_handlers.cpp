@@ -257,9 +257,9 @@ TEST(saxHandlers, floating)
         EXPECT_FALSE(handler.Int64(std::numeric_limits<int64_t>::min()));
         EXPECT_FALSE(handler.Int64(std::numeric_limits<int64_t>::max()));
         EXPECT_FALSE(handler.Uint64(std::numeric_limits<uint64_t>::max()));
-        EXPECT_TRUE(handler.Double(std::numeric_limits<float>::min()));
+        EXPECT_TRUE(handler.Double(std::numeric_limits<float>::lowest()));
         EXPECT_TRUE(handler.Double(std::numeric_limits<float>::max()));
-        EXPECT_FALSE(handler.Double(std::numeric_limits<double>::min()));
+        EXPECT_FALSE(handler.Double(std::numeric_limits<double>::lowest()));
         EXPECT_FALSE(handler.Double(std::numeric_limits<double>::max()));
         EXPECT_FALSE(handler.RawNumber("15", 2, true));
         EXPECT_FALSE(handler.String("test", 4, true));
@@ -282,9 +282,9 @@ TEST(saxHandlers, floating)
         EXPECT_FALSE(handler.Int64(std::numeric_limits<int64_t>::min()));
         EXPECT_FALSE(handler.Int64(std::numeric_limits<int64_t>::max()));
         EXPECT_FALSE(handler.Uint64(std::numeric_limits<uint64_t>::max()));
-        EXPECT_TRUE(handler.Double(std::numeric_limits<float>::min()));
+        EXPECT_TRUE(handler.Double(std::numeric_limits<float>::lowest()));
         EXPECT_TRUE(handler.Double(std::numeric_limits<float>::max()));
-        EXPECT_TRUE(handler.Double(std::numeric_limits<double>::min()));
+        EXPECT_TRUE(handler.Double(std::numeric_limits<double>::lowest()));
         EXPECT_TRUE(handler.Double(std::numeric_limits<double>::max()));
         EXPECT_FALSE(handler.RawNumber("15", 2, true));
         EXPECT_FALSE(handler.String("test", 4, true));

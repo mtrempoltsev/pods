@@ -2,7 +2,7 @@
 #include <sstream>
 
 #include <pods/pods.h>
-#include <pods/binary.h>
+#include <pods/msgpack.h>
 #include <pods/streams.h>
 
 struct Server
@@ -23,7 +23,7 @@ int main(int /*argc*/, char** /*argv*/)
     std::stringstream buffer;
 
     pods::OutputStream out(buffer);
-    pods::BinarySerializer<decltype(out)> serializer(out);
+    pods::MsgPackSerializer<decltype(out)> serializer(out);
     if (serializer.save(original) != pods::Error::NoError)
     {
         std::cerr << "serialization error\n";
@@ -35,7 +35,7 @@ int main(int /*argc*/, char** /*argv*/)
     loaded.port = 0;
 
     pods::InputStream in(buffer);
-    pods::BinaryDeserializer<decltype(in)> deserializer(in);
+    pods::MsgPackDeserializer<decltype(in)> deserializer(in);
     if (deserializer.load(loaded) != pods::Error::NoError)
     {
         std::cerr << "deserialization error\n";

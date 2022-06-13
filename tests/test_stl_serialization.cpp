@@ -1,6 +1,5 @@
 ﻿#include <gtest/gtest.h>
 
-#include <pods/binary.h>
 #include <pods/buffers.h>
 #include <pods/json.h>
 #include <pods/msgpack.h>
@@ -28,18 +27,6 @@ void test()
     EXPECT_EQ(expected.x, actual.x);
     EXPECT_EQ(expected.y, actual.y);
     EXPECT_EQ(expected.z, actual.z);
-}
-
-TEST(stlSerialization, binary)
-{
-    using BinarySerializer = pods::BinarySerializer<pods::ResizableOutputBuffer>;
-    using BinaryDeserializer = pods::BinaryDeserializer<pods::InputBuffer>;
-
-    test<StlArray, BinarySerializer, BinaryDeserializer>();
-    test<StlVector, BinarySerializer, BinaryDeserializer>();
-    test<StlDeque, BinarySerializer, BinaryDeserializer>();
-    test<StlList, BinarySerializer, BinaryDeserializer>();
-    test<StlForwardList, BinarySerializer, BinaryDeserializer>();
 }
 
 TEST(stlSerialization, json)

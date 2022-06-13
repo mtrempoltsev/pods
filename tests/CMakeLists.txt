@@ -21,7 +21,6 @@ include_directories(${PODS_INCLUDE})
 
 set(HEADERS
     data.h
-    serialization_tests.h
     stl_data.h
     stl_map_data.h
     storage_data.h
@@ -30,8 +29,6 @@ set(HEADERS
 
 set(SOURCES
     test_base64.cpp
-    test_binary_serializer.cpp
-    test_binary_versioning.cpp
     test_buffer.cpp
     test_endianness.cpp
     test_json_versioning.cpp

@@ -263,7 +263,7 @@ namespace pods
 
             bool Double(double value) noexcept
             {
-                if (value < std::numeric_limits<T>::min() || value > std::numeric_limits<T>::max())
+                if (value < std::numeric_limits<T>::lowest() || value > std::numeric_limits<T>::max())
                 {
                     return false;
                 }

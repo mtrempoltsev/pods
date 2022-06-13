@@ -7,10 +7,12 @@
 
 struct Float
 {
-    float a = 3.4e38f;
-    double b = 1.7e308;
+    float a1 = -3.4e38f;
+    float a2 = 3.4e38f;
+    double b1 = -1.7e308;
+    double b2 = 1.7e308;
 
-    PODS_SERIALIZABLE(1, PODS_MDR(a), PODS_MDR(b))
+    PODS_SERIALIZABLE(1, PODS_MDR(a1), PODS_MDR(a2), PODS_MDR(b1), PODS_MDR(b2))
 };
 
 template <class Serializer, class Deserializer>
@@ -29,8 +31,10 @@ void testFloat()
     Deserializer deserializer(in);
     EXPECT_EQ(deserializer.load(actual), pods::Error::NoError);
 
-    EXPECT_FLOAT_EQ(expected.a, actual.a);
-    EXPECT_DOUBLE_EQ(expected.b, actual.b);
+    EXPECT_FLOAT_EQ(expected.a1, actual.a1);
+    EXPECT_FLOAT_EQ(expected.a2, actual.a2);
+    EXPECT_DOUBLE_EQ(expected.b1, actual.b1);
+    EXPECT_DOUBLE_EQ(expected.b2, actual.b2);
 }
 
 TEST(json, testFloat)

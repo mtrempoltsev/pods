@@ -1,7 +1,7 @@
 ﻿#include <iostream>
 #include <chrono>
 
-#include <pods/binary.h>
+#include <pods/json.h>
 #include <pods/msgpack.h>
 #include <pods/buffers.h>
 
@@ -105,13 +105,13 @@ int main()
 
     Data data = {};
 
-    const auto serializedSize = getSerializedSize<pods::BinarySerializer<pods::ResizableOutputBuffer>>(data);
-    std::cout << "serialized data size: " << serializedSize << '\n';
+    const auto jsonSerializedSize = getSerializedSize<pods::JsonSerializer<pods::ResizableOutputBuffer>>(data);
+    std::cout << "JSON data size: " << jsonSerializedSize << '\n';
 
     const auto msgpackSerializedSize = getSerializedSize<pods::MsgPackSerializer<pods::ResizableOutputBuffer>>(data);
-    std::cout << "msgpack serialized data size: " << msgpackSerializedSize << '\n';
+    std::cout << "MsgPack data size: " << msgpackSerializedSize << '\n';
 
-    const auto maxSize = std::max(size, std::max(serializedSize, msgpackSerializedSize));
+    const auto maxSize = std::max(size, std::max(jsonSerializedSize, msgpackSerializedSize));
     auto buffer = std::make_unique<char[]>(maxSize * N);
 
     {
@@ -130,8 +130,8 @@ int main()
         printSpeed(N * R, size, timer.stop());
     }
 
-    std::cout << "\nPODS format";
-    benchmark<pods::MsgPackSerializer<pods::OutputBuffer>, pods::MsgPackDeserializer<pods::InputBuffer>>(data, buffer.get(), serializedSize);
+    std::cout << "\nJSON format";
+    benchmark<pods::JsonSerializer<pods::OutputBuffer>, pods::JsonDeserializer<pods::InputBuffer>>(data, buffer.get(), jsonSerializedSize);
 
     std::cout << "\nMsgPack format";
     benchmark<pods::MsgPackSerializer<pods::OutputBuffer>, pods::MsgPackDeserializer<pods::InputBuffer>>(data, buffer.get(), msgpackSerializedSize);
