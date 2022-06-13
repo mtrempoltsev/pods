@@ -32,19 +32,7 @@ struct A
 
     std::array<float, 5> floatData = { { 1.1f, 2.2f, 3.3f, 4.4f, 5.5f } };
 
-    static constexpr pods::Version version()
-    {
-        return 5;
-    }
-
-    template <class Serializer>
-    pods::Error serialize(Serializer& serializer, pods::Version /*archiveVersion*/)
-    {
-        return serializer
-        (
-            PODS_OPT(floatData)
-        );
-    }
+    PODS_SERIALIZABLE(5, PODS_OPT(floatData))
 };
 
 struct TestData
@@ -63,38 +51,15 @@ struct TestData
             Enum1 e1 = ::BB;
             Enum2 e2 = Enum2::X;
 
-            static constexpr pods::Version version()
-            {
-                return 1;
-            }
-
-            template <class Serializer>
-            pods::Error serialize(Serializer& serializer, pods::Version /*archiveVersion*/)
-            {
-                return serializer
-                (
-                    PODS_OPT(b),
-                    PODS_MDR(e1),
-                    PODS_MDR(e2)
-                );
-            }
+            PODS_SERIALIZABLE(1,
+                PODS_OPT(b),
+                PODS_MDR(e1),
+                PODS_MDR(e2))
         };
 
         C c;
 
-        static constexpr pods::Version version()
-        {
-            return 2;
-        }
-
-        template <class Serializer>
-        pods::Error serialize(Serializer& serializer, pods::Version /*archiveVersion*/)
-        {
-            return serializer
-            (
-                PODS_MDR(c)
-            );
-        }
+        PODS_SERIALIZABLE(2, PODS_MDR(c))
     };
 
     B b;
@@ -114,20 +79,9 @@ struct TestData
             return x == other.x && y == other.y;
         }
 
-        static constexpr pods::Version version()
-        {
-            return 1;
-        }
-
-        template <class Serializer>
-        pods::Error serialize(Serializer& serializer, pods::Version /*archiveVersion*/)
-        {
-            return serializer
-            (
-                PODS_MDR(x),
-                PODS_OPT(y)
-            );
-        }
+        PODS_SERIALIZABLE(1,
+            PODS_MDR(x),
+            PODS_OPT(y))
     };
 
     std::vector<Point> points = { { 1, 2}, { 3, 4 } };
@@ -140,28 +94,17 @@ struct TestData
 
     std::map<Point, Point> map = { { { 7, 8 }, { 9, 10 } } };
 
-    static constexpr pods::Version version()
-    {
-        return 1;
-    }
-
-    template <class Serializer>
-    pods::Error serialize(Serializer& serializer, pods::Version /*archiveVersion*/)
-    {
-        return serializer
-        (
-            PODS_MDR(x),
-            PODS_OPT(y),
-            PODS_MDR(z),
-            PODS_OPT(a),
-            PODS_MDR(b),
-            PODS_OPT(points),
-            PODS_MDR(dict),
-            PODS_MDR(strings),
-            PODS_OPT(arr),
-            PODS_OPT(map)
-        );
-    }
+    PODS_SERIALIZABLE(1,
+        PODS_MDR(x),
+        PODS_OPT(y),
+        PODS_MDR(z),
+        PODS_OPT(a),
+        PODS_MDR(b),
+        PODS_OPT(points),
+        PODS_MDR(dict),
+        PODS_MDR(strings),
+        PODS_OPT(arr),
+        PODS_OPT(map))
 };
 
 struct BinData1

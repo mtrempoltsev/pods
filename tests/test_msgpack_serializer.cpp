@@ -2,9 +2,7 @@
 
 #include <pods/buffers.h>
 #include <pods/msgpack.h>
-#include <pods/streams.h>
-
-#include "serialization_tests.h"
+#include <pods/pods.h>
 
 struct Int8
 {
@@ -80,48 +78,18 @@ void check(T expected)
     EXPECT_EQ(expected, to.x);
 }
 
-TEST(msgpackSerializer, testBool)
-{
-    testBool<pods::MsgPackSerializer<pods::ResizableOutputBuffer>, pods::MsgPackDeserializer<pods::InputBuffer>>();
-}
-
-TEST(msgpackSerializer, testInt)
-{
-    testInt<pods::MsgPackSerializer<pods::ResizableOutputBuffer>, pods::MsgPackDeserializer<pods::InputBuffer>>();
-}
-
-TEST(msgpackSerializer, testUnsigned)
-{
-    testUnsigned<pods::MsgPackSerializer<pods::ResizableOutputBuffer>, pods::MsgPackDeserializer<pods::InputBuffer>>();
-}
-
-TEST(msgpackSerializer, testFloat)
-{
-    testFloat<pods::MsgPackSerializer<pods::ResizableOutputBuffer>, pods::MsgPackDeserializer<pods::InputBuffer>>();
-}
-
-TEST(msgpackSerializer, testString)
-{
-    testString<pods::MsgPackSerializer<pods::ResizableOutputBuffer>, pods::MsgPackDeserializer<pods::InputBuffer>>();
-}
-
-TEST(msgpackSerializer, testBinary)
-{
-    testBinary<pods::MsgPackSerializer<pods::ResizableOutputBuffer>, pods::MsgPackDeserializer<pods::InputBuffer>>();
-}
-
 TEST(msgpackSerializer, testIntSizes)
 {
     const auto min5bits = -32;
 
-    const auto min1byte = std::numeric_limits<int8_t>::min();
-    const auto max1byte = std::numeric_limits<int8_t>::max();
+    constexpr auto min1byte = std::numeric_limits<int8_t>::min();
+    constexpr auto max1byte = std::numeric_limits<int8_t>::max();
 
-    const auto min2byte = std::numeric_limits<int16_t>::min();
-    const auto max2byte = std::numeric_limits<int16_t>::max();
+    constexpr auto min2byte = std::numeric_limits<int16_t>::min();
+    constexpr auto max2byte = std::numeric_limits<int16_t>::max();
 
-    const auto min4byte = std::numeric_limits<int32_t>::min();
-    const auto max4byte = std::numeric_limits<int32_t>::max();
+    constexpr auto min4byte = std::numeric_limits<int32_t>::min();
+    constexpr auto max4byte = std::numeric_limits<int32_t>::max();
 
     check<Int16, Int8>(min5bits);
     check<Int16, Int8>(min1byte);
@@ -145,9 +113,9 @@ TEST(msgpackSerializer, testIntSizes)
 TEST(msgpackSerializer, testUIntSizes)
 {
     const auto max7bits = 127u;
-    const auto max1byte = std::numeric_limits<uint8_t>::max();
-    const auto max2byte = std::numeric_limits<uint16_t>::max();
-    const auto max4byte = std::numeric_limits<uint32_t>::max();
+    constexpr auto max1byte = std::numeric_limits<uint8_t>::max();
+    constexpr auto max2byte = std::numeric_limits<uint16_t>::max();
+    constexpr auto max4byte = std::numeric_limits<uint32_t>::max();
 
     check<UInt16, UInt8>(max7bits);
     check<UInt16, UInt8>(max1byte);
@@ -160,14 +128,4 @@ TEST(msgpackSerializer, testUIntSizes)
     check<UInt64, UInt8>(max1byte);
     check<UInt64, UInt16>(max2byte);
     check<UInt64, UInt32>(max4byte);
-}
-
-TEST(msgpackSerializer, testArray)
-{
-    testArray<pods::MsgPackSerializer<pods::ResizableOutputBuffer>, pods::MsgPackDeserializer<pods::InputBuffer>>();
-}
-
-TEST(msgpackSerializer, testMap)
-{
-    testMap<pods::MsgPackSerializer<pods::ResizableOutputBuffer>, pods::MsgPackDeserializer<pods::InputBuffer>>();
 }

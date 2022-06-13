@@ -34,7 +34,6 @@ set(SOURCES
     test_binary_versioning.cpp
     test_buffer.cpp
     test_endianness.cpp
-    test_json_serializer.cpp
     test_json_versioning.cpp
     test_msgpack_serializer.cpp
     test_rapidjson_wrapper.cpp
@@ -43,6 +42,16 @@ set(SOURCES
     test_stl_map_serialization.cpp
     test_stl_serialization.cpp
     test_stream.cpp
+
+    test_bool.cpp
+    test_int.cpp
+    test_unsigned.cpp
+    test_float.cpp
+    test_string.cpp
+    test_binary.cpp
+    test_array.cpp
+    test_map.cpp
+
     main.cpp
     )
 
