@@ -98,7 +98,7 @@ pods: time = 235 milliseconds
 #include <iostream>
 
 #include <pods/pods.h>
-#include <pods/binary_serializer.h>
+#include <pods/binary.h>
 #include <pods/buffers.h>
 
 struct Server
@@ -153,7 +153,7 @@ int main(int /*argc*/, char** /*argv*/)
 #include <iostream>
 
 #include <pods/pods.h>
-#include <pods/json_serializer.h>
+#include <pods/json.h>
 #include <pods/buffers.h>
 
 struct Server
@@ -239,7 +239,7 @@ int main(int /*argc*/, char** /*argv*/)
 #include <sstream>
 
 #include <pods/pods.h>
-#include <pods/binary_serializer.h>
+#include <pods/binary.h>
 #include <pods/streams.h>
 
 struct Server
