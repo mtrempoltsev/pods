@@ -38,12 +38,9 @@
 #ifdef PODS_SERIALIZABLE
 #error Rename the macro
 #endif
-#define PODS_SERIALIZABLE(dataVersion, ...)                             \
-    static constexpr pods::Version version() { return dataVersion; }    \
-                                                                        \
+#define PODS_SERIALIZABLE(...)                                          \
     template <class Serializer>                                         \
-    pods::Error serialize(Serializer& serializer, pods::Version)        \
+    pods::Error serialize(Serializer& serializer)                       \
     {                                                                   \
         return serializer(__VA_ARGS__);                                 \
     }                                                                   \
-

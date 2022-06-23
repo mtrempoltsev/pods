@@ -5,15 +5,15 @@
 #include <pods/msgpack.h>
 #include <pods/streams.h>
 
+// just a struct for serialization
 struct Server
 {
-    std::string address = "localhost";  // this is default value
-    uint16_t port = 8080;               // this is default value
+    std::string address;        // no default value
+    uint16_t port = 8080;       // default value
 
     PODS_SERIALIZABLE(
-        1,                      // this is version
-        PODS_MDR(address),      // this field is mandatory
-        PODS_OPT(port))         // this field is optional
+        PODS_MDR(address),      // mandatory field
+        PODS_OPT(port))         // optional field
 };
 
 int main(int /*argc*/, char** /*argv*/)
@@ -30,9 +30,7 @@ int main(int /*argc*/, char** /*argv*/)
         return EXIT_FAILURE;
     }
 
-    Server loaded;
-    loaded.address = "";
-    loaded.port = 0;
+    Server loaded = {};
 
     pods::InputStream in(buffer);
     pods::MsgPackDeserializer<decltype(in)> deserializer(in);

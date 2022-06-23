@@ -43,7 +43,7 @@ struct Binary
         }
     }
 
-    PODS_SERIALIZABLE(1, PODS_MDR_BIN(a), PODS_MDR_BIN(b), PODS_MDR_BIN_2(c, size),
+    PODS_SERIALIZABLE(PODS_MDR_BIN(a), PODS_MDR_BIN(b), PODS_MDR_BIN_2(c, size),
         PODS_MDR_BIN_2(d, size), PODS_MDR_BIN(e), PODS_MDR_BIN(f), PODS_MDR_BIN(g),
         PODS_MDR_BIN(h), PODS_MDR_BIN(i))
 };

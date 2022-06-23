@@ -32,7 +32,7 @@ struct A
 
     std::array<float, 5> floatData = { { 1.1f, 2.2f, 3.3f, 4.4f, 5.5f } };
 
-    PODS_SERIALIZABLE(5, PODS_OPT(floatData))
+    PODS_SERIALIZABLE(PODS_OPT(floatData))
 };
 
 struct TestData
@@ -51,7 +51,7 @@ struct TestData
             Enum1 e1 = ::BB;
             Enum2 e2 = Enum2::X;
 
-            PODS_SERIALIZABLE(1,
+            PODS_SERIALIZABLE(
                 PODS_OPT(b),
                 PODS_MDR(e1),
                 PODS_MDR(e2))
@@ -59,7 +59,7 @@ struct TestData
 
         C c;
 
-        PODS_SERIALIZABLE(2, PODS_MDR(c))
+        PODS_SERIALIZABLE(PODS_MDR(c))
     };
 
     B b;
@@ -79,7 +79,7 @@ struct TestData
             return x == other.x && y == other.y;
         }
 
-        PODS_SERIALIZABLE(1,
+        PODS_SERIALIZABLE(
             PODS_MDR(x),
             PODS_OPT(y))
     };
@@ -94,7 +94,7 @@ struct TestData
 
     std::map<Point, Point> map = { { { 7, 8 }, { 9, 10 } } };
 
-    PODS_SERIALIZABLE(1,
+    PODS_SERIALIZABLE(
         PODS_MDR(x),
         PODS_OPT(y),
         PODS_MDR(z),
@@ -110,7 +110,7 @@ struct TestData
 struct BinData1
 {
     std::vector<uint32_t> x = { 0xfedcba98, 0x76543210, 0x648823fe };
-    PODS_SERIALIZABLE(1, PODS_MDR_BIN(x))
+    PODS_SERIALIZABLE(PODS_MDR_BIN(x))
 };
 
 struct BinData2
@@ -118,7 +118,7 @@ struct BinData2
     static constexpr int size = 3;
     std::unique_ptr<int16_t[]> x;
     int16_t* y;
-    PODS_SERIALIZABLE(1,
+    PODS_SERIALIZABLE(
         PODS_MDR_BIN_2(x, size),
         PODS_MDR_BIN_2(y, size))
 };
@@ -126,31 +126,31 @@ struct BinData2
 struct Array1
 {
     std::array<uint32_t, 3> x = { { 0xfedcba98, 0x76543210, 0x648823fe } };
-    PODS_SERIALIZABLE(1, PODS_MDR_BIN(x))
+    PODS_SERIALIZABLE(PODS_MDR_BIN(x))
 };
 
 struct Array2
 {
     std::array<uint32_t, 1> x = { { 100 } };
-    PODS_SERIALIZABLE(1, PODS_MDR_BIN(x))
+    PODS_SERIALIZABLE(PODS_MDR_BIN(x))
 };
 
 struct CArray
 {
     bool ok = true;
     uint32_t x[4] = { 1, 2, 3, 4 };
-    PODS_SERIALIZABLE(1, PODS_MDR(x), PODS_MDR(ok))
+    PODS_SERIALIZABLE(PODS_MDR(x), PODS_MDR(ok))
 };
 
 struct CArrayBin
 {
     bool ok = true;
     uint32_t x[4] = { 1, 2, 3, 4 };
-    PODS_SERIALIZABLE(1, PODS_MDR_BIN(x), PODS_MDR(ok))
+    PODS_SERIALIZABLE(PODS_MDR_BIN(x), PODS_MDR(ok))
 };
 
 struct InvalidSize
 {
     char data[1] = { '\0' };
-    PODS_SERIALIZABLE(1, PODS_MDR_BIN_2(data, static_cast<size_t>(std::numeric_limits<uint64_t>::max())))
+    PODS_SERIALIZABLE(PODS_MDR_BIN_2(data, static_cast<size_t>(std::numeric_limits<uint64_t>::max())))
 };

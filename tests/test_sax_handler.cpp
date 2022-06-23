@@ -2,9 +2,9 @@
 
 #include <pods/details/formats/json_input.h>
 
-TEST(saxHandlers, startObject)
+TEST(saxHandler, startObject)
 {
-    pods::details::StartObjectHandler handler;
+    pods::details::Handler<pods::details::StartObjectTag, pods::details::IsEndOfArrayData> handler;
 
     EXPECT_FALSE(handler.Null());
     EXPECT_FALSE(handler.Bool(true));
@@ -21,12 +21,35 @@ TEST(saxHandlers, startObject)
     EXPECT_FALSE(handler.Key("key", 3, true));
     EXPECT_FALSE(handler.EndObject(1));
     EXPECT_FALSE(handler.StartArray());
+    EXPECT_TRUE(handler.EndArray(2));
+    EXPECT_TRUE(handler.data_.isEndOfArray_);
+}
+
+TEST(saxHandler, endObject)
+{
+    pods::details::Handler<pods::details::EndObjectTag, pods::details::EmptyData> handler;
+
+    EXPECT_FALSE(handler.Null());
+    EXPECT_FALSE(handler.Bool(true));
+    EXPECT_FALSE(handler.Int(std::numeric_limits<int32_t>::min()));
+    EXPECT_FALSE(handler.Int(std::numeric_limits<int32_t>::max()));
+    EXPECT_FALSE(handler.Uint(std::numeric_limits<uint32_t>::max()));
+    EXPECT_FALSE(handler.Int64(std::numeric_limits<int64_t>::min()));
+    EXPECT_FALSE(handler.Int64(std::numeric_limits<int64_t>::max()));
+    EXPECT_FALSE(handler.Uint64(std::numeric_limits<uint64_t>::max()));
+    EXPECT_FALSE(handler.Double(0.5));
+    EXPECT_FALSE(handler.RawNumber("15", 2, true));
+    EXPECT_FALSE(handler.String("test", 4, true));
+    EXPECT_FALSE(handler.StartObject());
+    EXPECT_FALSE(handler.Key("key", 3, true));
+    EXPECT_TRUE(handler.EndObject(1));
+    EXPECT_FALSE(handler.StartArray());
     EXPECT_FALSE(handler.EndArray(2));
 }
 
-TEST(saxHandlers, startArray)
+TEST(saxHandler, startArray)
 {
-    pods::details::StartArrayHandler handler;
+    pods::details::Handler<pods::details::StartArrayTag, pods::details::IsEndOfArrayData> handler;
 
     EXPECT_FALSE(handler.Null());
     EXPECT_FALSE(handler.Bool(true));
@@ -43,12 +66,13 @@ TEST(saxHandlers, startArray)
     EXPECT_FALSE(handler.Key("key", 3, true));
     EXPECT_FALSE(handler.EndObject(1));
     EXPECT_TRUE(handler.StartArray());
-    EXPECT_FALSE(handler.EndArray(2));
+    EXPECT_TRUE(handler.EndArray(2));
+    EXPECT_TRUE(handler.data_.isEndOfArray_);
 }
 
-TEST(saxHandlers, endArray)
+TEST(saxHandler, endArray)
 {
-    pods::details::EndArrayHandler handler;
+    pods::details::Handler<pods::details::EndArrayTag, pods::details::EmptyData> handler;
 
     EXPECT_FALSE(handler.Null());
     EXPECT_FALSE(handler.Bool(true));
@@ -68,69 +92,40 @@ TEST(saxHandlers, endArray)
     EXPECT_TRUE(handler.EndArray(2));
 }
 
-TEST(saxHandlers, key)
+TEST(saxHandler, key)
 {
-    {
-        std::string next;
-        bool isEndOfObject = false;
+    std::string key;
 
-        pods::details::KeyHandler handler("key", next, isEndOfObject);
+    pods::details::Handler<pods::details::KeyTag, pods::details::ValueAndIsEndOfArrayOrObjectData<std::string>> handler(key);
 
-        EXPECT_FALSE(handler.Null());
-        EXPECT_FALSE(handler.Bool(true));
-        EXPECT_FALSE(handler.Int(std::numeric_limits<int32_t>::min()));
-        EXPECT_FALSE(handler.Int(std::numeric_limits<int32_t>::max()));
-        EXPECT_FALSE(handler.Uint(std::numeric_limits<uint32_t>::max()));
-        EXPECT_FALSE(handler.Int64(std::numeric_limits<int64_t>::min()));
-        EXPECT_FALSE(handler.Int64(std::numeric_limits<int64_t>::max()));
-        EXPECT_FALSE(handler.Uint64(std::numeric_limits<uint64_t>::max()));
-        EXPECT_FALSE(handler.Double(0.5));
-        EXPECT_FALSE(handler.RawNumber("15", 2, true));
-        EXPECT_FALSE(handler.String("test", 4, true));
-        EXPECT_FALSE(handler.StartObject());
-        EXPECT_TRUE(handler.Key("key", 3, true));
-        EXPECT_FALSE(isEndOfObject);
-        EXPECT_TRUE(handler.EndObject(1));
-        EXPECT_FALSE(handler.StartArray());
-        EXPECT_FALSE(handler.EndArray(2));
+    EXPECT_FALSE(handler.Null());
+    EXPECT_FALSE(handler.Bool(true));
+    EXPECT_FALSE(handler.Int(std::numeric_limits<int32_t>::min()));
+    EXPECT_FALSE(handler.Int(std::numeric_limits<int32_t>::max()));
+    EXPECT_FALSE(handler.Uint(std::numeric_limits<uint32_t>::max()));
+    EXPECT_FALSE(handler.Int64(std::numeric_limits<int64_t>::min()));
+    EXPECT_FALSE(handler.Int64(std::numeric_limits<int64_t>::max()));
+    EXPECT_FALSE(handler.Uint64(std::numeric_limits<uint64_t>::max()));
+    EXPECT_FALSE(handler.Double(0.5));
+    EXPECT_FALSE(handler.RawNumber("15", 2, true));
+    EXPECT_FALSE(handler.String("test", 4, true));
+    EXPECT_FALSE(handler.StartObject());
+    EXPECT_TRUE(handler.Key("key", 3, true));
+    EXPECT_FALSE(handler.data_.isEndOfArray_);
+    EXPECT_FALSE(handler.data_.isEndOfObject_);
+    EXPECT_TRUE(handler.EndObject(1));
+    EXPECT_TRUE(handler.data_.isEndOfObject_);
+    EXPECT_FALSE(handler.StartArray());
+    EXPECT_TRUE(handler.EndArray(2));
+    EXPECT_TRUE(handler.data_.isEndOfArray_);
 
-        EXPECT_TRUE(next.empty());
-        EXPECT_TRUE(isEndOfObject);
-    }
-
-    {
-        std::string next;
-        bool isEndOfObject = false;
-
-        pods::details::KeyHandler handler("no", next, isEndOfObject);
-
-        EXPECT_FALSE(handler.Null());
-        EXPECT_FALSE(handler.Bool(true));
-        EXPECT_FALSE(handler.Int(std::numeric_limits<int32_t>::min()));
-        EXPECT_FALSE(handler.Int(std::numeric_limits<int32_t>::max()));
-        EXPECT_FALSE(handler.Uint(std::numeric_limits<uint32_t>::max()));
-        EXPECT_FALSE(handler.Int64(std::numeric_limits<int64_t>::min()));
-        EXPECT_FALSE(handler.Int64(std::numeric_limits<int64_t>::max()));
-        EXPECT_FALSE(handler.Uint64(std::numeric_limits<uint64_t>::max()));
-        EXPECT_FALSE(handler.Double(0.5));
-        EXPECT_FALSE(handler.RawNumber("15", 2, true));
-        EXPECT_FALSE(handler.String("test", 4, true));
-        EXPECT_FALSE(handler.StartObject());
-        EXPECT_TRUE(handler.Key("key", 3, true));
-        EXPECT_FALSE(isEndOfObject);
-        EXPECT_TRUE(handler.EndObject(1));
-        EXPECT_FALSE(handler.StartArray());
-        EXPECT_FALSE(handler.EndArray(2));
-
-        EXPECT_EQ(next, "key");
-        EXPECT_TRUE(isEndOfObject);
-    }
+    EXPECT_EQ(key, "key");
 }
 
-TEST(saxHandlers, boolHandler)
+TEST(saxHandler, boolHandler)
 {
     bool ok = false;
-    pods::details::BoolHandler handler(ok);
+    pods::details::Handler<pods::details::BoolTag, pods::details::ValueAndIsEndOfArrayData<bool>> handler(ok);
 
     EXPECT_FALSE(handler.Null());
     EXPECT_TRUE(handler.Bool(true));
@@ -147,16 +142,17 @@ TEST(saxHandlers, boolHandler)
     EXPECT_FALSE(handler.Key("key", 3, true));
     EXPECT_FALSE(handler.EndObject(1));
     EXPECT_FALSE(handler.StartArray());
-    EXPECT_FALSE(handler.EndArray(2));
+    EXPECT_TRUE(handler.EndArray(2));
+    EXPECT_TRUE(handler.data_.isEndOfArray_);
 
     EXPECT_TRUE(ok);
 }
 
-TEST(saxHandlers, intHandler)
+TEST(saxHandler, intHandler)
 {
     {
         int32_t x = 0;
-        pods::details::IntHandler<decltype(x)> handler(x);
+        pods::details::Handler<pods::details::IntTag, pods::details::ValueAndIsEndOfArrayData<decltype(x)>> handler(x);
 
         EXPECT_FALSE(handler.Null());
         EXPECT_FALSE(handler.Bool(true));
@@ -173,12 +169,16 @@ TEST(saxHandlers, intHandler)
         EXPECT_FALSE(handler.Key("key", 3, true));
         EXPECT_FALSE(handler.EndObject(1));
         EXPECT_FALSE(handler.StartArray());
-        EXPECT_FALSE(handler.EndArray(2));
+        EXPECT_TRUE(handler.EndArray(2));
+        EXPECT_TRUE(handler.data_.isEndOfArray_);
+
+        EXPECT_TRUE(handler.Int(-5));
+        EXPECT_EQ(x, -5);
     }
 
     {
         uint32_t x = 0;
-        pods::details::IntHandler<decltype(x)> handler(x);
+        pods::details::Handler<pods::details::IntTag, pods::details::ValueAndIsEndOfArrayData<decltype(x)>> handler(x);
 
         EXPECT_FALSE(handler.Null());
         EXPECT_FALSE(handler.Bool(true));
@@ -195,12 +195,16 @@ TEST(saxHandlers, intHandler)
         EXPECT_FALSE(handler.Key("key", 3, true));
         EXPECT_FALSE(handler.EndObject(1));
         EXPECT_FALSE(handler.StartArray());
-        EXPECT_FALSE(handler.EndArray(2));
+        EXPECT_TRUE(handler.EndArray(2));
+        EXPECT_TRUE(handler.data_.isEndOfArray_);
+
+        EXPECT_TRUE(handler.Int(5));
+        EXPECT_EQ(x, 5u);
     }
 
     {
         int64_t x = 0;
-        pods::details::IntHandler<decltype(x)> handler(x);
+        pods::details::Handler<pods::details::IntTag, pods::details::ValueAndIsEndOfArrayData<decltype(x)>> handler(x);
 
         EXPECT_FALSE(handler.Null());
         EXPECT_FALSE(handler.Bool(true));
@@ -217,12 +221,16 @@ TEST(saxHandlers, intHandler)
         EXPECT_FALSE(handler.Key("key", 3, true));
         EXPECT_FALSE(handler.EndObject(1));
         EXPECT_FALSE(handler.StartArray());
-        EXPECT_FALSE(handler.EndArray(2));
+        EXPECT_TRUE(handler.EndArray(2));
+        EXPECT_TRUE(handler.data_.isEndOfArray_);
+
+        EXPECT_TRUE(handler.Int(-5));
+        EXPECT_EQ(x, -5);
     }
 
     {
         uint64_t x = 0;
-        pods::details::IntHandler<decltype(x)> handler(x);
+        pods::details::Handler<pods::details::IntTag, pods::details::ValueAndIsEndOfArrayData<decltype(x)>> handler(x);
 
         EXPECT_FALSE(handler.Null());
         EXPECT_FALSE(handler.Bool(true));
@@ -239,15 +247,19 @@ TEST(saxHandlers, intHandler)
         EXPECT_FALSE(handler.Key("key", 3, true));
         EXPECT_FALSE(handler.EndObject(1));
         EXPECT_FALSE(handler.StartArray());
-        EXPECT_FALSE(handler.EndArray(2));
+        EXPECT_TRUE(handler.EndArray(2));
+        EXPECT_TRUE(handler.data_.isEndOfArray_);
+
+        EXPECT_TRUE(handler.Int(5));
+        EXPECT_EQ(x, 5u);
     }
 }
 
-TEST(saxHandlers, floating)
+TEST(saxHandler, floating)
 {
     {
         float x = 0;
-        pods::details::FloatingHandler<decltype(x)> handler(x);
+        pods::details::Handler<pods::details::FloatTag, pods::details::ValueAndIsEndOfArrayData<decltype(x)>> handler(x);
 
         EXPECT_FALSE(handler.Null());
         EXPECT_FALSE(handler.Bool(true));
@@ -267,12 +279,16 @@ TEST(saxHandlers, floating)
         EXPECT_FALSE(handler.Key("key", 3, true));
         EXPECT_FALSE(handler.EndObject(1));
         EXPECT_FALSE(handler.StartArray());
-        EXPECT_FALSE(handler.EndArray(2));
+        EXPECT_TRUE(handler.EndArray(2));
+        EXPECT_TRUE(handler.data_.isEndOfArray_);
+
+        EXPECT_TRUE(handler.Double(5.5));
+        EXPECT_FLOAT_EQ(x, 5.5);
     }
 
     {
         double x = 0;
-        pods::details::FloatingHandler<decltype(x)> handler(x);
+        pods::details::Handler<pods::details::FloatTag, pods::details::ValueAndIsEndOfArrayData<decltype(x)>> handler(x);
 
         EXPECT_FALSE(handler.Null());
         EXPECT_FALSE(handler.Bool(true));
@@ -292,14 +308,18 @@ TEST(saxHandlers, floating)
         EXPECT_FALSE(handler.Key("key", 3, true));
         EXPECT_FALSE(handler.EndObject(1));
         EXPECT_FALSE(handler.StartArray());
-        EXPECT_FALSE(handler.EndArray(2));
+        EXPECT_TRUE(handler.EndArray(2));
+        EXPECT_TRUE(handler.data_.isEndOfArray_);
+
+        EXPECT_TRUE(handler.Double(5.5));
+        EXPECT_DOUBLE_EQ(x, 5.5);
     }
 }
 
-TEST(saxHandlers, string)
+TEST(saxHandler, string)
 {
     std::string x;
-    pods::details::StringHandler handler(x);
+    pods::details::Handler<pods::details::StringTag, pods::details::ValueAndIsEndOfArrayData<decltype(x)>> handler(x);
 
     EXPECT_FALSE(handler.Null());
     EXPECT_FALSE(handler.Bool(true));
@@ -316,7 +336,8 @@ TEST(saxHandlers, string)
     EXPECT_FALSE(handler.Key("key", 3, true));
     EXPECT_FALSE(handler.EndObject(1));
     EXPECT_FALSE(handler.StartArray());
-    EXPECT_FALSE(handler.EndArray(2));
+    EXPECT_TRUE(handler.EndArray(2));
+    EXPECT_TRUE(handler.data_.isEndOfArray_);
 
     EXPECT_EQ(x, "test");
 }

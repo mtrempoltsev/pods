@@ -96,7 +96,7 @@ struct Data
     char ca3[64];
     float fa3[64];
     double da3[64];
-    PODS_SERIALIZABLE(1,
+    PODS_SERIALIZABLE(
         PODS_MDR(us0),
         PODS_MDR(i0),
         PODS_MDR(b0),

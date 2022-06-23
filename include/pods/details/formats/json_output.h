@@ -5,6 +5,7 @@
 
 #include "../base64.h"
 #include "../rapidjson_wrappers.h"
+#include "../serialization_traits.h"
 #include "../utils.h"
 
 #include "../../errors.h"
@@ -18,6 +19,8 @@ namespace pods
         class JsonOutput final
         {
         public:
+            using Traits = JsonTraits;
+
             explicit JsonOutput(Storage& storage) noexcept
                 : stream_(storage)
                 , writer_(stream_)
@@ -46,6 +49,11 @@ namespace pods
                     : Error::WriteError;
             }
 
+            Error saveKey(const char* value)
+            {
+                return saveName(value);
+            }
+
             Error startObject()
             {
                 return writer_.StartObject() && stream_.good()
@@ -60,11 +68,8 @@ namespace pods
                     : Error::WriteError;
             }
 
-            Error startArray(Size size)
+            Error startArray(Size /*size*/)
             {
-                PODS_SAFE_CALL(saveName(PODS_SIZE));
-                PODS_SAFE_CALL(save(size));
-                PODS_SAFE_CALL(saveName(PODS_DATA));
                 return writer_.StartArray() && stream_.good()
                     ? Error::NoError
                     : Error::WriteError;
@@ -77,14 +82,14 @@ namespace pods
                     : Error::WriteError;
             }
 
-            Error startMap(Size size)
+            Error startMap(Size /*size*/)
             {
-                return startArray(size);
+                return startObject();
             }
 
             Error endMap()
             {
-                return endArray();
+                return endObject();
             }
 
             Error save(int32_t value)

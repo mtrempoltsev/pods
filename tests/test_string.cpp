@@ -13,7 +13,7 @@ struct String
     std::string d = std::string(std::numeric_limits<uint8_t>::max() + 1, 'd');
     std::string e = std::string(std::numeric_limits<uint16_t>::max() + 1, 'e');
 
-    PODS_SERIALIZABLE(1, PODS_MDR(a), PODS_MDR(b), PODS_MDR(c), PODS_MDR(d), PODS_MDR(e))
+    PODS_SERIALIZABLE(PODS_MDR(a), PODS_MDR(b), PODS_MDR(c), PODS_MDR(d), PODS_MDR(e))
 };
 
 template <class Serializer, class Deserializer>

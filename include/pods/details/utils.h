@@ -9,23 +9,15 @@ namespace pods
 {
     namespace details
     {
-        template <class T>
-        struct IsPodsSerializableImpl
+        template<class T, class S, class = T>
+        struct IsPodsSerializable
+            : std::false_type
         {
-        private:
-            static void check(...);
-
-            template <class U>
-            static decltype(U::version()) check(U*);
-
-        public:
-            static constexpr bool value =
-                std::is_same<Version, decltype(IsPodsSerializableImpl<T>::check(static_cast<std::remove_reference_t<T>*>(nullptr)))>::value;
         };
 
-        template <class T>
-        struct IsPodsSerializable
-            : std::integral_constant<bool, IsPodsSerializableImpl<T>::value>
+        template<class T, class S>
+        struct IsPodsSerializable<T, S, std::enable_if_t<std::is_same<decltype(T().serialize(*static_cast<S>(nullptr))), Error>::value, T>>
+            : std::true_type
         {
         };
 
@@ -45,7 +37,7 @@ namespace pods
         {
             return size < MaxSize
                 ? pods::Error::NoError
-                : Error::SizeToLarge;
+                : Error::InvalidSize;
         }
     }
 }

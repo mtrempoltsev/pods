@@ -18,7 +18,7 @@ struct Unsigned
     uint64_t h = c;
     uint64_t i = d;
 
-    PODS_SERIALIZABLE(1,
+    PODS_SERIALIZABLE(
         PODS_MDR(a), PODS_MDR(b), PODS_MDR(c), PODS_MDR(d), PODS_MDR(e), PODS_MDR(f), PODS_MDR(g),
         PODS_MDR(h), PODS_MDR(i))
 };

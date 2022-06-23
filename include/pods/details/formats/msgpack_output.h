@@ -3,6 +3,7 @@
 #include <cassert>
 
 #include "../endianness.h"
+#include "../serialization_traits.h"
 #include "../utils.h"
 
 #include "../../errors.h"
@@ -18,6 +19,8 @@ namespace pods
         class MsgPackOutput final
         {
         public:
+            using Traits = MsgPackTraits;
+
             explicit MsgPackOutput(Storage& storage) noexcept
                 : storage_(storage)
             {

@@ -10,7 +10,6 @@ struct Server
     uint16_t port = 8080;               // this is default value
 
     PODS_SERIALIZABLE(
-        1,                      // this is version
         PODS_MDR(address),      // this field is mandatory
         PODS_OPT(port))         // this field is optional
 };

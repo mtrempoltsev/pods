@@ -1,6 +1,7 @@
 ﻿#pragma once
 
 #include "../endianness.h"
+#include "../serialization_traits.h"
 #include "../utils.h"
 
 #include "../../errors.h"
@@ -16,6 +17,8 @@ namespace pods
         class MsgPackInput final
         {
         public:
+            using Traits = MsgPackTraits;
+
             explicit MsgPackInput(Storage& storage) noexcept
                 : storage_(storage)
             {

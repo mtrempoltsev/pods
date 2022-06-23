@@ -9,7 +9,7 @@ struct SimpleSerializable
 {
     int64_t a;
 
-    PODS_SERIALIZABLE(1, PODS_MDR(a))
+    PODS_SERIALIZABLE(PODS_MDR(a))
 
         bool operator==(const SimpleSerializable& right) const
     {
@@ -22,10 +22,13 @@ struct Array
     static constexpr int aSize = 15;
     static constexpr int bSize = 16;
     static constexpr int cSize = 65536;
+    static constexpr int dSize = 2;
 
     std::string a[aSize];
     SimpleSerializable b[bSize];
     int32_t c[cSize];
+    using IntArray = int[dSize];
+    IntArray d[dSize];
 
     void fill()
     {
@@ -43,9 +46,17 @@ struct Array
         {
             c[i] = i;
         }
-    }
 
-    PODS_SERIALIZABLE(1, PODS_MDR(a), PODS_MDR(b), PODS_MDR(c))
+        for (int i = 0; i < dSize; ++i)
+        {
+            for (int j = 0; j < dSize; ++j)
+            {
+                d[i][j] = i + j;
+            }
+        }
+    };
+
+    PODS_SERIALIZABLE(PODS_MDR(a), PODS_MDR(b), PODS_MDR(c), PODS_MDR(d))
 };
 
 template <class Serializer, class Deserializer>
@@ -78,6 +89,11 @@ void testArray()
     EXPECT_EQ(expected.c[Array::bSize - 1], actual.c[Array::bSize - 1]);
     EXPECT_EQ(expected.c[Array::bSize], actual.c[Array::bSize]);
     EXPECT_EQ(expected.c[Array::cSize - 1], actual.c[Array::cSize - 1]);
+
+    EXPECT_EQ(expected.d[0][0], actual.d[0][0]);
+    EXPECT_EQ(expected.d[1][0], actual.d[1][0]);
+    EXPECT_EQ(expected.d[0][1], actual.d[0][1]);
+    EXPECT_EQ(expected.d[1][1], actual.d[1][1]);
 }
 
 TEST(msgpack, testArray)

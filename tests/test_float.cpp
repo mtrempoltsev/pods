@@ -12,7 +12,7 @@ struct Float
     double b1 = -1.7e308;
     double b2 = 1.7e308;
 
-    PODS_SERIALIZABLE(1, PODS_MDR(a1), PODS_MDR(a2), PODS_MDR(b1), PODS_MDR(b2))
+    PODS_SERIALIZABLE(PODS_MDR(a1), PODS_MDR(a2), PODS_MDR(b1), PODS_MDR(b2))
 };
 
 template <class Serializer, class Deserializer>

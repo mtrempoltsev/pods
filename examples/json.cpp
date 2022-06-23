@@ -4,15 +4,15 @@
 #include <pods/json.h>
 #include <pods/buffers.h>
 
+// just a struct for serialization
 struct Server
 {
-    std::string address;
-    uint16_t port;
+    std::string address;        // no default value
+    uint16_t port = 8080;       // default value
 
     PODS_SERIALIZABLE(
-        1,                      // this is version
-        PODS_MDR(address),      // this field is mandatory
-        PODS_OPT(port))         // this field is optional
+        PODS_MDR(address),      // mandatory field
+        PODS_OPT(port))         // optional field
 };
 
 struct ServerList
@@ -21,11 +21,10 @@ struct ServerList
     {
         // this is default values
         Server { "localhost", 8080 },
-        Server { "volt.trempoltsev.ru", 2018 }
+        Server { "my.com", 2018 }
     };
 
     PODS_SERIALIZABLE(
-        5,
         PODS_MDR(servers))
 };
 

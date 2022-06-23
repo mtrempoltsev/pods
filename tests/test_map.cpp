@@ -33,7 +33,7 @@ struct Map
         }
     }
 
-    PODS_SERIALIZABLE(1, PODS_MDR(a), PODS_MDR(b), PODS_MDR(c))
+    PODS_SERIALIZABLE(PODS_MDR(a), PODS_MDR(b), PODS_MDR(c))
 };
 
 template <class Serializer, class Deserializer>

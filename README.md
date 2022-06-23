@@ -11,10 +11,9 @@
 - header only
 - high performance (perhaps binary serialization is the fastest on the Earth)
 - optional values
-- versioning
 - supported archive formats:
   - JSON
-  - binary
+  - MsgPack
 - serialization from/to:
   - memory buffer
   - resizable memory buffer
@@ -92,24 +91,24 @@ pods: time = 235 milliseconds
 
 ## Using PODS
 
-### Binary serialization
+### MsgPack serialization
 
 ```c++
 #include <iostream>
 
 #include <pods/pods.h>
-#include <pods/binary_serializer.h>
+#include <pods/msgpack.h>
 #include <pods/buffers.h>
 
+// just a struct for serialization
 struct Server
 {
-    std::string address = "localhost";  // this is default value
-    uint16_t port = 8080;               // this is default value
+    std::string address;        // no default value
+    uint16_t port = 8080;       // default value
 
     PODS_SERIALIZABLE(
-        1,                      // this is version
-        PODS_MDR(address),      // this field is mandatory
-        PODS_OPT(port))         // this field is optional
+        PODS_MDR(address),      // mandatory field
+        PODS_OPT(port))         // optional field
 };
 
 int main(int /*argc*/, char** /*argv*/)
@@ -117,19 +116,17 @@ int main(int /*argc*/, char** /*argv*/)
     const Server original;
 
     pods::ResizableOutputBuffer out;
-    pods::BinarySerializer<decltype(out)> serializer(out);
+    pods::MsgPackSerializer<decltype(out)> serializer(out);
     if (serializer.save(original) != pods::Error::NoError)
     {
         std::cerr << "serialization error\n";
         return EXIT_FAILURE;
     }
 
-    Server loaded;
-    loaded.address = "";
-    loaded.port = 0;
+    Server loaded = {};
 
     pods::InputBuffer in(out.data(), out.size());
-    pods::BinaryDeserializer<decltype(in)> deserializer(in);
+    pods::MsgPackDeserializer<decltype(in)> deserializer(in);
     if (deserializer.load(loaded) != pods::Error::NoError)
     {
         std::cerr << "deserialization error\n";
@@ -153,18 +150,18 @@ int main(int /*argc*/, char** /*argv*/)
 #include <iostream>
 
 #include <pods/pods.h>
-#include <pods/json_serializer.h>
+#include <pods/json.h>
 #include <pods/buffers.h>
 
+// just a struct for serialization
 struct Server
 {
-    std::string address;
-    uint16_t port;
+    std::string address;        // no default value
+    uint16_t port = 8080;       // default value
 
     PODS_SERIALIZABLE(
-        1,                      // this is version
-        PODS_MDR(address),      // this field is mandatory
-        PODS_OPT(port))         // this field is optional
+        PODS_MDR(address),      // mandatory field
+        PODS_OPT(port))         // optional field
 };
 
 struct ServerList
@@ -177,7 +174,6 @@ struct ServerList
     };
 
     PODS_SERIALIZABLE(
-        5,
         PODS_MDR(servers))
 };
 
@@ -215,20 +211,16 @@ int main(int /*argc*/, char** /*argv*/)
 
 ```
 {
-    "version": 5,
-    "servers": {
-        "version": 1,
-        "data": [
-            {
-                "address": "localhost",
-                "port": 8080
-            },
-            {
-                "address": "my.com",
-                "port": 2018
-            }
-        ]
-    }
+    "servers": [
+        {
+            "address": "localhost",
+            "port": 8080
+        },
+        {
+            "address": "my.com",
+            "port": 2018
+        }
+    ]
 }
 ```
 
@@ -239,18 +231,18 @@ int main(int /*argc*/, char** /*argv*/)
 #include <sstream>
 
 #include <pods/pods.h>
-#include <pods/binary_serializer.h>
+#include <pods/msgpack.h>
 #include <pods/streams.h>
 
+// just a struct for serialization
 struct Server
 {
-    std::string address = "localhost";  // this is default value
-    uint16_t port = 8080;               // this is default value
+    std::string address;        // no default value
+    uint16_t port = 8080;       // default value
 
     PODS_SERIALIZABLE(
-        1,                      // this is version
-        PODS_MDR(address),      // this field is mandatory
-        PODS_OPT(port))         // this field is optional
+        PODS_MDR(address),      // mandatory field
+        PODS_OPT(port))         // optional field
 };
 
 int main(int /*argc*/, char** /*argv*/)
@@ -260,19 +252,17 @@ int main(int /*argc*/, char** /*argv*/)
     std::stringstream buffer;
 
     pods::OutputStream out(buffer);
-    pods::BinarySerializer<decltype(out)> serializer(out);
+    pods::MsgPackSerializer<decltype(out)> serializer(out);
     if (serializer.save(original) != pods::Error::NoError)
     {
         std::cerr << "serialization error\n";
         return EXIT_FAILURE;
     }
 
-    Server loaded;
-    loaded.address = "";
-    loaded.port = 0;
+    Server loaded = {};
 
     pods::InputStream in(buffer);
-    pods::BinaryDeserializer<decltype(in)> deserializer(in);
+    pods::MsgPackDeserializer<decltype(in)> deserializer(in);
     if (deserializer.load(loaded) != pods::Error::NoError)
     {
         std::cerr << "deserialization error\n";
@@ -281,5 +271,4 @@ int main(int /*argc*/, char** /*argv*/)
 
     return EXIT_SUCCESS;
 }
-
 ```

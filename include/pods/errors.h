@@ -8,16 +8,17 @@ namespace pods
     {
         NoError,
 
-        ArchiveVersionMismatch,
         MandatoryFieldMissed,
         OptionalFieldMissed,
         CorruptedArchive,
         NotEnoughMemory,
         UnexpectedEnd,
-        SizeToLarge,
+        InvalidSize,
         WriteError,
         ReadError,
         Eof,
+        EndOfArray,
+        EndOfObject,
 
         UnknownError
     };

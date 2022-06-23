@@ -30,7 +30,7 @@ struct First
     uint16_t l;
 
 #ifdef __cplusplus
-    PODS_SERIALIZABLE(1, PODS_MDR(a), PODS_MDR(b), PODS_MDR(c), PODS_MDR(d),
+    PODS_SERIALIZABLE(PODS_MDR(a), PODS_MDR(b), PODS_MDR(c), PODS_MDR(d),
         PODS_MDR(e), PODS_MDR(f), PODS_MDR_BIN_2(g, Small), PODS_MDR_BIN_2(h, Medium),
         PODS_MDR_BIN_2(i, Large), PODS_MDR(k), PODS_MDR(l))
 #endif
@@ -73,7 +73,7 @@ struct Second
     int32_t l;
 
 #ifdef __cplusplus
-    PODS_SERIALIZABLE(1, PODS_MDR(a), PODS_MDR(b), PODS_MDR(c), PODS_MDR(d),
+    PODS_SERIALIZABLE(PODS_MDR(a), PODS_MDR(b), PODS_MDR(c), PODS_MDR(d),
         PODS_MDR(e), PODS_MDR(f), PODS_MDR(g), PODS_MDR(h), PODS_MDR(i),
         PODS_MDR(k), PODS_MDR(l))
 #endif
@@ -104,7 +104,7 @@ struct Third
     struct Second second;
 
     #ifdef __cplusplus
-        PODS_SERIALIZABLE(1, PODS_MDR(first), PODS_MDR(second))
+        PODS_SERIALIZABLE(PODS_MDR(first), PODS_MDR(second))
     #endif
 };
 
@@ -125,7 +125,7 @@ struct Data
     struct Third third[StructsNum];
 
     #ifdef __cplusplus
-        PODS_SERIALIZABLE(1, PODS_MDR(third))
+        PODS_SERIALIZABLE(PODS_MDR(third))
     #endif
 };
 

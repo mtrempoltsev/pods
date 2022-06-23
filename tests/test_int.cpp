@@ -28,7 +28,7 @@ struct Int
     int64_t p = g;
     int64_t q = h;
 
-    PODS_SERIALIZABLE(1,
+    PODS_SERIALIZABLE(
         PODS_MDR(a), PODS_MDR(b), PODS_MDR(c), PODS_MDR(d), PODS_MDR(e), PODS_MDR(f), PODS_MDR(g),
         PODS_MDR(h), PODS_MDR(i), PODS_MDR(k), PODS_MDR(l), PODS_MDR(m), PODS_MDR(n), PODS_MDR(o),
         PODS_MDR(p), PODS_MDR(q))

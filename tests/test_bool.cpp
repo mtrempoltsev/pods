@@ -10,7 +10,7 @@ struct Bool
     bool a = true;
     bool b = false;
 
-    PODS_SERIALIZABLE(1, PODS_MDR(a), PODS_MDR(b))
+    PODS_SERIALIZABLE(PODS_MDR(a), PODS_MDR(b))
 };
 
 template <class Serializer, class Deserializer>

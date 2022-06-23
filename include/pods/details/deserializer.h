@@ -20,7 +20,6 @@
 #include <queue>
 
 #include "binary_wrappers.h"
-#include "names.h"
 #include "utils.h"
 
 #include "../errors.h"
@@ -56,120 +55,66 @@ namespace pods
             template <class... ArgsT>
             Error operator()(ArgsT&&... args)
             {
-                return process(args...);
+                return processField(args...);
             }
 
         private:
             template <class T>
             Error deserialize(T& value)
             {
-                static_assert(IsPodsSerializable<T>::value,
-                    "You must define the methods version() and serialize() for each serializable struct");
+                static_assert(IsPodsSerializable<T, decltype(this)>::value,
+                    "You must define the serialize() method for each serializable struct");
 
                 PODS_SAFE_CALL(format_.startDeserialization());
-                Version version = NoVersion;
-                PODS_SAFE_CALL(loadVersion<T>(PODS_VERSION, version));
-                PODS_SAFE_CALL(value.serialize(*this, version));
+                PODS_SAFE_CALL(value.serialize(*this));
                 return format_.endDeserialization();
             }
 
             template <class T>
-            Error doDeserialize(T& value)
-            {
-                static_assert(IsPodsSerializable<T>::value,
-                    "You must define the methods version() and serialize() for each serializable struct");
-
-                PODS_SAFE_CALL(format_.startObject());
-                Version version = NoVersion;
-                PODS_SAFE_CALL(loadVersion<T>(PODS_VERSION, version));
-                PODS_SAFE_CALL(value.serialize(*this, version));
-                return format_.endObject();
-            }
-
-            template <class T>
-            Error doDeserializeWithoutVersion(T& value, Version version)
-            {
-                static_assert(IsPodsSerializable<T>::value,
-                    "You must define the methods version() and serialize() for each serializable struct");
-
-                PODS_SAFE_CALL(format_.startObject());
-                PODS_SAFE_CALL(value.serialize(*this, version));
-                return format_.endObject();
-            }
-
-            template <class T>
-            Error process(const char* name, T& value)
+            Error processField(const char* name, T& value)
             {
                 const auto result = format_.checkName(name);
                 if (result == Error::NoError)
                 {
-                    return doProcess(value);
+                    return processValue(value);
                 }
-                else if (result == Error::OptionalFieldMissed)
-                {
-                    return Error::NoError;
-                }
-                return result;
+
+                return result == Error::OptionalFieldMissed
+                    ? Error::NoError
+                    : result;
             }
 
             template <class T, class... ArgsT>
-            Error process(const char* name, T& value, ArgsT&... args)
+            Error processField(const char* name, T& value, ArgsT&... args)
             {
                 const auto result = format_.checkName(name);
                 if (result == Error::NoError)
                 {
-                    const auto error = doProcess(value);
+                    const auto error = processValue(value);
                     return error == Error::NoError
-                        ? process(args...)
+                        ? processField(args...)
                         : error;
                 }
-                else if (result == Error::OptionalFieldMissed)
-                {
-                    return process(args...);
-                }
-                return result;
-            }
 
-            template <class T, typename std::enable_if<IsPodsSerializable<T>::value, int>::type = 0>
-            Error doProcessWithoutVersion(T& value, Version version = NoVersion)
-            {
-                return doDeserializeWithoutVersion(value, version);
-            }
-
-            template <class T, typename std::enable_if<!IsPodsSerializable<T>::value, int>::type = 0>
-            Error doProcessWithoutVersion(T& value, Version)
-            {
-                return doProcess(value);
-            }
-
-            template <class Key, class Val>
-            Error doProcessWithoutVersion(std::pair<Key, Val>& value, Version keyVersion = NoVersion, Version valVersion = NoVersion)
-            {
-                PODS_SAFE_CALL(format_.startObject());
-
-                PODS_SAFE_CALL(format_.saveKey(PODS_KEY));
-                PODS_SAFE_CALL(doProcessWithoutVersion(value.first, keyVersion));
-
-                PODS_SAFE_CALL(format_.saveKey(PODS_VAL));
-                PODS_SAFE_CALL(doProcessWithoutVersion(value.second, valVersion));
-
-                return format_.endObject();
+                return result == Error::OptionalFieldMissed
+                    ? processField(args...)
+                    : result;
             }
 
             template <class T, typename std::enable_if<std::is_class<T>::value, int>::type = 0>
-            Error doProcess(T& value)
+            Error processValue(T& value)
             {
-                return doDeserialize(value);
+                return deserialize(value);
             }
 
             template <class T, typename std::enable_if<std::is_arithmetic<T>::value, int>::type = 0>
-            Error doProcess(T& value)
+            Error processValue(T& value)
             {
                 return format_.load(value);
             }
 
             template <class T, typename std::enable_if<std::is_enum<T>::value, int>::type = 0>
-            Error doProcess(T& value)
+            Error processValue(T& value)
             {
                 std::underlying_type_t<T> n = 0;
                 PODS_SAFE_CALL(format_.load(n));
@@ -177,18 +122,18 @@ namespace pods
                 return Error::NoError;
             }
 
-            Error doProcess(std::string& value)
+            Error processValue(std::string& value)
             {
                 return format_.load(value);
             }
 
-            Error doProcess(BinaryArray& value)
+            Error processValue(BinaryArray& value)
             {
                 return format_.loadBlob(value.data(), value.size());
             }
 
             template <class T>
-            Error doProcess(BinaryVector<T>& value)
+            Error processValue(BinaryVector<T>& value)
             {
                 return format_.loadBlob(
                     [&](char*& data, Size size)
@@ -198,13 +143,13 @@ namespace pods
             }
 
             template <class T, size_t ArraySize>
-            Error doProcess(T(&value)[ArraySize])
+            Error processValue(T(&value)[ArraySize])
             {
                 return loadArray(value, ArraySize);
             }
 
             template <class T, size_t ArraySize>
-            Error doProcess(std::array<T, ArraySize>& value)
+            Error processValue(std::array<T, ArraySize>& value)
             {
                 return loadArray(value.data(), ArraySize);
             }
@@ -212,228 +157,295 @@ namespace pods
             template <class T>
             Error loadArray(T* begin, size_t arraySize)
             {
-                return loadArray<T>(
-                    [arraySize](Size size)
+                if constexpr (Format::Traits::SupportsSeqSizes)
+                {
+                    Size size = 0;
+                    PODS_SAFE_CALL(format_.startArray(size));
+
+                    if (size != arraySize)
                     {
-                        return size == arraySize
-                            ? Error::NoError
-                            : Error::CorruptedArchive;
-                    },
-                    [begin]() { return begin; });
-            }
+                        return Error::CorruptedArchive;
+                    }
 
-            template <class T>
-            Error doProcess(std::vector<T>& value)
-            {
-                return loadSequenceContainer<T>(value);
-            }
-
-            template <class T>
-            Error doProcess(std::deque<T>& value)
-            {
-                return loadSequenceContainer<T>(value);
-            }
-
-            template <class T>
-            Error doProcess(std::forward_list<T>& value)
-            {
-                return loadSequenceContainer<T>(value);
-            }
-
-            template <class T>
-            Error doProcess(std::list<T>& value)
-            {
-                return loadSequenceContainer<T>(value);
-            }
-
-            template <class T, class Container>
-            Error loadSequenceContainer(Container& value)
-            {
-                return loadArray<T>(
-                    [&](Size size)
+                    for (Size i = 0; i < size; ++i)
                     {
-                        value.resize(size);
-                        return Error::NoError;
-                    },
-                    [&]() { return value.begin(); });
+                        PODS_SAFE_CALL(processValue(*begin++));
+                    }
+
+                    return format_.endArray();
+                }
+                else
+                {
+                    PODS_SAFE_CALL(format_.startArray());
+
+                    for (Size i = 0; i < MaxSize; ++i)
+                    {
+                        const Error error = processValue(*begin++);
+                        if (error == Error::NoError)
+                        {
+                            continue;
+                        }
+                        else if (error == Error::EndOfArray)
+                        {
+                            return i == arraySize
+                                ? Error::NoError
+                                : Error::CorruptedArchive;
+                        }
+                        else
+                        {
+                            return Error::CorruptedArchive;
+                        }
+                    }
+
+                    return Error::InvalidSize;
+                }
+            }
+
+            template <class T>
+            Error processValue(std::vector<T>& value)
+            {
+                return loadSequense(value);
+            }
+
+            template <class T>
+            Error processValue(std::deque<T>& value)
+            {
+                return loadSequense(value);
+            }
+
+            template <class T>
+            Error processValue(std::forward_list<T>& value)
+            {
+                if constexpr (Format::Traits::SupportsSeqSizes)
+                {
+                    Size size = 0;
+                    PODS_SAFE_CALL(format_.startArray(size));
+
+                    value.clear();
+
+                    for (Size i = 0; i < size; ++i)
+                    {
+                        T temp;
+                        PODS_SAFE_CALL(processValue(temp));
+                        value.push_front(std::move(temp));
+                    }
+
+                    value.reverse();
+
+                    return format_.endArray();
+                }
+                else
+                {
+                    PODS_SAFE_CALL(format_.startArray());
+
+                    value.clear();
+
+                    for (Size i = 0; i < MaxSize; ++i)
+                    {
+                        T temp;
+                        const auto error = processValue(temp);
+                        if (error == Error::NoError)
+                        {
+                            value.push_front(std::move(temp));
+                        }
+                        else if (error == Error::EndOfArray)
+                        {
+                            value.reverse();
+                            return Error::NoError;
+                        }
+                        else
+                        {
+                            return error;
+                        }
+                    }
+
+                    return Error::InvalidSize;
+                }
+            }
+
+            template <class T>
+            Error processValue(std::list<T>& value)
+            {
+                if constexpr (Format::Traits::SupportsSeqSizes)
+                {
+                    Size size = 0;
+                    PODS_SAFE_CALL(format_.startArray(size));
+
+                    value.clear();
+
+                    for (Size i = 0; i < size; ++i)
+                    {
+                        T temp;
+                        PODS_SAFE_CALL(processValue(temp));
+                        value.push_back(std::move(temp));
+                    }
+
+                    return format_.endArray();
+                }
+                else
+                {
+                    PODS_SAFE_CALL(format_.startArray());
+
+                    value.clear();
+
+                    for (Size i = 0; i < MaxSize; ++i)
+                    {
+                        T temp;
+                        const auto error = processValue(temp);
+                        if (error == Error::NoError)
+                        {
+                            value.push_back(std::move(temp));
+                        }
+                        else if (error == Error::EndOfArray)
+                        {
+                            return Error::NoError;
+                        }
+                        else
+                        {
+                            return error;
+                        }
+                    }
+
+                    return Error::InvalidSize;
+                }
+            }
+
+            template <class Container>
+            Error loadSequense(Container& value)
+            {
+                if constexpr (Format::Traits::SupportsSeqSizes)
+                {
+                    Size size = 0;
+                    PODS_SAFE_CALL(format_.startArray(size));
+
+                    value.resize(size);
+
+                    auto it = value.begin();
+                    for (Size i = 0; i < size; ++i)
+                    {
+                        PODS_SAFE_CALL(processValue(*it++));
+                    }
+
+                    return format_.endArray();
+                }
+                else
+                {
+                    PODS_SAFE_CALL(format_.startArray());
+
+                    value.clear();
+
+                    for (Size i = 0; i < MaxSize; ++i)
+                    {
+                        typename Container::value_type temp;
+                        const auto error = processValue(temp);
+                        if (error == Error::NoError)
+                        {
+                            value.push_back(std::move(temp));
+                            continue;
+                        }
+                        else if (error == Error::EndOfArray)
+                        {
+                            return Error::NoError;
+                        }
+                        else
+                        {
+                            return error;
+                        }
+                    }
+
+                    return Error::InvalidSize;
+                }
             }
 
             template <class Key, class Val>
-            Error doProcess(std::pair<Key, Val>& value)
+            Error processValue(std::pair<Key, Val>& value)
             {
-                PODS_SAFE_CALL(format_.startObject());
+                PODS_SAFE_CALL(format_.startArray(2));
 
-                PODS_SAFE_CALL(format_.checkName(PODS_KEY));
-                PODS_SAFE_CALL(doProcess(value.first));
+                PODS_SAFE_CALL(processValue(value.first));
+                PODS_SAFE_CALL(processValue(value.second));
 
-                PODS_SAFE_CALL(format_.checkName(PODS_VAL));
-                PODS_SAFE_CALL(doProcess(value.second));
-
-                return format_.endObject();
+                return format_.endArray();
             }
 
             template <class Key, class Val>
-            Error doProcess(std::map<Key, Val>& value)
+            Error processValue(std::map<Key, Val>& value)
             {
-                return loadMap<Key, Val>(
-                    [](Size) { return Error::NoError; },
-                    value);
-            }
+                static_assert(!(Format::Traits::OnlyStringKeys && !std::is_same<std::string, std::remove_const_t<Key>> ::value),
+                    "This serialization format only supports string keys");
 
-            template <class T, class Init, class GetIterator, typename std::enable_if<IsPodsSerializable<T>::value, int>::type = 0>
-            Error loadArray(Init init, GetIterator getIterator)
-            {
-                PODS_SAFE_CALL(format_.startObject());
-
-                Version version = NoVersion;
-                PODS_SAFE_CALL(loadVersion<T>(PODS_VERSION, version));
-
-                Size size = 0;
-                PODS_SAFE_CALL(format_.startArray(size));
-
-                PODS_SAFE_CALL(init(size));
-
-                auto it = getIterator();
-                for (Size i = 0; i < size; ++i)
+                if constexpr (Format::Traits::SupportsSeqSizes)
                 {
-                    PODS_SAFE_CALL(doDeserializeWithoutVersion(*it++, version));
+                    Size size = 0;
+                    PODS_SAFE_CALL(format_.startMap(size));
+
+                    value.clear();
+
+                    auto hint = value.begin();
+                    for (Size i = 0; i < size; ++i)
+                    {
+                        Key key;
+                        if constexpr (Format::Traits::OnlyStringKeys)
+                        {
+                            PODS_SAFE_CALL(format_.loadKey(key));
+                        }
+                        else
+                        {
+                            PODS_SAFE_CALL(processValue(key));
+                        }
+
+                        Val val;
+                        PODS_SAFE_CALL(processValue(val));
+
+                        hint = value.emplace_hint(hint, std::move(key), std::move(val));
+                    }
+
+                    return format_.endMap();
                 }
-
-                PODS_SAFE_CALL(format_.endArray());
-
-                return format_.endObject();
-            }
-
-            template <class T, class Init, class GetIterator, typename std::enable_if<!IsPodsSerializable<T>::value, int>::type = 0>
-            Error loadArray(Init init, GetIterator getIterator)
-            {
-                PODS_SAFE_CALL(format_.startObject());
-
-                Size size = 0;
-                PODS_SAFE_CALL(format_.startArray(size));
-
-                PODS_SAFE_CALL(init(size));
-
-                auto it = getIterator();
-                for (Size i = 0; i < size; ++i)
+                else
                 {
-                    PODS_SAFE_CALL(doProcess(*it++));
+                    PODS_SAFE_CALL(format_.startMap());
+
+                    value.clear();
+
+                    auto hint = value.begin();
+                    for (Size i = 0; i < MaxSize; ++i)
+                    {
+                        Error error = Error::NoError;
+
+                        Key key;
+                        if constexpr (Format::Traits::OnlyStringKeys)
+                        {
+                            error = format_.loadKey(key);
+                        }
+                        else
+                        {
+                            error = processValue(key);
+                        }
+
+                        if (error == Error::NoError)
+                        {
+                            Val val;
+                            PODS_SAFE_CALL(processValue(val));
+
+                            hint = value.emplace_hint(hint, std::move(key), std::move(val));
+                        }
+                        else if (error == Error::EndOfArray)
+                        {
+                            return Error::NoError;
+                        }
+                        else if (error == Error::EndOfObject)
+                        {
+                            return Error::NoError;
+                        }
+                        else
+                        {
+                            return error;
+                        }
+                    }
+
+                    return Error::InvalidSize;
                 }
-
-                PODS_SAFE_CALL(format_.endArray());
-
-                return format_.endObject();
-            }
-
-            template <class Key, class Val, class Init, class Container,
-                typename std::enable_if<IsPodsSerializable<Key>::value && IsPodsSerializable<Val>::value, int>::type = 0>
-            Error loadMap(Init&& init, Container& value)
-            {
-                PODS_SAFE_CALL(format_.startObject());
-
-                Version keyVersion = NoVersion;
-                PODS_SAFE_CALL(loadVersion<Key>(PODS_KEY_VERSION, keyVersion));
-
-                Version valVersion = NoVersion;
-                PODS_SAFE_CALL(loadVersion<Val>(PODS_VAL_VERSION, valVersion));
-
-                const auto error = doLoadMap<Key, Val>(std::forward<Init>(init), value, keyVersion, valVersion);
-                if (error != Error::NoError)
-                {
-                    return error;
-                }
-
-                return format_.endObject();
-            }
-
-            template <class Key, class Val, class Init, class Container,
-                typename std::enable_if<IsPodsSerializable<Key>::value && !IsPodsSerializable<Val>::value, int>::type = 0>
-            Error loadMap(Init&& init, Container& value)
-            {
-                PODS_SAFE_CALL(format_.startObject());
-
-                Version valVersion = NoVersion;
-                PODS_SAFE_CALL(loadVersion<Key>(PODS_KEY_VERSION, valVersion));
-
-                const auto error = doLoadMap<Key, Val>(std::forward<Init>(init), value, valVersion, NoVersion);
-                if (error != Error::NoError)
-                {
-                    return error;
-                }
-
-                return format_.endObject();
-            }
-
-            template <class Key, class Val, class Init, class Container,
-                typename std::enable_if<!IsPodsSerializable<Key>::value && IsPodsSerializable<Val>::value, int>::type = 0>
-            Error loadMap(Init&& init, Container& value)
-            {
-                PODS_SAFE_CALL(format_.startObject());
-
-                Version valVersion = NoVersion;
-                PODS_SAFE_CALL(loadVersion<Val>(PODS_VAL_VERSION, valVersion));
-
-                const auto error = doLoadMap<Key, Val>(std::forward<Init>(init), value, NoVersion, valVersion);
-                if (error != Error::NoError)
-                {
-                    return error;
-                }
-
-                return format_.endObject();
-            }
-
-            template <class Key, class Val, class Init, class Container,
-                typename std::enable_if<!IsPodsSerializable<Key>::value && !IsPodsSerializable<Val>::value, int>::type = 0>
-            Error loadMap(Init&& init, Container& value)
-            {
-                PODS_SAFE_CALL(format_.startObject());
-
-                const auto error = doLoadMap<Key, Val>(std::forward<Init>(init), value, NoVersion, NoVersion);
-                if (error != Error::NoError)
-                {
-                    return error;
-                }
-
-                return format_.endObject();
-            }
-
-            template <class Key, class Val, class Init, class Container>
-            Error doLoadMap(Init&& init, Container& value, Version keyVersion = NoVersion, Version valVersion = NoVersion)
-            {
-                Size size = 0;
-                PODS_SAFE_CALL(format_.startMap(size));
-
-                PODS_SAFE_CALL(init(size));
-
-                auto hint = value.begin();
-                for (Size i = 0; i < size; ++i)
-                {
-                    PODS_SAFE_CALL(format_.startObject());
-
-                    Key key;
-                    PODS_SAFE_CALL(format_.checkName(PODS_KEY));
-                    PODS_SAFE_CALL(doProcessWithoutVersion(key, keyVersion));
-
-                    Val val;
-                    PODS_SAFE_CALL(format_.checkName(PODS_VAL));
-                    PODS_SAFE_CALL(doProcessWithoutVersion(val, valVersion));
-
-                    hint = value.emplace_hint(hint, std::move(key), std::move(val));
-
-                    PODS_SAFE_CALL(format_.endObject());
-                }
-
-                return format_.endMap();
-            }
-
-            template <class T>
-            Error loadVersion(const char* name, Version& version)
-            {
-                PODS_SAFE_CALL(format_.checkName(name));
-                PODS_SAFE_CALL(format_.load(version));
-                return version > std::decay_t<T>::version()
-                    ? Error::ArchiveVersionMismatch
-                    : Error::NoError;
             }
 
         private:

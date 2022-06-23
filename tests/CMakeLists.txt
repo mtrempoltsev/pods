@@ -21,23 +21,17 @@ include_directories(${PODS_INCLUDE})
 
 set(HEADERS
     data.h
-    stl_data.h
-    stl_map_data.h
     storage_data.h
-    versioning_data.h
     )
 
 set(SOURCES
     test_base64.cpp
     test_buffer.cpp
     test_endianness.cpp
-    test_json_versioning.cpp
     test_msgpack_serializer.cpp
     test_rapidjson_wrapper.cpp
     test_resizeable_buffer.cpp
-    test_sax_handlers.cpp
-    test_stl_map_serialization.cpp
-    test_stl_serialization.cpp
+    test_sax_handler.cpp
     test_stream.cpp
 
     test_bool.cpp
@@ -47,7 +41,13 @@ set(SOURCES
     test_string.cpp
     test_binary.cpp
     test_array.cpp
-    test_map.cpp
+
+    test_stl_array.cpp
+    test_stl_deque.cpp
+    test_stl_map.cpp
+    test_stl_forward_list.cpp
+    test_stl_list.cpp
+    test_stl_vector.cpp
 
     main.cpp
     )
